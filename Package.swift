@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-	name: "PythonSwiftLink",
+	name: "PySwiftKit",
 	platforms: [.macOS(.v11), .iOS(.v13)],
 	products: [
 		.library(
