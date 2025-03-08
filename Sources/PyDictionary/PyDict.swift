@@ -1,7 +1,7 @@
 import Foundation
 import PySwiftCore
-import PyEncode
-import PyDecode
+import PySerializing
+import PyDeserializing
 //import PythonTypeAlias
 import PythonCore
 
@@ -13,14 +13,14 @@ public func PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer {
 	key.withCString { PyDict_GetItemString(dict, $0) ?? .None }
 }
 
-public func PyDict_GetItem<R: PyDecodeProtocol>(_ dict: PyPointer, _ key: String) throws -> R {
+public func PyDict_GetItem<R>(_ dict: PyPointer, _ key: String) throws -> R where R: PyDeserialize {
 	
     try key.withCString {
-        guard let ptr = PyDict_GetItemString(dict, $0) else { throw PythonError.attribute }
+        guard let ptr = PyDict_GetItemString(dict, $0) else { throw PyStandardException.keyError }
         defer { Py_DecRef(ptr) }
         return try R(object: ptr) }
 }
-public func PyDict_GetItem<R: PyDecodeProtocol>(_ dict: PyPointer?, _ key: String) throws -> R {
+public func PyDict_GetItem<R: PyDeserialize>(_ dict: PyPointer?, _ key: String) throws -> R {
     try key.withCString {
         guard
             let dict = dict,
@@ -76,20 +76,12 @@ public func PyDict_SetItem_ReducedIncRef(_ dict: PyPointer,_ next:  Dictionary<S
 }
 
 @discardableResult
-public func PyDict_SetItem(_ dict: PyPointer?, _ key: String, _ value: PyEncodable) -> Int32 {
+public func PyDict_SetItem(_ dict: PyPointer?, _ key: String, _ value: PySerialize) -> Int32 {
     key.withCString { PyDict_SetItemString(dict, $0, value.pyPointer) }
 }
 
 extension PyPointer {
-    @discardableResult
-    public func setPyDictItem(_ key: String, _ value: PyPointer?) -> Int32 {
-        key.withCString { PyDict_SetItemString(self, $0, value) }
-    }
-    
-    public func getPyDictItem(_ key: String) -> PyPointer? {
-        key.withCString { PyDict_GetItemString(self, $0) }
-    }
-    
+
     @discardableResult
     public func replacePyDictKey(_ key: String, new: String) -> Int32 {
         key.withCString {
@@ -108,13 +100,13 @@ extension PyPointer {
 //        }
 //    }
     
-    subscript<T: ConvertibleFromPython & PyConvertible>(index: String) -> T? {
+    public subscript<T: PySerialize & PyDeserialize>(index: String) -> T? {
         get {
             index.withCString { try? T(object: PyDict_GetItemString(self, $0) ) }
         }
         set(newValue) {
-            guard let newValue = newValue else { return }
-            _ = index.withCString { PyDict_SetItemString(self, $0, newValue.pyPointer) }
+            //guard let newValue = newValue else { return }
+            _ = index.withCString { PyDict_SetItemString(self, $0, newValue?.pyPointer ?? .None ) }
         }
     }
     

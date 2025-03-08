@@ -3,7 +3,7 @@
 import Foundation
 import PySwiftCore
 import PyCollection
-import PyDecode
+import PyDeserializing
 import PythonCore
 
 @inlinable

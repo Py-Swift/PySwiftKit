@@ -64,3 +64,47 @@ public func PyRun_URL(url: URL, flag: PyEvalFlag, globals: PyPointer, locals: Py
         PyRun_String(str, flag.rawValue, globals, locals)
     }
 }
+
+
+
+public extension PyMethodDef {
+    
+    enum MethFlag: Int32 {
+        case FASTCALL = 0x0080
+        case METHOD = 0x0200
+        case CLASS = 0x0010
+        case STATIC = 0x0020
+        case VARARGS = 0x0001
+        case KEYWORDS = 0x0002
+        case NOARGS = 0x0004
+        case ONE_ARG = 0x0008
+        case COEXIST = 0x0040
+        
+        public static func | (l: Self, r: Self) -> Int32 {
+            l.rawValue | r.rawValue
+        }
+        
+        public static func | (l: Self, r: Self) -> Self {
+            .init(rawValue: l | r )!
+        }
+    }
+    
+    static func new(name: String, meth: PyCFunction, flags: MethFlag) -> Self {
+        
+        return name.withCString { string in
+            return .init(
+                ml_name: string,
+                ml_meth: meth,
+                ml_flags: flags.rawValue,
+                ml_doc: nil
+            )
+        }
+    }
+    static func oneArgMethod(name: String, meth: PyCFunction) -> Self {
+        .new(
+            name: name,
+            meth: meth,
+            flags: .ONE_ARG
+        )
+    }
+}

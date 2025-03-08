@@ -1,34 +1,40 @@
 import Foundation
 import PySwiftCore
 //import PyEncode
-import PyDecode
+import PyDeserializing
 import PythonCore
 //import PythonTypeAlias
 //import _PySwiftObject
 
 @inlinable
-public func optionalPyCast<R: ConvertibleFromPython>(from o: PyPointer?) -> R? {
+public func optionalPyCast<R: PyDeserialize>(from o: PyPointer?) -> R? {
     guard let object = o, object != PyNone else { return nil }
     return try? R(object: object)
 }
 
 @inlinable
-public func pyCast<R: ConvertibleFromPython>(from o: PyPointer?) throws -> R {
-	guard let object = o, object != PyNone else { throw PythonError.type(.init(describing: R.self)) }
-	return try R(object: object)
+public func pyCast<T: PyDeserialize>(from o: PyPointer?) throws -> T {
+	guard let object = o, object != PyNone else { throw PythonError.type(.init(describing: T.self)) }
+	return try T(object: object)
+}
+
+@inlinable
+public func pyCast<T: PyDeserialize>(from args: UnsafePointer<PyPointer?>, index: Int) throws -> T {
+    guard let object = args[index], object != PyNone else { throw PythonError.type(.init(describing: T.self)) }
+    return try T(object: object)
 }
 
 // consuming
 
 @inlinable
-public func optionalPyCast<R: ConvertibleFromPython>(consuming o: PyPointer?) -> R? {
+public func optionalPyCast<R: PyDeserialize>(consuming o: PyPointer?) -> R? {
 	guard let object = o, object != PyNone else { return nil }
 	defer { object.decref() }
 	return try? R(object: object)
 }
 
 @inlinable
-public func pyCast<R: ConvertibleFromPython>(consuming o: PyPointer?) throws -> R {
+public func pyCast<R: PyDeserialize>(consuming o: PyPointer?) throws -> R {
 	guard let object = o, object != PyNone else { throw PythonError.type(.init(describing: R.self)) }
 	defer { object.decref() }
 	return try R(object: object)

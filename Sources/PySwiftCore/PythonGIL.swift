@@ -8,6 +8,15 @@ import Foundation
 import PythonCore
 
 //#endif
+@inlinable
+public func PyHasGIL() -> Bool {
+    PyGILState_Check() == 1
+}
+
+@inlinable
+public func PyGILisReleased() -> Bool {
+    PyGILState_Check() == 0
+}
 
 @inlinable
 public func withGIL(handle: @escaping ()->Void ) {
@@ -48,17 +57,30 @@ public func withAutoGIL(handle: @escaping ()->Void ) {
     gilCheck("autogil")
     //
     handle()
-    
-//    if PyGILState_Check() == 0 {
-//
-//        print(gil)
-//        handle()
-//
-//    } else {
-//        handle()
-//    }
-    
+
     PyEval_SaveThread()
+}
+
+@inlinable
+public func withAutoGIL(handle: @escaping () throws -> Void ) rethrows {
+    let has_gil = PyHasGIL()
+    //print("withAutoGIL has gil", has_gil)
+    //var state: PyThreadState = .init()
+    
+    
+    if has_gil {
+        try handle()
+        //PyGILState_Release(gil)
+        PyEval_SaveThread()
+        return
+    }
+
+    //print("ensuring gil")
+    let gil = PyGILState_Ensure()
+    try handle()
+    //PyEval_SaveThread()
+    PyGILState_Release(gil)
+    //print("gil removed")
 }
 
 extension DispatchQueue {

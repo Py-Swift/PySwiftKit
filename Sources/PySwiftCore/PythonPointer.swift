@@ -52,6 +52,7 @@ extension PyPointer {
     }
 }
 
+
 @inlinable public func PyObject_HasAttr(_ o: PyPointer, _ key: String) -> Bool {
     key.withCString { string in
         PyObject_HasAttrString(o, string) == 1
@@ -78,6 +79,7 @@ extension PythonPointer {
     
     @inlinable public var sequence: UnsafeBufferPointer<PythonPointer?> {
         let fast_list = PySequence_Fast(self, nil)!
+        
         let buffer = PySequenceBuffer(
             start: PySequence_FastItems(fast_list),
             count: PySequence_FastSize(fast_list)
@@ -130,14 +132,14 @@ extension PythonPointer {
     
     @inlinable public func decref() {
         //Py_DecRef(self)
-		Py_DECREF(self)
-		//_Py_DecRef(self)
+		//Py_DECREF(self)
+		_Py_DecRef(self)
     }
     
     @inlinable public func incref() {
         //Py_IncRef(self)
-		//_Py_IncRef(self)
-		Py_INCREF(self)
+		_Py_IncRef(self)
+		//Py_INCREF(self)
     }
     
 //    @inlinable

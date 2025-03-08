@@ -1,12 +1,12 @@
 import Foundation
 import PySwiftCore
-import PyEncode
-import PyDecode
+import PyDeserializing
+import PySerializing
 import PythonCore
 //import PythonTypeAlias
 
 extension PythonPointer {
-    @inlinable public func callAsFunction_<R: PyDecodable>(_ args: [PyEncodable]) throws -> R {
+    @inlinable public func callAsFunction_<R: PyDeserialize>(_ args: [PySerialize]) throws -> R {
         
         let _args: [PyPointer?] = args.map(\.pyPointer)
         //            _args.enumerated().forEach { i, ptr in
@@ -32,7 +32,7 @@ extension PythonPointer {
         return rtn
     }
     
-    @inlinable public func callAsFunction_(_ args: [PyEncodable]) throws -> PyPointer {
+    @inlinable public func callAsFunction_(_ args: [PySerialize]) throws -> PyPointer {
         
         let _args: [PyPointer?] = args.map(\.pyPointer)
 
@@ -47,7 +47,7 @@ extension PythonPointer {
     
 }
 
-public func GenericPyCFuncCall<A: PyDecodable, B: PyDecodable, R: PyEncodable>(args: UnsafePointer<PyPointer?>?, count: Int,_ function: @escaping ((A,B)-> R) ) -> R? {
+public func GenericPyCFuncCall<A: PyDeserialize, B: PyDeserialize, R: PySerialize>(args: UnsafePointer<PyPointer?>?, count: Int,_ function: @escaping ((A,B)-> R) ) -> R? {
     do {
         guard count > 1, let args = args else { throw PythonError.call }
         return function(
@@ -60,7 +60,7 @@ public func GenericPyCFuncCall<A: PyDecodable, B: PyDecodable, R: PyEncodable>(a
     return nil
 }
 
-public func GenericPyCFuncCall<A: PyDecodable, B: PyDecodable, C: PyDecodable, R: PyEncodable>(args: UnsafePointer<PyPointer?>?, count: Int,_ function: @escaping ((A,B,C)-> R) ) -> R? {
+public func GenericPyCFuncCall<A: PyDeserialize, B: PyDeserialize, C: PyDeserialize, R: PySerialize>(args: UnsafePointer<PyPointer?>?, count: Int,_ function: @escaping ((A,B,C)-> R) ) -> R? {
     do {
         guard count > 2, let args = args else { throw PythonError.index }
         return function(

@@ -1,7 +1,7 @@
 import Foundation
 import PySwiftCore
-import PyDecode
-import PyEncode
+import PyDeserializing
+import PySerializing
 import PythonCore
 //import PythonTypeAlias
 
@@ -9,7 +9,7 @@ import Foundation
 extension PyPointer {
 
     public func callAsFunction<R>() throws -> R where 
-    	R: PyDecodable {
+    	R: PyDeserialize {
         guard let result = PyObject_CallNoArgs(self) else {
             PyErr_Print()
             throw PythonError.call
@@ -28,8 +28,8 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, R>(_ a: A) throws -> R where 
-    	A: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	R: PyDeserialize {
         let arg = a.pyPointer
         guard let result = PyObject_CallOneArg(self, arg) else {
             PyErr_Print()
@@ -43,7 +43,7 @@ extension PyPointer {
     }
 
     public func callAsFunction<A>(_ a: A) throws where 
-    	A: PyEncodable {
+    	A: PySerialize {
         let arg = a.pyPointer
         guard let result = PyObject_CallOneArg(self, arg) else {
             PyErr_Print()
@@ -53,11 +53,11 @@ extension PyPointer {
         Py_DecRef(arg)
         Py_DecRef(result)
     }
-
-    public func callAsFunction<A, B, R>(_ a: A, _ b: B) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	R: PyDecodable {
+    
+    public func callAsFunction<A, B, R>(_ a: A, _ b: B) throws -> R where
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 2)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -77,8 +77,8 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B>(_ a: A, _ b: B) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 2)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -96,10 +96,10 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, R>(_ a: A, _ b: B, _ c: C) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 3)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -122,9 +122,9 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C>(_ a: A, _ b: B, _ c: C) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 3)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -145,11 +145,11 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, R>(_ a: A, _ b: B, _ c: C, _ d: D) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 4)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -175,10 +175,10 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D>(_ a: A, _ b: B, _ c: C, _ d: D) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 4)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -202,12 +202,12 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, R>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 5)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -236,11 +236,11 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 5)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -267,13 +267,13 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, R>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 6)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -305,12 +305,12 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 6)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -340,14 +340,14 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G, R>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 7)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -382,13 +382,13 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 7)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -421,15 +421,15 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G, H, R>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable, 
-    	H: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize, 
+    	H: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 8)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -467,14 +467,14 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G, H>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable, 
-    	H: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize, 
+    	H: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 8)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -510,16 +510,16 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G, H, I, R>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws -> R where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable, 
-    	H: PyEncodable, 
-    	I: PyEncodable, 
-    	R: PyDecodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize, 
+    	H: PySerialize, 
+    	I: PySerialize, 
+    	R: PyDeserialize {
         let args = VectorCallArgs.allocate(capacity: 9)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -560,15 +560,15 @@ extension PyPointer {
     }
 
     public func callAsFunction<A, B, C, D, E, F, G, H, I>(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws where 
-    	A: PyEncodable, 
-    	B: PyEncodable, 
-    	C: PyEncodable, 
-    	D: PyEncodable, 
-    	E: PyEncodable, 
-    	F: PyEncodable, 
-    	G: PyEncodable, 
-    	H: PyEncodable, 
-    	I: PyEncodable {
+    	A: PySerialize, 
+    	B: PySerialize, 
+    	C: PySerialize, 
+    	D: PySerialize, 
+    	E: PySerialize, 
+    	F: PySerialize, 
+    	G: PySerialize, 
+    	H: PySerialize, 
+    	I: PySerialize {
         let args = VectorCallArgs.allocate(capacity: 9)
         args[0] = a.pyPointer
         args[1] = b.pyPointer
@@ -607,7 +607,7 @@ extension PyPointer {
     }
 }
 
-public func PythonTriggerCall<A>(call: PyPointer, _ a: A) where A: PyEncodable {
+public func PythonTriggerCall<A>(call: PyPointer, _ a: A) where A: PySerialize {
 	let arg = a.pyPointer
 	guard let result = PyObject_CallOneArg(call, arg) else {
 		PyErr_Print()
@@ -619,7 +619,7 @@ public func PythonTriggerCall<A>(call: PyPointer, _ a: A) where A: PyEncodable {
 }
 
 public func PythonCall < R>(call: PyPointer) throws -> R where
-	R: PyDecodable {
+	R: PyDeserialize {
     guard let result = PyObject_CallNoArgs(call) else {
         PyErr_Print()
         throw PythonError.call
@@ -638,8 +638,8 @@ public func PythonCall(call: PyPointer) throws {
 }
 
 public func PythonCall<A, R>(call: PyPointer, _ a: A) throws -> R where 
-	A: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	R: PyDeserialize {
     let arg = a.pyPointer
     guard let result = PyObject_CallOneArg(call, arg) else {
         PyErr_Print()
@@ -653,7 +653,7 @@ public func PythonCall<A, R>(call: PyPointer, _ a: A) throws -> R where
 }
 
 public func PythonCall<A>(call: PyPointer, _ a: A) throws where 
-	A: PyEncodable {
+	A: PySerialize {
     let arg = a.pyPointer
     guard let result = PyObject_CallOneArg(call, arg) else {
         PyErr_Print()
@@ -665,9 +665,9 @@ public func PythonCall<A>(call: PyPointer, _ a: A) throws where
 }
 
 public func PythonCall<A, B, R>(call: PyPointer, _ a: A, _ b: B) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 2)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -687,8 +687,8 @@ public func PythonCall<A, B, R>(call: PyPointer, _ a: A, _ b: B) throws -> R whe
 }
 
 public func PythonCall<A, B>(call: PyPointer, _ a: A, _ b: B) throws where 
-	A: PyEncodable, 
-	B: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 2)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -706,10 +706,10 @@ public func PythonCall<A, B>(call: PyPointer, _ a: A, _ b: B) throws where
 }
 
 public func PythonCall<A, B, C, R>(call: PyPointer, _ a: A, _ b: B, _ c: C) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 3)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -732,9 +732,9 @@ public func PythonCall<A, B, C, R>(call: PyPointer, _ a: A, _ b: B, _ c: C) thro
 }
 
 public func PythonCall<A, B, C>(call: PyPointer, _ a: A, _ b: B, _ c: C) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 3)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -755,11 +755,11 @@ public func PythonCall<A, B, C>(call: PyPointer, _ a: A, _ b: B, _ c: C) throws 
 }
 
 public func PythonCall<A, B, C, D, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 4)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -785,10 +785,10 @@ public func PythonCall<A, B, C, D, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _
 }
 
 public func PythonCall<A, B, C, D>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 4)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -812,12 +812,12 @@ public func PythonCall<A, B, C, D>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d:
 }
 
 public func PythonCall<A, B, C, D, E, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 5)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -846,11 +846,11 @@ public func PythonCall<A, B, C, D, E, R>(call: PyPointer, _ a: A, _ b: B, _ c: C
 }
 
 public func PythonCall<A, B, C, D, E>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 5)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -877,13 +877,13 @@ public func PythonCall<A, B, C, D, E>(call: PyPointer, _ a: A, _ b: B, _ c: C, _
 }
 
 public func PythonCall<A, B, C, D, E, F, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 6)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -915,12 +915,12 @@ public func PythonCall<A, B, C, D, E, F, R>(call: PyPointer, _ a: A, _ b: B, _ c
 }
 
 public func PythonCall<A, B, C, D, E, F>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 6)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -950,14 +950,14 @@ public func PythonCall<A, B, C, D, E, F>(call: PyPointer, _ a: A, _ b: B, _ c: C
 }
 
 public func PythonCall<A, B, C, D, E, F, G, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 7)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -992,13 +992,13 @@ public func PythonCall<A, B, C, D, E, F, G, R>(call: PyPointer, _ a: A, _ b: B, 
 }
 
 public func PythonCall<A, B, C, D, E, F, G>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 7)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -1031,15 +1031,15 @@ public func PythonCall<A, B, C, D, E, F, G>(call: PyPointer, _ a: A, _ b: B, _ c
 }
 
 public func PythonCall<A, B, C, D, E, F, G, H, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 8)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -1077,14 +1077,14 @@ public func PythonCall<A, B, C, D, E, F, G, H, R>(call: PyPointer, _ a: A, _ b: 
 }
 
 public func PythonCall<A, B, C, D, E, F, G, H>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 8)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -1120,16 +1120,16 @@ public func PythonCall<A, B, C, D, E, F, G, H>(call: PyPointer, _ a: A, _ b: B, 
 }
 
 public func PythonCall<A, B, C, D, E, F, G, H, I, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	I: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	I: PySerialize, 
+	R: PyDeserialize {
     let args = VectorCallArgs.allocate(capacity: 9)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -1170,15 +1170,15 @@ public func PythonCall<A, B, C, D, E, F, G, H, I, R>(call: PyPointer, _ a: A, _ 
 }
 
 public func PythonCall<A, B, C, D, E, F, G, H, I>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	I: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	I: PySerialize {
     let args = VectorCallArgs.allocate(capacity: 9)
     args[0] = a.pyPointer
     args[1] = b.pyPointer
@@ -1217,7 +1217,7 @@ public func PythonCall<A, B, C, D, E, F, G, H, I>(call: PyPointer, _ a: A, _ b: 
 }
 
 public func PythonCallWithGil < R>(call: PyPointer) throws -> R where 
-	R: PyDecodable {
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     guard let result = PyObject_CallNoArgs(call) else {
         PyErr_Print()
@@ -1240,8 +1240,8 @@ public func PythonCallWithGil(call: PyPointer) throws {
 }
 
 public func PythonCallWithGil_PrintError<A, R>(call: PyPointer, _ a: A) throws -> R where
-A: PyEncodable,
-R: PyDecodable {
+A: PySerialize,
+R: PyDeserialize {
 	let gil = PyGILState_Ensure()
 	let arg = a.pyPointer
 	guard let result = PyObject_CallOneArg(call, arg) else {
@@ -1257,8 +1257,8 @@ R: PyDecodable {
 }
 
 public func PythonCallWithGil<A, R>(call: PyPointer, _ a: A) throws -> R where
-	A: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let arg = a.pyPointer
     guard let result = PyObject_CallOneArg(call, arg) else {
@@ -1274,7 +1274,7 @@ public func PythonCallWithGil<A, R>(call: PyPointer, _ a: A) throws -> R where
 }
 
 public func PythonCallWithGil<A>(call: PyPointer, _ a: A) throws where 
-	A: PyEncodable {
+	A: PySerialize {
     let gil = PyGILState_Ensure()
     let arg = a.pyPointer
     guard let result = PyObject_CallOneArg(call, arg) else {
@@ -1288,9 +1288,9 @@ public func PythonCallWithGil<A>(call: PyPointer, _ a: A) throws where
 }
 
 public func PythonCallWithGil<A, B, R>(call: PyPointer, _ a: A, _ b: B) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 2)
     args[0] = a.pyPointer
@@ -1312,8 +1312,8 @@ public func PythonCallWithGil<A, B, R>(call: PyPointer, _ a: A, _ b: B) throws -
 }
 
 public func PythonCallWithGil<A, B>(call: PyPointer, _ a: A, _ b: B) throws where 
-	A: PyEncodable, 
-	B: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 2)
     args[0] = a.pyPointer
@@ -1333,10 +1333,10 @@ public func PythonCallWithGil<A, B>(call: PyPointer, _ a: A, _ b: B) throws wher
 }
 
 public func PythonCallWithGil<A, B, C, R>(call: PyPointer, _ a: A, _ b: B, _ c: C) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 3)
     args[0] = a.pyPointer
@@ -1361,9 +1361,9 @@ public func PythonCallWithGil<A, B, C, R>(call: PyPointer, _ a: A, _ b: B, _ c: 
 }
 
 public func PythonCallWithGil<A, B, C>(call: PyPointer, _ a: A, _ b: B, _ c: C) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 3)
     args[0] = a.pyPointer
@@ -1386,11 +1386,11 @@ public func PythonCallWithGil<A, B, C>(call: PyPointer, _ a: A, _ b: B, _ c: C) 
 }
 
 public func PythonCallWithGil<A, B, C, D, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 4)
     args[0] = a.pyPointer
@@ -1418,10 +1418,10 @@ public func PythonCallWithGil<A, B, C, D, R>(call: PyPointer, _ a: A, _ b: B, _ 
 }
 
 public func PythonCallWithGil<A, B, C, D>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 4)
     args[0] = a.pyPointer
@@ -1447,12 +1447,12 @@ public func PythonCallWithGil<A, B, C, D>(call: PyPointer, _ a: A, _ b: B, _ c: 
 }
 
 public func PythonCallWithGil<A, B, C, D, E, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 5)
     args[0] = a.pyPointer
@@ -1483,11 +1483,11 @@ public func PythonCallWithGil<A, B, C, D, E, R>(call: PyPointer, _ a: A, _ b: B,
 }
 
 public func PythonCallWithGil<A, B, C, D, E>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 5)
     args[0] = a.pyPointer
@@ -1516,13 +1516,13 @@ public func PythonCallWithGil<A, B, C, D, E>(call: PyPointer, _ a: A, _ b: B, _ 
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 6)
     args[0] = a.pyPointer
@@ -1556,12 +1556,12 @@ public func PythonCallWithGil<A, B, C, D, E, F, R>(call: PyPointer, _ a: A, _ b:
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 6)
     args[0] = a.pyPointer
@@ -1593,14 +1593,14 @@ public func PythonCallWithGil<A, B, C, D, E, F>(call: PyPointer, _ a: A, _ b: B,
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 7)
     args[0] = a.pyPointer
@@ -1637,13 +1637,13 @@ public func PythonCallWithGil<A, B, C, D, E, F, G, R>(call: PyPointer, _ a: A, _
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 7)
     args[0] = a.pyPointer
@@ -1678,15 +1678,15 @@ public func PythonCallWithGil<A, B, C, D, E, F, G>(call: PyPointer, _ a: A, _ b:
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G, H, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 8)
     args[0] = a.pyPointer
@@ -1726,14 +1726,14 @@ public func PythonCallWithGil<A, B, C, D, E, F, G, H, R>(call: PyPointer, _ a: A
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G, H>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 8)
     args[0] = a.pyPointer
@@ -1771,16 +1771,16 @@ public func PythonCallWithGil<A, B, C, D, E, F, G, H>(call: PyPointer, _ a: A, _
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G, H, I, R>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws -> R where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	I: PyEncodable, 
-	R: PyDecodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	I: PySerialize, 
+	R: PyDeserialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 9)
     args[0] = a.pyPointer
@@ -1823,15 +1823,15 @@ public func PythonCallWithGil<A, B, C, D, E, F, G, H, I, R>(call: PyPointer, _ a
 }
 
 public func PythonCallWithGil<A, B, C, D, E, F, G, H, I>(call: PyPointer, _ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H, _ i: I) throws where 
-	A: PyEncodable, 
-	B: PyEncodable, 
-	C: PyEncodable, 
-	D: PyEncodable, 
-	E: PyEncodable, 
-	F: PyEncodable, 
-	G: PyEncodable, 
-	H: PyEncodable, 
-	I: PyEncodable {
+	A: PySerialize, 
+	B: PySerialize, 
+	C: PySerialize, 
+	D: PySerialize, 
+	E: PySerialize, 
+	F: PySerialize, 
+	G: PySerialize, 
+	H: PySerialize, 
+	I: PySerialize {
     let gil = PyGILState_Ensure()
     let args = VectorCallArgs.allocate(capacity: 9)
     args[0] = a.pyPointer

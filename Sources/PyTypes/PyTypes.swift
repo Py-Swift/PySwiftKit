@@ -2,10 +2,10 @@
 import Foundation
 import PythonCore
 import PySwiftCore
-import PyEncode
+//import PyEncode
 
 
-public protocol PyTypeProtocol: PyEncodable {
+public protocol PyTypeProtocol {
 	static var PyType: UnsafeMutablePointer<PyTypeObject> { get }
 }
 

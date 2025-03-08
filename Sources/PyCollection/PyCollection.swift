@@ -2,15 +2,15 @@
 import PySwiftCore
 import PythonCore
 import Foundation
-import PyDecode
-import PyEncode
+import PyDeserializing
+import PySerializing
 
-extension Array : PyDecodable where Element : PyDecodable {
+extension Array : PyDeserialize where Element : PyDeserialize {
 	
 	public init(object: PyPointer) throws {
 		if PyList_Check(object) {
 			self = try object.map {
-				guard let element = $0 else { throw PythonError.index }
+                guard let element = $0 else { throw PyStandardException.indexError }
 				return try Element(object: element)
 			}//(Element.init)
 		} else if PyTuple_Check(object) {
@@ -26,14 +26,14 @@ extension Array : PyDecodable where Element : PyDecodable {
 }
 
 
-extension PythonPointer {
-	@inlinable public func append<T: PyConvertible>(_ value: T) {
+extension PyPointer {
+    @inlinable public func append<T: PySerialize>(_ value: T) {
 		let element = value.pyPointer
 		PyList_Append(self, element)
 		Py_DecRef(element)
 	}
 	@inlinable public func append(_ value: PyPointer) { PyList_Append(self, value) }
-	@inlinable public func append<T: PyConvertible>(contentsOf: [T]) {
+    @inlinable public func append<T: PySerialize>(contentsOf: [T]) {
 		for value in contentsOf { PyList_Append(self, value.pyPointer) }
 	}
 	
@@ -41,7 +41,7 @@ extension PythonPointer {
 		for value in contentsOf { PyList_Append(self, value) }
 	}
 	
-	@inlinable public mutating func insert<C, T: PyConvertible>(contentsOf newElements: C, at i: Int) where C : Collection, C.Element == T {
+    @inlinable public mutating func insert<C, T: PySerialize>(contentsOf newElements: C, at i: Int) where C : Collection, C.Element == T {
 		for element in newElements {
 			PyList_Insert(self, i, element.pyPointer)
 		}
@@ -52,9 +52,16 @@ extension PythonPointer {
 }
 
 
-extension PythonPointer: Sequence {
+extension PyPointer: @retroactive Sequence {
 	
 	public typealias Iterator = PySequenceBuffer.Iterator
+    
+    public var pySequence: PySequenceBuffer {
+        self.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
+            let o = pointer.pointee
+            return PySequenceBuffer(start: o.ob_item, count: o.ob_base.ob_size)
+        }
+    }
 	
 	public func makeIterator_old() -> PySequenceBuffer.Iterator {
 		let fast_list = PySequence_Fast(self, nil)!
@@ -68,19 +75,14 @@ extension PythonPointer: Sequence {
 	}
 	
 	public func makeIterator() -> PySequenceBuffer.Iterator {
-		//let fast_list = PySequence_Fast(self, nil)!
-		let buffer = try! self.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
-			let o = pointer.pointee
-			return PySequenceBuffer(start: o.ob_item, count: o.allocated)
-		}
-		return buffer.makeIterator()
+        pySequence.makeIterator()
 	}
 	
 	@inlinable
-	public func pyMap<T>(_ transform: (PyPointer) throws -> T) rethrows -> [T] where T: PyDecodable {
+    public func pyMap<T>(_ transform: (PyPointer) throws -> T) rethrows -> [T] where T: PyDeserialize {
 		try self.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
 			let o = pointer.pointee
-			return try PySequenceBuffer(start: o.ob_item, count: o.allocated).map { element in
+            return try PySequenceBuffer(start: o.ob_item, count: o.ob_base.ob_size).map { element in
 				guard let element = element else { throw PythonError.sequence }
 				return try transform(element)
 			}
@@ -88,10 +90,10 @@ extension PythonPointer: Sequence {
 	}
 }
 
-extension PythonPointer {
+extension PyPointer {
 	
 	@inlinable
-	public subscript<R: ConvertibleFromPython & PyConvertible>(index: Int) -> R? {
+    public subscript<R: PySerialize & PyDeserialize>(index: Int) -> R? {
 		
 		get {
 			if PyList_Check(self) {
