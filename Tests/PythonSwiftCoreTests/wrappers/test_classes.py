@@ -15,3 +15,12 @@ class StaticClassTest:
     
     @staticmethod
     def testB(count: int, n: int): ...
+    
+    @staticmethod
+    def add_callback(cb: object): ...
+    
+    class Callbacks(list):
+        
+        a: int
+        
+        

@@ -25,6 +25,13 @@ public extension PyDeserialize {
     }
 }
 
+@inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
+    try key.withCString { string in
+        let value = PyObject_GetAttrString(o, string)
+        defer { Py_DecRef(value) }
+        return try T(object: value)
+    }
+}
 
 @inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: CodingKey) throws -> T where T: PyDeserialize {
     try key.stringValue.withCString { string in

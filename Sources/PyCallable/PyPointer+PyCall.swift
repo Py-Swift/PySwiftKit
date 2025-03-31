@@ -1239,6 +1239,10 @@ public func PythonCallWithGil(call: PyPointer) throws {
     Py_DecRef(result)
 }
 
+public func PythonCall<each T>(args arg: repeat each T) throws where repeat each T: PySerialize {
+    (repeat each arg)
+}
+
 public func PythonCallWithGil_PrintError<A, R>(call: PyPointer, _ a: A) throws -> R where
 A: PySerialize,
 R: PyDeserialize {

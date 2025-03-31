@@ -6,6 +6,7 @@ import XCTest
 @testable import PyUnwrap
 @testable import PyTypes
 @testable import PySwiftObject
+@testable import PyCallable
 
 class TestClassA: PyUnwrapable {
 
@@ -19,20 +20,33 @@ fileprivate struct TestStruct {
     
 }
 
-class StaticClassTest {
+public class StaticClassTest: StaticClassTest_PyProtocol {
     static let shared = StaticClassTest()
-    
+    public var py_callback: PyCallback?
+    var py_callbacks: [PyCallback] = []
     init() {
         
     }
     
-    static func testA() {
+    public static func testA() {
         print(Self.self, "testA")
+        for cb in shared.py_callbacks {
+            cb.a = 2
+            cb.b = "abc"
+        }
+        
     }
     
-    static func testB(count: Int, n: Int) {
+    public static func testB(count: Int, n: Int) {
         print(Self.self, "testB", n, count)
     }
+    public static func add_callback(cb: PyPointer) {
+        shared.py_callbacks.append(.init(callback: cb))
+    }
+    public static func set_callback(cb: PyPointer) {
+        shared.py_callback = .init(callback: cb)
+    }
+    
 }
 
 fileprivate struct TestStructB: PyUnwrapable & PyTypeProtocol {
@@ -119,6 +133,29 @@ final class PyWrappingTests: XCTestCase {
             
             
             let code = """
+            class SCTCallback:
+                
+                @property
+                def a(self):
+                    return 0
+            
+                @a.setter
+                def a(self, value):
+                    print(self, "a", value)
+            
+                @property
+                def b(self):
+                    return 0
+            
+                @a.setter
+                def b(self, value):
+                    print(self, "b", value)
+            
+            sct_cb = SCTCallback()
+            sct_cb2 = SCTCallback()
+            StaticClassTest.add_callback(sct_cb)
+            StaticClassTest.add_callback(sct_cb2)
+            
             for i in range(10):
                 StaticClassTest.testA()
                 StaticClassTest.testB(10, i)

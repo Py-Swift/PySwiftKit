@@ -70,6 +70,10 @@ let package = Package(
             name: "PyDeserializing",
             targets: ["PyDeserializing"]
         ),
+        .library(
+            name: "PyBuffering",
+            targets: ["PyBuffering"]
+        ),
 //		.library(
 //			name: "PyDecode",
 //			targets: ["PyDecode"]
@@ -236,6 +240,14 @@ let package = Package(
                 "PyComparable"
             ]
         ),
+        .target(
+            name: "PyBuffering",
+            dependencies: [
+                "PySwiftCore",
+                "PyTypes",
+                "PyComparable"
+            ]
+        ),
 		.target(
 			name: "PyTypes",
 			dependencies: [
@@ -317,7 +329,8 @@ let package = Package(
                 "PyUnwrap",
                 "PyUnpack",
                 "PyWrap",
-                "PyDeserializing"
+                "PyDeserializing",
+                "PyCallable"
 				
 			],
 			resources: [
