@@ -48,10 +48,10 @@ jobs:
         run: |
           
           cp -f _PySwiftKit/Package.swift PySwiftKit/Package.swift
-          python repack.py
           echo "$(<_PySwiftKit/Package.swift )"
           cp -rf _PySwiftKit/Sources/* PySwiftKit/Sources/
           cp -rf _PySwiftKit/Tests PySwiftKit/Tests
+          python repack.py
 
 
       # commit new package to kivypythoncore/master
