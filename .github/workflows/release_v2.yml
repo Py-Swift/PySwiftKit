@@ -46,9 +46,10 @@ jobs:
         
       - name: repack
         run: |
+          
+          cp -f _PySwiftKit/Package.swift PySwiftKit/Package.swift
           python repack.py
           echo "$(<_PySwiftKit/Package.swift )"
-          cp -f _PySwiftKit/Package.swift PySwiftKit/Package.swift
           cp -rf _PySwiftKit/Sources/* PySwiftKit/Sources/
           cp -rf _PySwiftKit/Tests PySwiftKit/Tests
 
