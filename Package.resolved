@@ -26,6 +26,15 @@
         "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"
       }
+    },
+    {
+      "identity" : "swiftonizeplugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PythonSwiftLink/SwiftonizePlugin",
+      "state" : {
+        "revision" : "d2ee81f1f002148315faea68e7fc44d81157634d",
+        "version" : "0.1.5"
+      }
     }
   ],
   "version" : 2

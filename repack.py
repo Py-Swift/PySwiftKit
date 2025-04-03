@@ -1,4 +1,4 @@
-package_path = "_PythonSwiftLink/Package.swift"
+package_path = "_PySwiftKit/Package.swift"
 
 def get_package_swift() -> str:
     text = ""
