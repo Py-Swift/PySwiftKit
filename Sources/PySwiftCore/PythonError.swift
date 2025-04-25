@@ -478,6 +478,16 @@ public func setPyException(type: PyStandardException, message: String) {
     }
 }
 
+let swiftException = PyErr_NewException("SwiftError", nil, nil)
+
+public extension Error {
+    func anyErrorException() {
+        localizedDescription.withCString { text in
+            PyErr_SetString(swiftException, text)
+        }
+    }
+}
+
 public extension PyStandardException {
     func setException(_ msg: String) {
         setPyException(type: self, message: msg)

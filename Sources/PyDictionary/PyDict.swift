@@ -13,6 +13,11 @@ public func PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer {
 	key.withCString { PyDict_GetItemString(dict, $0) ?? .None }
 }
 
+public func PyDict_GetItem(_ dict: PyPointer?, _ key: String) throws -> PyPointer {
+    guard let dict else { throw PyStandardException.keyError }
+    return key.withCString { PyDict_GetItemString(dict, $0) ?? .None }
+}
+
 public func PyDict_GetItem<R>(_ dict: PyPointer, _ key: String) throws -> R where R: PyDeserialize {
 	
     try key.withCString {

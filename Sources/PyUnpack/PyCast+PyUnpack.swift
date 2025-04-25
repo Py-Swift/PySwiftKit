@@ -122,12 +122,21 @@ public func getPySwiftObject<T: AnyObject, R>(with self: PySwiftObjectPointer,ke
 	return Unmanaged<T>.fromOpaque(pointee.swift_ptr).takeUnretainedValue()[keyPath: key]
 }
 
+//@inlinable
+//public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer, as: T.Type) -> T {
+//    guard
+//        PyObject_TypeCheck(self, check),
+//        let pointee = unsafeBitCast(self, to: PySwiftObjectPointer.self)?.pointee
+//    else { fatalError("self is not a PySwiftObject") }
+//    return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
+//}
+
 @inlinable
-public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer, as: T.Type) -> T {
+public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer, as: T.Type) throws -> T {
     guard
         PyObject_TypeCheck(self, check),
         let pointee = unsafeBitCast(self, to: PySwiftObjectPointer.self)?.pointee
-    else { fatalError("self is not a PySwiftObject") }
+    else { throw PythonError.notPySwiftObject }
     return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
 }
 
