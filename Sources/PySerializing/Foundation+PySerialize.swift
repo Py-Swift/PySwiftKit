@@ -152,6 +152,19 @@ extension Float32: PySerialize {
     }
 }
 
+extension Data: PySerialize {
+    public var pyPointer: PyPointer {
+        var data = self
+        let size = self.count //* uint8_size
+        let buffer = data.withUnsafeMutableBytes {$0.baseAddress}
+        var pybuf = Py_buffer()
+        PyBuffer_FillInfo(&pybuf, nil, buffer, size , 0, PyBUF_WRITE)
+        let mem = PyMemoryView_FromBuffer(&pybuf)
+        let bytes = PyBytes_FromObject(mem) ?? .None
+        Py_DecRef(mem)
+        return bytes
+    }
+}
 
 extension Array: PySerialize where Element : PySerialize {
 
