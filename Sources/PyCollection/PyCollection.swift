@@ -50,7 +50,7 @@ extension PyPointer {
 	
 	
 }
-#if swift(>=5.10)
+#if swift(<6.0)
 extension PyPointer: @retroactive Sequence {}
 #else
 extension PyPointer: Sequence {}
