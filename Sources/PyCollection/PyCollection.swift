@@ -50,9 +50,14 @@ extension PyPointer {
 	
 	
 }
+#if swift(>=5.10)
+extension PyPointer: @retroactive Sequence {}
+#else
+extension PyPointer: Sequence {}
+#endif
 
-
-extension PyPointer: @retroactive Sequence {
+// Sequence
+extension PyPointer {
 	
 	public typealias Iterator = PySequenceBuffer.Iterator
     
