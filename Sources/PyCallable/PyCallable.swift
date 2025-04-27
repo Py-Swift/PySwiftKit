@@ -61,7 +61,6 @@ public extension PyMethodDef {
     }
 }
 
-
 public extension PyMethodDef {
     
     init(ml_name: String, ml_flags: Int32, ml_doc: String? = nil,  ml_meth: PySwiftFunctionFast) {
@@ -116,5 +115,18 @@ public extension PyMethodDef {
             ml_flags: ml_flags,
             ml_doc: handleDocString(ml_doc)
         )
+    }
+}
+
+@resultBuilder
+public struct PyMethodBuilder {
+    public static func buildBlock(_ components: PyMethodDef...) -> [PyMethodDef] {
+        components
+    }
+}
+
+extension Array where Element == PyMethodDef {
+    public init(@PyMethodBuilder methods: () -> [PyMethodDef]) {
+        self = methods()
     }
 }
