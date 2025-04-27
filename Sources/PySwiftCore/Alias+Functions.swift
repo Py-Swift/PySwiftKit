@@ -45,23 +45,21 @@ public typealias PySwift_am_anext = PySwift_unaryfunc
 
 public typealias PySwift_am_send = PySwift_sendfunc
 
-//PyGetSetDef.init(name: <#T##UnsafePointer<CChar>!#>, get: <#T##getter!##getter!##(UnsafeMutablePointer<PyObject>?, UnsafeMutableRawPointer?) -> UnsafeMutablePointer<PyObject>?#>, set: <#T##setter!##setter!##(UnsafeMutablePointer<PyObject>?, UnsafeMutablePointer<PyObject>?, UnsafeMutableRawPointer?) -> Int32#>, doc: <#T##UnsafePointer<CChar>!#>, closure: <#T##UnsafeMutableRawPointer!#>)
-
 public typealias PySwift_getter = (@convention(c) (_ s: PySwiftObjectPointer, _ raw: UnsafeMutableRawPointer?) -> PythonPointer?)?
 public typealias PySwift_setter = (@convention(c) (_ s: PySwiftObjectPointer,_ key: PythonPointer?, _ raw: UnsafeMutableRawPointer?) -> Int32)?
 
 
 // _PyCFunctionFastWithKeywords
-public typealias PySwiftFunctionFastWithKeywords = (@convention(c) (PySwiftObjectPointer, UnsafePointer<PyPointer?>?, Py_ssize_t, PyPointer?) -> PyPointer?)?
+public typealias PySwiftFunctionFastWithKeywords = (@convention(c) (PySwiftObjectPointer, VectorArgs, Py_ssize_t, PyPointer?) -> PyPointer?)?
 
 // _PyCFunctionFast
-public typealias PySwiftFunctionFast = (@convention(c) (PySwiftObjectPointer, UnsafePointer<PyPointer?>?, Py_ssize_t) -> PyPointer?)?
+public typealias PySwiftFunctionFast = (@convention(c) (PySwiftObjectPointer, VectorArgs, Py_ssize_t) -> PyPointer?)?
 
 // PyCFunction
 public typealias PySwiftFunction = (@convention(c) (PySwiftObjectPointer, PyPointer?) -> PyPointer?)?
 
 // PyCMethod
-public typealias PySwiftMethod = (@convention(c) (UnsafeMutablePointer<PyObject>?, UnsafeMutablePointer<PyTypeObject>?, UnsafePointer<PyPointer?>?, Int, PyPointer?) -> PyPointer?)?
+public typealias PySwiftMethod = (@convention(c) (UnsafeMutablePointer<PyObject>?, UnsafeMutablePointer<PyTypeObject>?, VectorArgs, Int, PyPointer?) -> PyPointer?)?
 
 
 public typealias PY_SEQUENCE_METHODS = PySequenceMethods
