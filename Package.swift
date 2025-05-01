@@ -1,6 +1,7 @@
 // swift-tools-version:5.9
 
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
 	name: "PySwiftKit",
@@ -99,14 +100,12 @@ let package = Package(
 				"PyTuples"
 			]
 		),
-		
 	],
 	dependencies: [
 
 		.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
 		.package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
         .package(url: "https://github.com/PythonSwiftLink/SwiftonizePlugin", .upToNextMajor(from: "0.0.0")),
-
 	],
 	
 	targets: [
@@ -310,13 +309,12 @@ let package = Package(
 				.linkedLibrary("sqlite3"), 
 			]
 		),
-		
-			.target(
-				name: "_PySwiftObject",
-				dependencies: [
-					"PythonCore"
-				]
-			),
+        .target(
+            name: "_PySwiftObject",
+            dependencies: [
+                "PythonCore"
+            ]
+        ),
 		.testTarget(
 			name: "PythonSwiftCoreTests",
 			dependencies: [
@@ -330,7 +328,7 @@ let package = Package(
                 "PyUnpack",
                 "PyWrap",
                 "PyDeserializing",
-                "PyCallable"
+                "PyCallable",
 				
 			],
 			resources: [
