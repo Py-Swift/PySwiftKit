@@ -26,27 +26,27 @@ fileprivate func handleMLFlag(flag: Int32, class_static: Bool? = nil) -> Int32 {
 
 public extension PyMethodDef {
     
-    static func noArgs(ml_name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func noArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
-            ml_name: cString(ml_name),
+            ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
             ml_flags: METH_NOARGS,
             ml_doc: handleDocString(doc)
         )
     }
     
-    static func staticNoArgs(ml_name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func staticNoArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
-            ml_name: cString(ml_name),
+            ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
             ml_flags: METH_NOARGS | METH_STATIC,
             ml_doc: handleDocString(doc)
         )
     }
     
-    static func classWNoArgs(ml_name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func classNoArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
-            ml_name: cString(ml_name),
+            ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
             ml_flags: METH_NOARGS | METH_CLASS,
             ml_doc: handleDocString(doc)
@@ -74,7 +74,7 @@ public extension PyMethodDef {
         )
     }
     
-    static func classWOneArg(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func classOneArg(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
             ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
