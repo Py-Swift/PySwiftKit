@@ -46,19 +46,20 @@ public func withAutoGIL(handle: @escaping ()->Void ) {
             handle()
             
             print(PyEval_RestoreThread(state) )
-            return
+        } else {
+            let gil = PyGILState_Ensure()
+            handle()
+            PyGILState_Release(gil)
         }
-        let gil = PyGILState_Ensure()
+        
+    } else {
+        
+        gilCheck("autogil")
+        //
         handle()
-        PyGILState_Release(gil)
-        return
+        
+        PyEval_SaveThread()
     }
-    
-    gilCheck("autogil")
-    //
-    handle()
-
-    PyEval_SaveThread()
 }
 
 @inlinable
