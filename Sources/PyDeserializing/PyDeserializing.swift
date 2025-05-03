@@ -38,7 +38,7 @@ extension PyDeserialize where Self: AnyObject {
             let pointee = unsafeBitCast(object, to: PySwiftObjectPointer.self)?.pointee
         else { throw PyStandardException.typeError }
         
-        return Unmanaged.fromOpaque(pointee.swift_ptr).takeRetainedValue()
+        return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
     }
 }
 
