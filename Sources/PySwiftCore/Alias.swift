@@ -6,6 +6,7 @@ import PythonCore
 import _PySwiftObject
 
 public typealias PythonType = UnsafeMutablePointer<PyTypeObject>?
+public typealias _PySwiftObjectPointer = UnsafeMutablePointer<PySwiftObject>
 public typealias PySwiftObjectPointer = UnsafeMutablePointer<PySwiftObject>?
 //public typealias PythonPointer = UnsafeMutablePointer<PyObject>//?
 public typealias PythonPointer = PyPointer

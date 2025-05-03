@@ -5,10 +5,16 @@ import Foundation
 
 public protocol PyDeserialize {
     init(object: PyPointer) throws
+    static func casted(from object: PyPointer) throws -> Self
 }
 
 
 public extension PyDeserialize {
+    
+    static func casted(from object: PyPointer) throws -> Self {
+        try Self(object: object)
+    }
+    
     init(consuming object: PyPointer) throws {
         try self.init(object: object)
         _Py_DecRef(object)
@@ -24,6 +30,19 @@ public extension PyDeserialize {
         try self.init(object: object)
     }
 }
+
+extension PyDeserialize where Self: AnyObject {
+    public static func casted(from object: PyPointer) throws -> Self {
+        guard
+            object != PyNone,
+            let pointee = unsafeBitCast(object, to: PySwiftObjectPointer.self)?.pointee
+        else { throw PyStandardException.typeError }
+        
+        return Unmanaged.fromOpaque(pointee.swift_ptr).takeRetainedValue()
+    }
+}
+
+
 
 @inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
     try key.withCString { string in

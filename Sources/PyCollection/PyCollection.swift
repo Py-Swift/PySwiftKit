@@ -25,6 +25,23 @@ extension Array : PyDeserialize where Element : PyDeserialize {
 	
 }
 
+extension Array where Element: PyDeserialize & AnyObject {
+    public static func casted(from object: PyPointer) throws -> Self {
+        guard
+            object != PyNone
+        else { throw PyStandardException.typeError }
+                
+        return try object.map { element in
+            if let element {
+                try Element.casted(from: element)
+            } else {
+                throw PyStandardException.typeError
+            }
+        }
+
+    }
+}
+
 
 extension PyPointer {
     @inlinable public func append<T: PySerialize>(_ value: T) {
@@ -51,7 +68,7 @@ extension PyPointer {
 	
 }
 
-extension PythonCore.PyPointer: Swift.Sequence {
+extension PyPointer: Swift.Sequence {
 	
 	public typealias Iterator = PySequenceBuffer.Iterator
     
