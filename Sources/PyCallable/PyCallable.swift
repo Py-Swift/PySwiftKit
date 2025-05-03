@@ -35,10 +35,10 @@ public extension PyMethodDef {
         )
     }
     
-    static func staticNoArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func staticNoArgs(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
         .init(
             ml_name: cString(name),
-            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_meth: ml_meth,
             ml_flags: METH_NOARGS | METH_STATIC,
             ml_doc: handleDocString(doc)
         )
@@ -53,6 +53,14 @@ public extension PyMethodDef {
         )
     }
     
+    static func moduleNoArgs(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: ml_meth,
+            ml_flags: METH_NOARGS,
+            ml_doc: handleDocString(doc)
+        )
+    }
 }
 
 public extension PyMethodDef {
@@ -65,10 +73,10 @@ public extension PyMethodDef {
         )
     }
     
-    static func staticOneArg(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
+    static func staticOneArg(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
         .init(
             ml_name: cString(name),
-            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_meth: ml_meth,
             ml_flags: METH_O | METH_STATIC,
             ml_doc: handleDocString(doc)
         )
@@ -79,10 +87,18 @@ public extension PyMethodDef {
             ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
             ml_flags: METH_O | METH_CLASS,
-            ml_doc: (doc != nil ? cString(doc!) : nil )
+            ml_doc: handleDocString(doc)
         )
     }
     
+    static func moduleOneArg(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: ml_meth,
+            ml_flags: METH_O,
+            ml_doc: handleDocString(doc)
+        )
+    }
 }
 
 public extension PyMethodDef {
@@ -95,7 +111,7 @@ public extension PyMethodDef {
         )
     }
     
-    static func staticWithArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunctionFast) -> Self {
+    static func staticWithArgs(name: String, doc: String? = nil,  ml_meth: _PyCFunctionFast) -> Self {
         .init(
             ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
@@ -112,7 +128,15 @@ public extension PyMethodDef {
             ml_doc: handleDocString(doc)
         )
     }
-
+    
+    static func moduleWithArgs(name: String, doc: String? = nil,  ml_meth: _PyCFunctionFast) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_flags: METH_FASTCALL,
+            ml_doc: handleDocString(doc)
+        )
+    }
 }
 
 @resultBuilder
