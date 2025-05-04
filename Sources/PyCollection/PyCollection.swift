@@ -22,13 +22,26 @@ extension Array : PyDeserialize where Element : PyDeserialize {
 			throw PythonError.sequence
 		}
 	}
-	
+    
+    public static func casted(from object: PyPointer) throws -> Array<Element> {
+        guard
+            PyObject_TypeCheck(object, .PyList)
+        else { throw PyStandardException.typeError }
+                
+        return try object.map { element in
+            if let element {
+                try Element.casted(from: element)
+            } else {
+                throw PyStandardException.typeError
+            }
+        }
+    }
 }
 
 extension Array where Element: PyDeserialize & AnyObject {
     public static func casted(from object: PyPointer) throws -> Self {
         guard
-            object != PyNone
+            PyObject_TypeCheck(object, .PyList)
         else { throw PyStandardException.typeError }
                 
         return try object.map { element in

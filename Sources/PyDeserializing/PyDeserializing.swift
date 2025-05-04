@@ -34,7 +34,6 @@ public extension PyDeserialize {
 extension PyDeserialize where Self: AnyObject {
     public static func casted(from object: PyPointer) throws -> Self {
         guard
-            object != PyNone,
             let pointee = unsafeBitCast(object, to: PySwiftObjectPointer.self)?.pointee
         else { throw PyStandardException.typeError }
         
@@ -42,7 +41,22 @@ extension PyDeserialize where Self: AnyObject {
     }
 }
 
-
+extension Optional: PyDeserialize where Wrapped: PyDeserialize {
+    public init(object: PythonCore.PyPointer) throws {
+        self = if object == PyNone {
+            nil
+        } else {
+            try Wrapped(object: object)
+        }
+    }
+    public static func casted(from object: PyPointer) throws -> Optional<Wrapped> {
+        if object == PyNone {
+            nil
+        } else {
+            try Wrapped.casted(from: object)
+        }
+    }
+}
 
 @inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
     try key.withCString { string in
