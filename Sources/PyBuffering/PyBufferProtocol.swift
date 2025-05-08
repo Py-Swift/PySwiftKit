@@ -5,7 +5,7 @@
 //  Created by CodeBuilder on 12/03/2025.
 //
 
-import PySwiftCore
+import PySwiftKit
 import PythonCore
 
 public protocol PyBuffer {

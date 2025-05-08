@@ -3,10 +3,10 @@
     {
       "identity" : "pythoncore",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PythonSwiftLink/PythonCore",
+      "location" : "https://github.com/KivySwiftLink/PythonCore",
       "state" : {
-        "revision" : "98d767de5b72e4d6505a47448e6f2cf9e506cfdf",
-        "version" : "311.0.3"
+        "revision" : "e6642987fe462fe99a3d08da0b6e40c05373014f",
+        "version" : "311.1.1"
       }
     },
     {

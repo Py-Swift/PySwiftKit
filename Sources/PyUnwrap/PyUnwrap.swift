@@ -1,5 +1,5 @@
 import Foundation
-import PySwiftCore
+import PySwiftKit
 import _PySwiftObject
 import PyCollection
 import PythonCore

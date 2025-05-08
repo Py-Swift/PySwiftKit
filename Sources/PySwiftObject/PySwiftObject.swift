@@ -1,6 +1,6 @@
 import Foundation
 @_exported import _PySwiftObject
-import PySwiftCore
+import PySwiftKit
 import PythonCore
 //import PythonSwiftCore
 //import PythonTypeAlias

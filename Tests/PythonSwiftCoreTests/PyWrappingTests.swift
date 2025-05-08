@@ -1,5 +1,5 @@
 import XCTest
-@testable import PySwiftCore
+@testable import PySwiftKit
 @testable import PythonCore
 @testable import PyExecute
 @testable import PyDictionary

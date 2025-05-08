@@ -7,7 +7,7 @@
 
 import Foundation
 import PythonCore
-import PySwiftCore
+import PySwiftKit
 import PySerializing
 
 fileprivate func handleDocString(_ string: String?) -> UnsafePointer<CChar>? {
@@ -248,4 +248,23 @@ public extension PyMethodDef {
             ml_doc: handleDocString(ml_doc)
         )
     }
+}
+
+
+public struct PyFunction {
+    let ptr: PyPointer?
+    func callAsFunction() {
+        
+    }
+    func callAsFunction<A>(_ a: A) where A: PySerialize {
+        
+    }
+    func callAsFunction<A, B>(_ a: A, _ b: B) where A: PySerialize, B: PySerialize {
+        
+    }
+}
+
+
+fileprivate func playground() {
+    PyFunction(ptr: nil)()
 }

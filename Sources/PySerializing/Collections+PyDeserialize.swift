@@ -1,10 +1,14 @@
 import Foundation
-import PySwiftCore
+import PySwiftKit
 import PythonCore
 import PyTypes
 //import PyComparable
 
 extension RawRepresentable where RawValue: PyDeserialize {
+   
+}
+
+extension PyDeserialize where Self: RawRepresentable, Self.RawValue: PyDeserialize {
     public init(object: PyPointer) throws {
         guard let raw = Self(rawValue: try RawValue(object: object)) else {
             throw PythonError.type("\(RawValue.self)")
@@ -26,8 +30,6 @@ extension Dictionary: PyDeserialize where Key: PyDeserialize,  Value: PyDeserial
         
         self = d
     }
-    
-    
 }
 
 extension Dictionary where Key == String, Value == PyPointer {
@@ -44,19 +46,12 @@ extension Dictionary where Key == String, Value == PyPointer {
         
         self = d
     }
-    
-    
 }
 
-fileprivate enum TestStruct: Int32 {
-    case a
-}
-
-func test()  throws {
-    let obj = PyPointer.None
-    
-    let dict: [Int:String] = try .init(object: obj)
-    
-    let teststruct = TestStruct.a
-    try TestStruct.init(object: obj)
+extension UnsafeMutableBufferPointer where Self.Element: PyDeserialize {
+    func test() {
+        map { element in
+            
+        }
+    }
 }

@@ -6,7 +6,7 @@
 //
 
 import PythonCore
-import PySwiftCore
+import PySwiftKit
 import Foundation
 
 
@@ -190,19 +190,32 @@ extension Array: PySerialize where Element : PySerialize {
 }
 
 
-extension Dictionary: PySerialize where Key == StringLiteralType, Value: PySerialize  {
+extension Dictionary: PySerialize where Key: PySerialize, Value: PySerialize  {
     
 
     public var pyPointer: PyPointer {
         let dict = PyDict_New()
         for (key,value) in self {
             let v = value.pyPointer
-            _ = key.withCString{PyDict_SetItemString(dict, $0, v)}
-            //Py_DecRef(v)
+            let k = key.pyPointer
+            //_ = key.withCString{PyDict_SetItemString(dict, $0, v)}
+            PyDict_SetItem(dict, k, v)
+            Py_DecRef(k)
         }
         return dict ?? .None
     }
+}
+
+extension Dictionary where Key == String, Value: PySerialize  {
     
+    public var pyPointer: PyPointer {
+        let dict = PyDict_New()
+        for (key,value) in self {
+            let v = value.pyPointer
+            _ = key.withCString{PyDict_SetItemString(dict, $0, v)}
+        }
+        return dict ?? .None
+    }
     
 }
 
@@ -233,5 +246,12 @@ extension KeyValuePairs: PySerialize where Key: PySerialize, Value: PySerialize 
             _Py_DecRef(o)
         }
         return dict
+    }
+}
+
+
+extension Error where Self: PySerialize {
+    public var pyPointer: PyPointer {
+        localizedDescription.pyPointer
     }
 }

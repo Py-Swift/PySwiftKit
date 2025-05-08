@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PySwiftCore
+import PySwiftKit
 import PythonCore
 
 public extension Dictionary where Key == String, Value == PyPointer {

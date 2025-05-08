@@ -1,7 +1,7 @@
 import Foundation
-import PySwiftCore
+import PySwiftKit
 //import PyEncode
-import PyDeserializing
+import PySerializing
 import PythonCore
 //import PythonTypeAlias
 //import _PySwiftObject
@@ -149,6 +149,14 @@ public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyP
     return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
 }
 
+@inlinable
+public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer) throws -> T {
+    guard
+        PyObject_TypeCheck(self, check),
+        let pointee = unsafeBitCast(self, to: PySwiftObjectPointer.self)?.pointee
+    else { throw PythonError.type(.init(cString: _PyType_Name(check))) }
+    return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
+}
 
 @inlinable
 public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer?) throws -> T {
@@ -157,6 +165,16 @@ public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyP
         PyObject_TypeCheck(self, check),
         let pointee = unsafeBitCast(self, to: PySwiftObjectPointer.self)?.pointee
     else { throw PythonError.type(.init(cString: _PyType_Name(check))) }
+    return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
+}
+
+@inlinable
+public func UnPackPyPointer<T: AnyObject>(with check: PythonType, from self: PyPointer) throws -> T? {
+    guard self.notNone else { return nil }
+    
+    guard PyObject_TypeCheck(self, check), let pointee = unsafeBitCast(self, to: PySwiftObjectPointer.self)?.pointee
+    else { throw PythonError.type(.init(cString: _PyType_Name(check))) }
+    
     return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
 }
 

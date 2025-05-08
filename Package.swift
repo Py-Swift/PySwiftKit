@@ -3,13 +3,21 @@
 import PackageDescription
 import CompilerPluginSupport
 
+let kivy = true
+
+let pythoncore: Package.Dependency = if kivy {
+    .package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+} else {
+    .package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+}
+
 let package = Package(
 	name: "PySwiftKit",
 	platforms: [.macOS(.v11), .iOS(.v13)],
 	products: [
 		.library(
-			name: "PySwiftCore",
-			targets: ["PySwiftCore"]
+			name: "PySwiftKit",
+			targets: ["PySwiftKit"]
 		),
 		.library(
 			name: "PySwiftObject",
@@ -67,10 +75,10 @@ let package = Package(
             name: "PySerializing",
             targets: ["PySerializing"]
         ),
-        .library(
-            name: "PyDeserializing",
-            targets: ["PyDeserializing"]
-        ),
+//        .library(
+//            name: //"PyDeserializing",
+//            targets: [//"PyDeserializing"]
+//        ),
         .library(
             name: "PyBuffering",
             targets: ["PyBuffering"]
@@ -90,7 +98,7 @@ let package = Package(
 		.library(
 			name: "SwiftonizeModules",
 			targets: [
-				"PySwiftCore",
+				"PySwiftKit",
 				"PySwiftObject",
 				"PyUnpack",
 				//"PyEncode",
@@ -103,7 +111,8 @@ let package = Package(
 	],
 	dependencies: [
 
-		.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
+		//.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
+        pythoncore,
 		.package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
         .package(url: "https://github.com/PythonSwiftLink/SwiftonizePlugin", .upToNextMajor(from: "0.0.0")),
 	],
@@ -112,7 +121,7 @@ let package = Package(
 		.target(
 			name: "PyExecute",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
 				//"PyDecode",
 				//"PyEncode"
 			]
@@ -120,29 +129,29 @@ let package = Package(
 		.target(
 			name: "PyCallable",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
                 "PySwiftObject",
 //				"PyDecode",
 //				"PyEncode"
                 "PySerializing",
-                "PyDeserializing"
+                //"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyUnpack",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
 				"PyCollection",
                 //"PyDecode",
                 //"PyEncode"
                 "PySerializing",
-                "PyDeserializing"
+                //"PyDeserializing"
 			]
 		),
         .target(
             name: "PyUnwrap",
             dependencies: [
-                "PySwiftCore",
+                "PySwiftKit",
                 "PyCollection",
                 "PyTypes"
             ]
@@ -150,7 +159,7 @@ let package = Package(
         .target(
             name: "PyWrap",
             dependencies: [
-                "PySwiftCore",
+                "PySwiftKit",
                 "PyCollection",
                 "PyTypes"
             ]
@@ -158,7 +167,7 @@ let package = Package(
 		.target(
 			name: "PyExpressible",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
 //				"PyDecode",
 //				"PyEncode"
 			]
@@ -166,17 +175,7 @@ let package = Package(
 		.target(
 			name: "PyCollection",
 			dependencies: [
-				"PySwiftCore",
-                //"PyDecode",
-                //"PyEncode"
-                "PySerializing",
-                "PyDeserializing"
-			]
-		),
-		.target(
-			name: "PyMemoryView",
-			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
                 //"PyDecode",
                 //"PyEncode"
                 "PySerializing",
@@ -184,29 +183,39 @@ let package = Package(
 			]
 		),
 		.target(
+			name: "PyMemoryView",
+			dependencies: [
+				"PySwiftKit",
+                //"PyDecode",
+                //"PyEncode"
+                "PySerializing",
+                ////"PyDeserializing"
+			]
+		),
+		.target(
 			name: "PyUnicode",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
                 //"PyDecode",
                 //"PyEncode"
                 //"PySerializing",
-                "PyDeserializing"
+                //"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyDictionary",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
                 //"PyDecode",
                 //"PyEncode"
                 "PySerializing",
-                "PyDeserializing"
+                //"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyComparable",
 			dependencies: [
-				"PySwiftCore",
+				"PySwiftKit",
 				"PyTypes",
 				//				"PyEncode"
 			]
@@ -214,7 +223,7 @@ let package = Package(
 //		.target(
 //			name: "PyDecode",
 //			dependencies: [
-//				"PySwiftCore",
+//				"PySwiftKit",
 //				"PyTypes",
 //				"PyComparable"
 //			]
@@ -222,27 +231,29 @@ let package = Package(
 //		.target(
 //			name: "PyEncode",
 //			dependencies: [
-//				"PySwiftCore",
+//				"PySwiftKit",
 //			]
 //		),
         .target(
             name: "PySerializing",
             dependencies: [
-                "PySwiftCore",
-            ]
-        ),
-        .target(
-            name: "PyDeserializing",
-            dependencies: [
-                "PySwiftCore",
+                "PySwiftKit",
                 "PyTypes",
                 "PyComparable"
             ]
         ),
+//        .target(
+//            name: //"PyDeserializing",
+//            dependencies: [
+//                "PySwiftKit",
+//                "PyTypes",
+//                "PyComparable"
+//            ]
+//        ),
         .target(
             name: "PyBuffering",
             dependencies: [
-                "PySwiftCore",
+                "PySwiftKit",
                 "PyTypes",
                 "PyComparable"
             ]
@@ -251,9 +262,9 @@ let package = Package(
 			name: "PyTypes",
 			dependencies: [
 				//"PyEncode",
-                //"PyDeserializing",
+                ////"PyDeserializing",
                 "PySwiftObject",
-				"PySwiftCore",
+				"PySwiftKit",
 			]
 		),
 		.target(
@@ -262,8 +273,8 @@ let package = Package(
                 //"PyDecode",
                 //"PyEncode"
                 "PySerializing",
-                "PyDeserializing",
-				"PySwiftCore",
+                //"PyDeserializing",
+				"PySwiftKit",
 			]
 		),
 		
@@ -273,8 +284,8 @@ let package = Package(
                     //"PyDecode",
                     //"PyEncode"
                     "PySerializing",
-                    "PyDeserializing",
-                    "PySwiftCore",
+                    //"PyDeserializing",
+                    "PySwiftKit",
                 ]
             ),
 		
@@ -282,7 +293,7 @@ let package = Package(
 			name: "PySwiftObject",
 			dependencies: [
 				"PythonCore",
-				"PySwiftCore",
+				"PySwiftKit",
 				//"_PySwiftObject"
 				//"PythonTypeAlias"
 			],
@@ -292,7 +303,7 @@ let package = Package(
 			swiftSettings: []
 		),
 		.target(
-			name: "PySwiftCore",
+			name: "PySwiftKit",
 			dependencies: [
 				"PythonCore",
 				"_PySwiftObject"
@@ -319,7 +330,7 @@ let package = Package(
 			name: "PythonSwiftCoreTests",
 			dependencies: [
 				"PythonCore",
-				"PySwiftCore",
+				"PySwiftKit",
                 "PySwiftObject",
 				"PyExecute",
 				"PyCollection",
@@ -327,7 +338,7 @@ let package = Package(
                 "PyUnwrap",
                 "PyUnpack",
                 "PyWrap",
-                "PyDeserializing",
+                //"PyDeserializing",
                 "PyCallable",
 				
 			],

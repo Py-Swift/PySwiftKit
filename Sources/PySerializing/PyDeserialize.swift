@@ -1,5 +1,5 @@
 import PythonCore
-import PySwiftCore
+import PySwiftKit
 import Foundation
 
 
@@ -10,6 +10,10 @@ public protocol PyDeserialize {
 
 
 public extension PyDeserialize {
+    
+    init(object: PyPointer) throws {
+        fatalError("\(Self.self)(object: PyPointer) not implemented")
+    }
     
     static func casted(from object: PyPointer) throws -> Self {
         try Self(object: object)
@@ -58,11 +62,20 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     }
 }
 
+
 @inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
     try key.withCString { string in
         let value = PyObject_GetAttrString(o, string)
         defer { Py_DecRef(value) }
         return try T(object: value)
+    }
+}
+
+@inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize & AnyObject {
+    try key.withCString { string in
+        guard let value = PyObject_GetAttrString(o, string) else { throw PyStandardException.typeError }
+        defer { Py_DecRef(value) }
+        return try T.casted(from: value)
     }
 }
 
@@ -73,3 +86,15 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
         return try T(object: value)
     }
 }
+
+
+public struct PyCast<T: PyDeserialize> {
+    public static func cast(from object: PyPointer) throws -> T {
+        try T(object: object)
+    }
+    
+    public static func cast(from object: PyPointer) throws -> T where T: AnyObject {
+        try .casted(from: object)
+    }
+}
+

@@ -1,26 +1,22 @@
 
-import PySwiftCore
+import PySwiftKit
 import PythonCore
 import Foundation
-import PyDeserializing
+//import PyDeserializing
 import PySerializing
 
 extension Array : PyDeserialize where Element : PyDeserialize {
 	
 	public init(object: PyPointer) throws {
-		if PyList_Check(object) {
-			self = try object.map {
-                guard let element = $0 else { throw PyStandardException.indexError }
-				return try Element(object: element)
-			}//(Element.init)
-		} else if PyTuple_Check(object) {
-			self = try object.map {
-				guard let element = $0 else { throw PythonError.index }
-				return try Element(object: element)
-			}//(Element.init)
-		} else {
-			throw PythonError.sequence
-		}
+        guard
+            PyObject_TypeCheck(object, .PyList)
+        else { throw PyStandardException.typeError }
+        
+        self = try object.map {
+            guard let element = $0 else { throw PyStandardException.indexError }
+            return try Element(object: element)
+        }//(Element.init)
+		
 	}
     
     public static func casted(from object: PyPointer) throws -> Array<Element> {
@@ -63,17 +59,27 @@ extension PyPointer {
 		Py_DecRef(element)
 	}
 	@inlinable public func append(_ value: PyPointer) { PyList_Append(self, value) }
-    @inlinable public func append<T: PySerialize>(contentsOf: [T]) {
-		for value in contentsOf { PyList_Append(self, value.pyPointer) }
-	}
+//    @inlinable public func append<T: PySerialize>(contentsOf: [T]) {
+//		for value in contentsOf { PyList_Append(self, value.pyPointer) }
+//	}
 	
-	@inlinable public func append(contentsOf: [PythonPointer]) {
+	@inlinable public func append(contentsOf: [PyPointer]) {
 		for value in contentsOf { PyList_Append(self, value) }
 	}
+    
+    @inlinable public func append<C>(contentsOf newElements: C) where C : Collection, C.Element: PySerialize {
+        for element in newElements {
+            let object = element.pyPointer
+            PyList_Append(self, object)
+            Py_DecRef(object)
+        }
+    }
 	
-    @inlinable public mutating func insert<C, T: PySerialize>(contentsOf newElements: C, at i: Int) where C : Collection, C.Element == T {
+    @inlinable public func insert<C>(contentsOf newElements: C, at i: Int) where C : Collection, C.Element: PySerialize {
 		for element in newElements {
-			PyList_Insert(self, i, element.pyPointer)
+            let object = element.pyPointer
+			PyList_Insert(self, i, object)
+            Py_DecRef(object)
 		}
 	}
 	

@@ -8,7 +8,7 @@
 import Foundation
 import PythonCore
 import PySwiftObject
-import PySwiftCore
+import PySwiftKit
 
 
 fileprivate var BaseMethods: [PyMethodDef] = [
