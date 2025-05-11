@@ -18,7 +18,7 @@ extension PyPointer {
         
     }
     
-    public static let StringIO: PyPointer? = pythonImport(from: "io", import_name: "StringIO")
+    //public static let StringIO: PyPointer? = pythonImport(from: "io", import_name: "StringIO")
     
     public var xINCREF: PyPointer {
             Py_IncRef(self)
@@ -63,6 +63,18 @@ extension PyPointer {
     key.stringValue.withCString { string in
         PyObject_HasAttrString(o, string) == 1
     }
+}
+
+@inlinable public func PyDict_GetItem(_ mp: PyPointer, _ key: String) throws -> PyPointer {
+    try key.withCString { ckey in
+        guard let result = Python.PyDict_GetItemString(mp, ckey) else { throw PyStandardException.keyError }
+        return result
+    }
+}
+
+@inlinable public func PyTuple_GetItem(_ o: PyPointer, _ index: Int) throws -> PyPointer {
+    guard let result: PyPointer = Python.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
+    return result
 }
 
 extension PythonPointer {

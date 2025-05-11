@@ -65,14 +65,14 @@ public protocol PyFloatProtocol {
 
 
 public protocol PyAsyncIterableProtocol {
-	func __am_aiter__() -> PyPointer?
+    func __am_aiter__(_self_: _PySwiftObjectPointer) -> PyPointer?
 }
 
 public protocol PyAsyncIteratorProtocol {
-	func __am_anext__() -> PyPointer?
+	func __am_anext__(_self_: _PySwiftObjectPointer) -> PyPointer?
 }
 
 public protocol PyAsyncProtocol: PyAsyncIteratorProtocol, PyAsyncIterableProtocol {
-	func __am_await__() -> PyPointer?
+	func __am_await__(_self_: _PySwiftObjectPointer) -> PyPointer?
 	func __am_send__(_ arg: PyPointer?, _ kwargs: UnsafeMutablePointer<PyPointer?>?) -> PySendResultFlag
 }

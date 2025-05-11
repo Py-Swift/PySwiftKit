@@ -5,7 +5,7 @@ import PythonCore
 private var importedModules = [String: PythonPointer]()
 private var importedModulesItems = [String: PythonPointer]()
 
-public func pythonImport(from mod: String, import_name: String) -> PythonPointer? {
+public func PyImport(from mod: String, import_name: String) -> PythonPointer? {
     let module_item_name = "\(mod)_\(import_name)"
     
     if let _import_ = importedModulesItems[module_item_name] {

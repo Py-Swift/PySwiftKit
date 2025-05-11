@@ -8,6 +8,7 @@ public protocol PyDeserialize {
     static func casted(from object: PyPointer) throws -> Self
 }
 
+public typealias PyDeserializeObject = PyDeserialize & AnyObject
 
 public extension PyDeserialize {
     
@@ -46,6 +47,9 @@ extension PyDeserialize where Self: AnyObject {
 }
 
 extension Optional: PyDeserialize where Wrapped: PyDeserialize {
+    
+    
+    
     public init(object: PythonCore.PyPointer) throws {
         self = if object == PyNone {
             nil
@@ -53,6 +57,9 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
             try Wrapped(object: object)
         }
     }
+    
+    
+    
     public static func casted(from object: PyPointer) throws -> Optional<Wrapped> {
         if object == PyNone {
             nil
@@ -60,6 +67,35 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
             try Wrapped.casted(from: object)
         }
     }
+}
+
+extension Optional where Wrapped: PyDeserializeObject {
+    
+    public init(object: PythonCore.PyPointer) throws {
+        self = if object == PyNone {
+            nil
+        } else {
+            try Wrapped.casted(from: object)
+        }
+    }
+    
+    public static func casted(from object: PyPointer) throws -> Self {
+        if object == PyNone {
+            nil
+        } else {
+            try Wrapped.casted(from: object)
+        }
+    }
+}
+
+extension Optional where Wrapped: PyDeserializeObject {
+//    public init(object: PythonCore.PyPointer) throws  {
+//        self = if object == PyNone {
+//            nil
+//        } else {
+//            try Wrapped.casted(from: object)
+//        }
+//    }
 }
 
 
@@ -87,8 +123,26 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     }
 }
 
+@inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T {
+    guard let result = Python.PyTuple_GetItem(o, index) else {
+        PyErr_Print()
+        throw PyStandardException.indexError
+    }
+    return try T(object: result)
+}
+
+@inlinable public func PyTuple_GetItem<T: PyDeserializeObject>(_ o: PyPointer, index: Int) throws -> T {
+    guard let result = Python.PyTuple_GetItem(o, index) else {
+        PyErr_Print()
+        throw PyStandardException.indexError
+    }
+    return try T.casted(from: result)
+}
 
 public struct PyCast<T: PyDeserialize> {
+    
+   
+    @_disfavoredOverload
     public static func cast(from object: PyPointer) throws -> T {
         try T(object: object)
     }
@@ -96,5 +150,8 @@ public struct PyCast<T: PyDeserialize> {
     public static func cast(from object: PyPointer) throws -> T where T: AnyObject {
         try .casted(from: object)
     }
+    
+
 }
+
 

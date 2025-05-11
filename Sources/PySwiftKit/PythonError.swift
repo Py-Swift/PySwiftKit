@@ -89,6 +89,9 @@ public func PyErr_Printer(_ com: @escaping (_ type: PyPointer?,_ value: PyPointe
 //
 //}
 
+
+
+
 public protocol PyException: Error {
     func pyException() -> PyPointer
 }
@@ -96,7 +99,12 @@ public protocol PyException: Error {
 public extension PyException {
     
     func pyExceptionError() {
-        localizedDescription.withCString { PyErr_SetString(pyException(), $0) }
+        if let py_err = PyErr_Occurred() {
+            PyErr_Print()
+            py_err.decref()
+        } else {
+            localizedDescription.withCString { PyErr_SetString(pyException(), $0) }
+        }
     }
     
     func raiseException(exc: PyPointer, _ message: String) {

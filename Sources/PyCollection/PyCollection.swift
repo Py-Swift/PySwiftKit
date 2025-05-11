@@ -7,17 +7,22 @@ import PySerializing
 
 extension Array : PyDeserialize where Element : PyDeserialize {
 	
-	public init(object: PyPointer) throws {
+}
+
+extension Array where Element: PyDeserialize {
+    @_disfavoredOverload
+    public init(object: PyPointer) throws {
         guard
             PyObject_TypeCheck(object, .PyList)
         else { throw PyStandardException.typeError }
         
         self = try object.map {
             guard let element = $0 else { throw PyStandardException.indexError }
-            return try Element(object: element)
+            //return try Element(object: element)
+            return try Element.casted(from: element)
         }//(Element.init)
-		
-	}
+        
+    }
     
     public static func casted(from object: PyPointer) throws -> Array<Element> {
         guard
@@ -34,7 +39,20 @@ extension Array : PyDeserialize where Element : PyDeserialize {
     }
 }
 
-extension Array where Element: PyDeserialize & AnyObject {
+extension Array where Element: PyDeserialize, Element: AnyObject {
+    
+    public init(object: PyPointer) throws {
+        guard
+            PyObject_TypeCheck(object, .PyList)
+        else { throw PyStandardException.typeError }
+        
+        self = try object.map {
+            guard let element = $0 else { throw PyStandardException.indexError }
+            return try Element.casted(from: element)
+        }//(Element.init)
+        
+    }
+    
     public static func casted(from object: PyPointer) throws -> Self {
         guard
             PyObject_TypeCheck(object, .PyList)
@@ -51,6 +69,39 @@ extension Array where Element: PyDeserialize & AnyObject {
     }
 }
 
+extension Optional where Wrapped: PyDeserializeObject {
+    
+}
+
+extension Array where Element: PyDeserializeObject {
+    
+//    public init(object: PyPointer) throws {
+//        guard
+//            PyObject_TypeCheck(object, .PyList)
+//        else { throw PyStandardException.typeError }
+//        
+//        self = try object.map {
+//            guard let element = $0 else { throw PyStandardException.indexError }
+//            return try Element.casted(from: element)
+//        }//(Element.init)
+//        
+//    }
+//    
+//    public static func casted(from object: PyPointer) throws -> Self {
+//        guard
+//            PyObject_TypeCheck(object, .PyList)
+//        else { throw PyStandardException.typeError }
+//                
+//        return try object.map { element in
+//            if let element {
+//                try Element.casted(from: element)
+//            } else {
+//                throw PyStandardException.typeError
+//            }
+//        }
+//
+//    }
+}
 
 extension PyPointer {
     @inlinable public func append<T: PySerialize>(_ value: T) {
@@ -138,7 +189,7 @@ extension PyPointer {
 				return nil
 			}
 			if PyTuple_Check(self) {
-				if let element = PyTuple_GetItem(self, index) {
+                if let element = Python.PyTuple_GetItem(self, index) {
 					return try? R(object: element)
 				}
 				return nil

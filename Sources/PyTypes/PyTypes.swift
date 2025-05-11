@@ -5,18 +5,7 @@ import PySwiftKit
 //import PyEncode
 
 
-public protocol PyTypeProtocol {
-	static var PyType: UnsafeMutablePointer<PyTypeObject> { get }
-}
 
-public protocol PyTypeObjectProtocol: PyTypeProtocol {
-	//static var tp_new: PySwift_newfunc { get }
-	static var tp_init: PySwift_initproc { get }
-	static var tp_dealloc: PySwift_destructor? { get }
-	static var pyTypeObject: PyTypeObject { get  }
-	static func asPyPointer(_ target: Self) -> PyPointer
-	static func asPyPointer(unretained target: Self) -> PyPointer
-}
 
 public protocol PyTypeObjectAllProtocol: PyTypeProtocol {
 	//static var tp_new: PySwift_newfunc { get }

@@ -1,4 +1,4 @@
-import PythonCore
+
 import PySwiftKit
 import Foundation
 
@@ -35,6 +35,19 @@ extension Optional: PySerialize where Wrapped: PySerialize {
     }
 }
 
+extension Error {
+    public var pyPointer: PyPointer {
+        localizedDescription.pyPointer
+    }
+}
+
+extension Optional where Wrapped == Error {
+    public var pyPointer: PyPointer {
+        self?.pyPointer ?? .None
+    }
+}
+
+
 extension RawRepresentable where RawValue: PySerialize {
     public var pyPointer: PyPointer {
         rawValue.pyPointer
@@ -47,4 +60,24 @@ extension RawRepresentable where RawValue: PySerialize {
         PyObject_SetAttrString(o, string, object)
         Py_DecRef(object)
     }
+}
+
+@inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PythonCore.PyPointer, _ key: String) throws -> T {
+    guard let result: PyPointer = key.withCString({ ckey in
+        PyDict_GetItemString(dict, ckey)
+    }) else {
+        PyErr_Print()
+        throw PyStandardException.keyError
+    }
+    return try T(object: result)
+}
+
+@inlinable public func PyDict_GetItem<T: PyDeserializeObject>(_ dict: PythonCore.PyPointer, _ key: String) throws -> T {
+    guard let result: PyPointer = key.withCString({ ckey in
+        PyDict_GetItemString(dict, ckey)
+    }) else {
+        PyErr_Print()
+        throw PyStandardException.keyError
+    }
+    return try PyCast<T>.cast(from: result)
 }
