@@ -3,7 +3,7 @@
 import PackageDescription
 import CompilerPluginSupport
 
-let kivy = true
+let kivy = false
 
 let pythoncore: Package.Dependency = if kivy {
     .package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
