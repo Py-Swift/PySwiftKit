@@ -49,9 +49,5 @@ extension Dictionary where Key == String, Value == PyPointer {
 }
 
 extension UnsafeMutableBufferPointer where Self.Element: PyDeserialize {
-    func test() {
-        map { element in
-            
-        }
-    }
+    
 }

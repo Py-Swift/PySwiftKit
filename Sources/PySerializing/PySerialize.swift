@@ -1,4 +1,4 @@
-
+//import PyKit
 import PySwiftKit
 import Foundation
 
@@ -7,8 +7,9 @@ public protocol PySerialize {
     var pyPointer: PyPointer { get }
     
 }
+//public typealias PySerialize = _PySerialize & PyInput
 
-
+//extension PyInput where Self: PySerialize {}
 
 extension PySerialize {
     public static func ~= (l: Self, r: PyPointer) -> Bool {
@@ -20,7 +21,7 @@ extension PySerialize {
 
 
 
-extension PyPointer : PySerialize {
+extension PyPointer : PySerializing.PySerialize {
 
     public var pyPointer: PyPointer {
         Py_XINCREF(self)
@@ -29,7 +30,7 @@ extension PyPointer : PySerialize {
     
 }
 
-extension Optional: PySerialize where Wrapped: PySerialize {
+extension Optional: PySerializing.PySerialize where Wrapped: PySerializing.PySerialize {
     public var pyPointer: PyPointer {
         self?.pyPointer ?? .None
     }

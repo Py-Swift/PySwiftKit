@@ -26,12 +26,12 @@ public extension PyDeserialize {
     }
     
     init(object: PyPointer?) throws {
-        guard object != PyNone else { throw PythonError.type("NoneType is not allowed")}
+        guard object != PySwiftKit.Py_None else { throw PythonError.type("NoneType is not allowed")}
         try self.init(object: object)
     }
     
     init?(optional object: PyPointer?) throws {
-        guard let object, object != PyNone else { return nil }
+        guard let object, object != PySwiftKit.Py_None else { return nil }
         try self.init(object: object)
     }
 }
@@ -51,7 +51,7 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     
     
     public init(object: PythonCore.PyPointer) throws {
-        self = if object == PyNone {
+        self = if object == PySwiftKit.Py_None {
             nil
         } else {
             try Wrapped(object: object)
@@ -61,7 +61,7 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     
     
     public static func casted(from object: PyPointer) throws -> Optional<Wrapped> {
-        if object == PyNone {
+        if object == PySwiftKit.Py_None {
             nil
         } else {
             try Wrapped.casted(from: object)
@@ -72,7 +72,7 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
 extension Optional where Wrapped: PyDeserializeObject {
     
     public init(object: PythonCore.PyPointer) throws {
-        self = if object == PyNone {
+        self = if object == PySwiftKit.Py_None {
             nil
         } else {
             try Wrapped.casted(from: object)
@@ -80,7 +80,7 @@ extension Optional where Wrapped: PyDeserializeObject {
     }
     
     public static func casted(from object: PyPointer) throws -> Self {
-        if object == PyNone {
+        if object == PySwiftKit.Py_None {
             nil
         } else {
             try Wrapped.casted(from: object)

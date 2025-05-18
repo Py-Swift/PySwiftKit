@@ -41,7 +41,7 @@ extension PySwiftBuffer {
 }
 
 extension PyTypeBufferProtocol where Self: PySwiftBuffer {
-    public static func buffer_procs() -> UnsafeMutablePointer<PyBufferProcs> { .init(&buffer) }
+    public static func buffer_procs() -> UnsafeMutablePointer<PyBufferProcs> { withUnsafeMutablePointer(to: &buffer, {$0}) }
 }
 
 
@@ -57,7 +57,7 @@ public protocol PyClassBuffer: _PyTypeBufferProtocol, AnyObject {
 extension PyClassBuffer {
     public static func __buffer__(_ s: PyPointer, _ buffer: UnsafeMutablePointer<Py_buffer>) -> Int32 {
         guard
-            s != PyNone,
+            s != Py_None,
             let pointee = unsafeBitCast(s, to: PySwiftObjectPointer.self)?.pointee
         else { fatalError() }
         
@@ -91,7 +91,6 @@ extension UnsafeMutableRawBufferPointer {
         flags: Int32 = PyBUF_WRITE
     ) -> Int32 {
         //var size = data.count
-        var element_size = 1
         buffer.pointee.obj = o
         buffer.pointee.buf = baseAddress
         
@@ -117,7 +116,7 @@ extension UnsafeMutablePointer where Pointee == UInt8 {
         flags: Int32 = PyBUF_WRITE
     ) -> Int32 {
         //var size = data.count
-        var element_size = 1
+        //var element_size = 1
         buffer.pointee.obj = o
         buffer.pointee.buf = .init(self)
         

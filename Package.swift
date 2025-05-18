@@ -4,6 +4,13 @@ import PackageDescription
 import CompilerPluginSupport
 
 let kivy = false
+let local = false
+
+let pykit: Package.Dependency = if local {
+    .package(path: "/Volumes/CodeSSD/PythonSwiftGithub/PyKit")
+} else {
+    .package(path: "/Volumes/CodeSSD/PythonSwiftGithub/PyKit")
+}
 
 let pythoncore: Package.Dependency = if kivy {
     .package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
@@ -113,6 +120,7 @@ let package = Package(
 
 		//.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
         pythoncore,
+        //pykit,
 		.package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
         .package(url: "https://github.com/PythonSwiftLink/SwiftonizePlugin", .upToNextMajor(from: "0.0.0")),
 	],
@@ -122,8 +130,6 @@ let package = Package(
 			name: "PyExecute",
 			dependencies: [
 				"PySwiftKit",
-				//"PyDecode",
-				//"PyEncode"
 			]
 		),
 		.target(
@@ -131,10 +137,7 @@ let package = Package(
 			dependencies: [
 				"PySwiftKit",
                 "PySwiftObject",
-//				"PyDecode",
-//				"PyEncode"
                 "PySerializing",
-                //"PyDeserializing"
 			]
 		),
 		.target(
@@ -142,10 +145,7 @@ let package = Package(
 			dependencies: [
 				"PySwiftKit",
 				"PyCollection",
-                //"PyDecode",
-                //"PyEncode"
                 "PySerializing",
-                //"PyDeserializing"
 			]
 		),
         .target(
@@ -168,48 +168,33 @@ let package = Package(
 			name: "PyExpressible",
 			dependencies: [
 				"PySwiftKit",
-//				"PyDecode",
-//				"PyEncode"
 			]
 		),
 		.target(
 			name: "PyCollection",
 			dependencies: [
 				"PySwiftKit",
-                //"PyDecode",
-                //"PyEncode"
                 "PySerializing",
-                //"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyMemoryView",
 			dependencies: [
 				"PySwiftKit",
-                //"PyDecode",
-                //"PyEncode"
                 "PySerializing",
-                ////"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyUnicode",
 			dependencies: [
 				"PySwiftKit",
-                //"PyDecode",
-                //"PyEncode"
-                //"PySerializing",
-                //"PyDeserializing"
 			]
 		),
 		.target(
 			name: "PyDictionary",
 			dependencies: [
 				"PySwiftKit",
-                //"PyDecode",
-                //"PyEncode"
-                "PySerializing",
-                //"PyDeserializing"
+                "PySerializing"
 			]
 		),
 		.target(
@@ -217,39 +202,17 @@ let package = Package(
 			dependencies: [
 				"PySwiftKit",
 				"PyTypes",
-				//				"PyEncode"
 			]
 		),
-//		.target(
-//			name: "PyDecode",
-//			dependencies: [
-//				"PySwiftKit",
-//				"PyTypes",
-//				"PyComparable"
-//			]
-//		),
-//		.target(
-//			name: "PyEncode",
-//			dependencies: [
-//				"PySwiftKit",
-//			]
-//		),
         .target(
             name: "PySerializing",
             dependencies: [
                 "PySwiftKit",
                 "PyTypes",
-                "PyComparable"
+                "PyComparable",
+                //"PyKit"
             ]
         ),
-//        .target(
-//            name: //"PyDeserializing",
-//            dependencies: [
-//                "PySwiftKit",
-//                "PyTypes",
-//                "PyComparable"
-//            ]
-//        ),
         .target(
             name: "PyBuffering",
             dependencies: [
@@ -261,8 +224,6 @@ let package = Package(
 		.target(
 			name: "PyTypes",
 			dependencies: [
-				//"PyEncode",
-                ////"PyDeserializing",
                 "PySwiftObject",
 				"PySwiftKit",
 			]
@@ -270,10 +231,7 @@ let package = Package(
 		.target(
 			name: "PyTuples",
 			dependencies: [
-                //"PyDecode",
-                //"PyEncode"
                 "PySerializing",
-                //"PyDeserializing",
 				"PySwiftKit",
 			]
 		),
@@ -281,10 +239,7 @@ let package = Package(
             .target(
                 name: "PyObjc",
                 dependencies: [
-                    //"PyDecode",
-                    //"PyEncode"
                     "PySerializing",
-                    //"PyDeserializing",
                     "PySwiftKit",
                 ]
             ),
@@ -294,8 +249,6 @@ let package = Package(
 			dependencies: [
 				"PythonCore",
 				"PySwiftKit",
-				//"_PySwiftObject"
-				//"PythonTypeAlias"
 			],
 			resources: [
 				
@@ -346,7 +299,7 @@ let package = Package(
 				.copy("python_stdlib"),
 			],
             plugins: [
-                .plugin(name: "Swiftonize", package: "SwiftonizePlugin")
+               // .plugin(name: "Swiftonize", package: "SwiftonizePlugin")
             ]
 		),
 		//			.target(

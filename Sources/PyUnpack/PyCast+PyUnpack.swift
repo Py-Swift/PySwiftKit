@@ -8,19 +8,19 @@ import PythonCore
 
 @inlinable
 public func optionalPyCast<R: PyDeserialize>(from o: PyPointer?) -> R? {
-    guard let object = o, object != PyNone else { return nil }
+    guard let object = o, object != PySwiftKit.Py_None else { return nil }
     return try? R(object: object)
 }
 
 @inlinable
 public func pyCast<T: PyDeserialize>(from o: PyPointer?) throws -> T {
-	guard let object = o, object != PyNone else { throw PythonError.type(.init(describing: T.self)) }
+    guard let object = o, object != PySwiftKit.Py_None else { throw PythonError.type(.init(describing: T.self)) }
 	return try T(object: object)
 }
 
 @inlinable
 public func pyCast<T: PyDeserialize>(from args: UnsafePointer<PyPointer?>, index: Int) throws -> T {
-    guard let object = args[index], object != PyNone else { throw PythonError.type(.init(describing: T.self)) }
+    guard let object = args[index], object != PySwiftKit.Py_None else { throw PythonError.type(.init(describing: T.self)) }
     return try T(object: object)
 }
 
@@ -28,14 +28,14 @@ public func pyCast<T: PyDeserialize>(from args: UnsafePointer<PyPointer?>, index
 
 @inlinable
 public func optionalPyCast<R: PyDeserialize>(consuming o: PyPointer?) -> R? {
-	guard let object = o, object != PyNone else { return nil }
+    guard let object = o, object != PySwiftKit.Py_None else { return nil }
 	defer { object.decref() }
 	return try? R(object: object)
 }
 
 @inlinable
 public func pyCast<R: PyDeserialize>(consuming o: PyPointer?) throws -> R {
-	guard let object = o, object != PyNone else { throw PythonError.type(.init(describing: R.self)) }
+    guard let object = o, object != PySwiftKit.Py_None else { throw PythonError.type(.init(describing: R.self)) }
 	defer { object.decref() }
 	return try R(object: object)
 }
@@ -45,7 +45,7 @@ public func pyCast<R: PyDeserialize>(consuming o: PyPointer?) throws -> R {
 @inlinable
 public func UnPackPyPointer<T: AnyObject>(from o: PyPointer?) -> T {
     guard
-        let object = o, object != PyNone,
+        let object = o, object != PySwiftKit.Py_None,
         let pointee = unsafeBitCast(o, to: PySwiftObjectPointer.self)?.pointee
     else { fatalError() }
     
@@ -55,7 +55,7 @@ public func UnPackPyPointer<T: AnyObject>(from o: PyPointer?) -> T {
 @inlinable
 public func UnPackOptionalPyPointer<T: AnyObject>(from o: PyPointer?) -> T? {
     guard
-        let object = o, object != PyNone,
+        let object = o, object != PySwiftKit.Py_None,
         let pointee = unsafeBitCast(o, to: PySwiftObjectPointer.self)?.pointee
     else { return nil }
 	//PyNone

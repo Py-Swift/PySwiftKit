@@ -11,7 +11,7 @@ import Foundation
 
 
 
-extension Bool : PySerialize {
+extension Bool : PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -24,7 +24,7 @@ extension Bool : PySerialize {
 }
 
 
-extension String : PySerialize {
+extension String : PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         withCString(PyUnicode_FromString) ?? .None
@@ -34,7 +34,7 @@ extension String : PySerialize {
 
 
 
-extension URL : PySerialize {
+extension URL : PySerializing.PySerialize {
 
     public var pyPointer: PyPointer {
         path.withCString(PyUnicode_FromString) ?? .None
@@ -42,7 +42,7 @@ extension URL : PySerialize {
     
 }
 
-extension Int : PySerialize {
+extension Int : PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyLong_FromLong(self)
@@ -50,7 +50,7 @@ extension Int : PySerialize {
     
 }
 
-extension UInt : PySerialize {
+extension UInt : PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -60,7 +60,7 @@ extension UInt : PySerialize {
 
     
 }
-extension Int64: PySerialize {
+extension Int64: PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyLong_FromLongLong(self)
@@ -68,7 +68,7 @@ extension Int64: PySerialize {
 
 }
 
-extension UInt64: PySerialize {
+extension UInt64: PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyLong_FromUnsignedLongLong(self)
@@ -76,7 +76,7 @@ extension UInt64: PySerialize {
     
 }
 
-extension Int32: PySerialize {
+extension Int32: PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyLong_FromLong(Int(self))
@@ -84,7 +84,7 @@ extension Int32: PySerialize {
     
 }
 
-extension UInt32: PySerialize {
+extension UInt32: PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyLong_FromLong(Int(self))
@@ -92,7 +92,7 @@ extension UInt32: PySerialize {
 
 }
 
-extension Int16: PySerialize {
+extension Int16: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -101,7 +101,7 @@ extension Int16: PySerialize {
 
 }
 
-extension UInt16: PySerialize {
+extension UInt16: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -110,7 +110,7 @@ extension UInt16: PySerialize {
 
 }
 
-extension Int8: PySerialize {
+extension Int8: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -119,7 +119,7 @@ extension Int8: PySerialize {
 
 }
 
-extension UInt8: PySerialize {
+extension UInt8: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -127,7 +127,7 @@ extension UInt8: PySerialize {
     }
 }
 
-extension Double: PySerialize {
+extension Double: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -136,7 +136,7 @@ extension Double: PySerialize {
     
 }
 
-extension CGFloat: PySerialize {
+extension CGFloat: PySerializing.PySerialize {
     
     
     public var pyPointer: PyPointer {
@@ -145,14 +145,14 @@ extension CGFloat: PySerialize {
 
 }
 
-extension Float32: PySerialize {
+extension Float32: PySerializing.PySerialize {
     
     public var pyPointer: PyPointer {
         PyFloat_FromDouble(Double(self))
     }
 }
 
-extension Data: PySerialize {
+extension Data: PySerializing.PySerialize {
     public var pyPointer: PyPointer {
         var data = self
         let size = self.count //* uint8_size
@@ -166,7 +166,7 @@ extension Data: PySerialize {
     }
 }
 
-extension Array: PySerialize where Element : PySerialize {
+extension Array: PySerializing.PySerialize where Element : PySerializing.PySerialize {
 
     public var pyPointer: PyPointer {
         guard let list = PyList_New(count) else { fatalError("creating new list failed, make sure GIL is active")}
@@ -190,7 +190,7 @@ extension Array: PySerialize where Element : PySerialize {
 }
 
 
-extension Dictionary: PySerialize where Key: PySerialize, Value: PySerialize  {
+extension Dictionary: PySerializing.PySerialize where Key: PySerializing.PySerialize, Value: PySerializing.PySerialize  {
     
 
     public var pyPointer: PyPointer {
@@ -206,7 +206,7 @@ extension Dictionary: PySerialize where Key: PySerialize, Value: PySerialize  {
     }
 }
 
-extension Dictionary where Key == String, Value: PySerialize  {
+extension Dictionary where Key == String, Value: PySerializing.PySerialize  {
     
     public var pyPointer: PyPointer {
         let dict = PyDict_New()
@@ -235,7 +235,7 @@ extension Dictionary where Key == StringLiteralType, Value == PySerialize  {
     
 }
 
-extension KeyValuePairs: PySerialize where Key: PySerialize, Value: PySerialize {
+extension KeyValuePairs: PySerializing.PySerialize where Key: PySerializing.PySerialize, Value: PySerializing.PySerialize {
     public var pyPointer: PyPointer {
         let dict = PyDict_New()!
         for (k, v) in self {
@@ -250,7 +250,7 @@ extension KeyValuePairs: PySerialize where Key: PySerialize, Value: PySerialize 
 }
 
 
-extension Error where Self: PySerialize {
+extension Error where Self: PySerializing.PySerialize {
     public var pyPointer: PyPointer {
         localizedDescription.pyPointer
     }

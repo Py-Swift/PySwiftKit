@@ -13,7 +13,7 @@ import PythonCore
 //	}
 //}
 
-extension PyPointer: CustomStringConvertible {
+extension PyPointer: Swift.CustomStringConvertible {
 	public var description: String {
 		guard let str = PyObject_Str(self) else { return "\(self.debugDescription)"}
 		defer { str.decref() }
@@ -24,14 +24,14 @@ extension PyPointer: CustomStringConvertible {
 }
 
 
-extension PythonPointer: ExpressibleByUnicodeScalarLiteral {
+extension PythonPointer: Swift.ExpressibleByUnicodeScalarLiteral {
     public typealias UnicodeScalarLiteralType = String
     @inlinable public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
         self = value.withCString(PyUnicode_FromString) ?? .None
     }
 }
 
-extension PyPointer: ExpressibleByArrayLiteral {
+extension PyPointer: Swift.ExpressibleByArrayLiteral {
 	public typealias ArrayLiteralElement = PythonPointer
 	
 	public init(arrayLiteral elements: PythonPointer...) {
@@ -51,7 +51,7 @@ extension PyPointer: ExpressibleByArrayLiteral {
 //    }
 //}
 
-extension PythonPointer: ExpressibleByExtendedGraphemeClusterLiteral {
+extension PythonPointer: Swift.ExpressibleByExtendedGraphemeClusterLiteral {
     public typealias ExtendedGraphemeClusterLiteralType = String
     @inlinable public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
         self = value.withCString(PyUnicode_FromString) ?? .None
@@ -59,7 +59,7 @@ extension PythonPointer: ExpressibleByExtendedGraphemeClusterLiteral {
 }
 
 
-extension PythonPointer: ExpressibleByStringLiteral  {
+extension PythonPointer: Swift.ExpressibleByStringLiteral  {
 
     @inlinable public init(stringLiteral value: StringLiteralType) {
         self = value.withCString(PyUnicode_FromString) ?? .None
@@ -81,11 +81,10 @@ extension PythonPointer: ExpressibleByStringLiteral  {
 //}
 
 
-extension PyPointer: ExpressibleByBooleanLiteral {
+extension PyPointer: Swift.ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: BooleanLiteralType) {
         
-        self = value ? PyTrue : PyFalse
-        Py_IncRef(self)
+        self = Py_NewRef(value ? Py_True : Py_False)
     }
 }
 
@@ -94,7 +93,7 @@ extension PyPointer: ExpressibleByBooleanLiteral {
 
 
 
-extension PyPointer: ExpressibleByDictionaryLiteral {
+extension PyPointer: Swift.ExpressibleByDictionaryLiteral {
     public typealias Key = String
     
     public typealias Value = PyPointer

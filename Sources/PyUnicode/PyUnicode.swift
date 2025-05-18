@@ -22,8 +22,8 @@ extension PyPointer {
 		let length = PyUnicode_GetLength(self)
 		switch kind {
 		//switch kind {
-		case .PyUnicode_WCHAR_KIND:
-			return nil
+//		case .PyUnicode_WCHAR_KIND:
+//			return nil
 		case .PyUnicode_1BYTE_KIND:
 			let size = length * MemoryLayout<Py_UCS1>.stride
 			let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)

@@ -9,12 +9,12 @@ import PyComparable
 extension Bool : PyDeserialize {
     
     public init(object: PyPointer) throws {
-        if object == PyTrue {
+        if object == PySwiftKit.Py_True {
             self = true
-        } else if object == PyFalse {
+        } else if object == PySwiftKit.Py_False {
             self = false
         } else {
-            throw PythonError.attribute
+            throw PyStandardException.typeError
         }
         
     }

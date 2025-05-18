@@ -1,6 +1,5 @@
 import XCTest
 @testable import PySwiftKit
-@testable import PythonCore
 @testable import PyExecute
 @testable import PyDictionary
 @testable import PyUnwrap
@@ -8,13 +7,7 @@ import XCTest
 @testable import PySwiftObject
 @testable import PyCallable
 
-class TestClassA: PyUnwrapable {
 
-}
-
-class TestClassB: PyUnwrapable, PyTypeProtocol {
-    
-}
 
 fileprivate struct TestStruct {
     

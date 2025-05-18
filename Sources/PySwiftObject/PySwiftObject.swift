@@ -45,13 +45,13 @@ func unpackStruct<T>(_ object: PyPointer) throws -> T {
 	}
 }
 
-func updateStruct<T>(_ object: PyPointer, key: KeyPath<T, Void>, _: T.Type) throws {
-	let ps_object = unsafeBitCast(object, to: PySwiftObject.self)
-	guard let raw = ps_object.swift_ptr else { throw PythonError.type("Swift Pointer not set") }
-	raw.withMemoryRebound(to: String.self, capacity: 1) { pointer in
-		//pointer.pointee[keyPath: key]
-	}
-}
+//func updateStruct<T, V>(_ object: PyPointer, key: KeyPath<T, V>, _: T.Type) throws {
+//	let ps_object = unsafeBitCast(object, to: PySwiftObject.self)
+//	guard let raw = ps_object.swift_ptr else { throw PythonError.type("Swift Pointer not set") }
+//    raw.withMemoryRebound(to: T.self, capacity: 1) { pointer in
+//        pointer.pointee[keyPath: key]
+//	}
+//}
 
 func getPropertyStruct<T,R>(_ object: PySwiftObjectPointer, key: KeyPath<T, R>) throws -> R {
 	guard let raw = object?.pointee.swift_ptr else { throw PythonError.type("Swift Pointer not set") }
@@ -60,8 +60,12 @@ func getPropertyStruct<T,R>(_ object: PySwiftObjectPointer, key: KeyPath<T, R>) 
 	}
 }
 
-func setPropertyStruct<Struct, Value>(for item: Struct, keyPath: WritableKeyPath<Struct, Value>, value: Value) {
+func setPropertyStruct<T,Value>(_ object: PySwiftObjectPointer, keyPath: WritableKeyPath<T, Value>, value: Value) throws {
 	//item[keyPath: keyPath] = value
+    guard let raw = object?.pointee.swift_ptr else { throw PythonError.type("Swift Pointer not set") }
+    return raw.withMemoryRebound(to: T.self, capacity: 1) { pointer in
+        pointer.pointer(to: keyPath)!.pointee = value
+    }
 }
 
 func howSwiftonizeMustDo(item: PySwiftObjectPointer) throws {
@@ -87,9 +91,9 @@ fileprivate func playground() throws {
 	
 	let py_swift_object: PySwiftObjectPointer = nil
 	
-	let string = try getPropertyStruct(py_swift_object, key: \TestStruct.a )
+	let _ = try getPropertyStruct(py_swift_object, key: \TestStruct.a )
 													// wtf 	 ^^^^^^^^^^^^^
-	
+    try setPropertyStruct(py_swift_object, keyPath: \TestStruct.a, value: "hello")
 	try setPropertyClass(for: py_swift_object, keyPath: \TestStruct.a, value: "hello")
 	
 	
