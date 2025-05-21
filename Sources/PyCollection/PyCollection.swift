@@ -149,16 +149,6 @@ extension PyPointer: Swift.Sequence {
         }
     }
 	
-	public func makeIterator_old() -> PySequenceBuffer.Iterator {
-		let fast_list = PySequence_Fast(self, nil)!
-		let buffer = PySequenceBuffer(
-			start: PySequence_FastItems(fast_list),
-			count: PySequence_FastSize(fast_list)
-		)
-		
-		defer { Py_DecRef(fast_list) }
-		return buffer.makeIterator()
-	}
 	
 	public func makeIterator() -> PySequenceBuffer.Iterator {
         pySequence.makeIterator()

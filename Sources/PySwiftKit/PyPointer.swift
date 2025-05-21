@@ -80,39 +80,39 @@ extension PyPointer {
 
 extension PythonPointer {
     
-    @inlinable
-        public func getBuffer() -> UnsafeBufferPointer<PythonPointer?> {
-            let fast_list = PySequence_Fast(self, nil)!
-            let list_count = PySequence_FastSize(fast_list)
-            let fast_items = PySequence_FastItems(fast_list)
-            let buffer = PySequenceBuffer(start: fast_items, count: list_count)
-            Py_DecRef(fast_list)
-            return buffer
-        }
+//    @inlinable
+//        public func getBuffer() -> UnsafeBufferPointer<PythonPointer?> {
+//            let fast_list = PySequence_Fast(self, nil)!
+//            let list_count = PySequence_FastSize(fast_list)
+//            let fast_items = PySequence_FastItems(fast_list)
+//            let buffer = PySequenceBuffer(start: fast_items, count: list_count)
+//            Py_DecRef(fast_list)
+//            return buffer
+//        }
+//    
+//    @inlinable public var sequence: UnsafeBufferPointer<PythonPointer?> {
+//        let fast_list = PySequence_Fast(self, nil)!
+//        
+//        let buffer = PySequenceBuffer(
+//            start: PySequence_FastItems(fast_list),
+//            count: PySequence_FastSize(fast_list)
+//        )
+//        Py_DecRef(fast_list)
+//        return buffer
+//    }
     
-    @inlinable public var sequence: UnsafeBufferPointer<PythonPointer?> {
-        let fast_list = PySequence_Fast(self, nil)!
-        
-        let buffer = PySequenceBuffer(
-            start: PySequence_FastItems(fast_list),
-            count: PySequence_FastSize(fast_list)
-        )
-        Py_DecRef(fast_list)
-        return buffer
-    }
-    
-    @inlinable public var _sequence: PySequenceBuffer? {
-        guard PySequence_Check(self) == 1 else { return nil }
-        
-        let fast_list = PySequence_Fast(self, nil)!
-        let buffer = PySequenceBuffer(
-			start: PySequence_FastItems(fast_list),
-            count: PySequence_FastSize(fast_list)
-        )
-        Py_DecRef(fast_list)
-        return buffer
-    }
-    
+//    @inlinable public var _sequence: PySequenceBuffer? {
+//        guard PySequence_Check(self) == 1 else { return nil }
+//        
+//        let fast_list = PySequence_Fast(self, nil)!
+//        let buffer = PySequenceBuffer(
+//			start: PySequence_FastItems(fast_list),
+//            count: PySequence_FastSize(fast_list)
+//        )
+//        Py_DecRef(fast_list)
+//        return buffer
+//    }
+//    
     
 }
 
