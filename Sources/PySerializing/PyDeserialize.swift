@@ -49,8 +49,8 @@ extension PyDeserialize where Self: AnyObject {
 extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     
     
-    
-    public init(object: PythonCore.PyPointer) throws {
+    @_disfavoredOverload
+    public init(object: PyPointer) throws {
         self = if object == PySwiftKit.Py_None {
             nil
         } else {
@@ -58,7 +58,13 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
         }
     }
     
-    
+    public init(object: PyPointer) throws where Wrapped: AnyObject {
+        self = if object == PySwiftKit.Py_None {
+            nil
+        } else {
+            try Wrapped.casted(from: object)
+        }
+    }
     
     public static func casted(from object: PyPointer) throws -> Optional<Wrapped> {
         if object == PySwiftKit.Py_None {
@@ -71,13 +77,13 @@ extension Optional: PyDeserialize where Wrapped: PyDeserialize {
 
 extension Optional where Wrapped: PyDeserializeObject {
     
-    public init(object: PythonCore.PyPointer) throws {
-        self = if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped.casted(from: object)
-        }
-    }
+//    public init(object: PyPointer) throws {
+//        self = if object == PySwiftKit.Py_None {
+//            nil
+//        } else {
+//            try Wrapped.casted(from: object)
+//        }
+//    }
     
     public static func casted(from object: PyPointer) throws -> Self {
         if object == PySwiftKit.Py_None {
@@ -88,15 +94,15 @@ extension Optional where Wrapped: PyDeserializeObject {
     }
 }
 
-extension Optional where Wrapped: PyDeserializeObject {
-//    public init(object: PythonCore.PyPointer) throws  {
-//        self = if object == PyNone {
-//            nil
-//        } else {
-//            try Wrapped.casted(from: object)
-//        }
-//    }
-}
+//extension Optional where Wrapped: PyDeserializeObject {
+////    public init(object: PythonCore.PyPointer) throws  {
+////        self = if object == PyNone {
+////            nil
+////        } else {
+////            try Wrapped.casted(from: object)
+////        }
+////    }
+//}
 
 
 @inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
@@ -123,6 +129,7 @@ extension Optional where Wrapped: PyDeserializeObject {
     }
 }
 
+@_disfavoredOverload
 @inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T {
     guard let result = Python.PyTuple_GetItem(o, index) else {
         PyErr_Print()
@@ -131,7 +138,7 @@ extension Optional where Wrapped: PyDeserializeObject {
     return try T(object: result)
 }
 
-@inlinable public func PyTuple_GetItem<T: PyDeserializeObject>(_ o: PyPointer, index: Int) throws -> T {
+@inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T where T: AnyObject {
     guard let result = Python.PyTuple_GetItem(o, index) else {
         PyErr_Print()
         throw PyStandardException.indexError
@@ -139,19 +146,45 @@ extension Optional where Wrapped: PyDeserializeObject {
     return try T.casted(from: result)
 }
 
+
+//@_disfavoredOverload
+@inlinable public func _PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T? {
+    guard let result = Python.PyTuple_GetItem(o, index) else {
+        PyErr_Print()
+        throw PyStandardException.indexError
+    }
+    return try T(object: result)
+}
+//@inlinable public func PyTuple_GetItem<T: PyDeserializeObject>(_ o: PyPointer, index: Int) throws -> T {
+//    guard let result = Python.PyTuple_GetItem(o, index) else {
+//        PyErr_Print()
+//        throw PyStandardException.indexError
+//    }
+//    return try T.casted(from: result)
+//}
+
 public struct PyCast<T: PyDeserialize> {
     
    
-    @_disfavoredOverload
-    public static func cast(from object: PyPointer) throws -> T {
-        try T(object: object)
-    }
     
     public static func cast(from object: PyPointer) throws -> T where T: AnyObject {
         try .casted(from: object)
     }
     
-
+    @_disfavoredOverload
+    public static func cast(from object: PyPointer) throws -> T {
+        try T(object: object)
+    }
+    
+    
+    public static func cast(from object: PyPointer) throws -> T? {
+        try T(object: object)
+    }
+    
+    public static func cast<O: PyDeserialize & AnyObject>(from object: PyPointer) throws -> T where T == Optional<O> {
+        try .casted(from: object)
+    }
 }
+
 
 

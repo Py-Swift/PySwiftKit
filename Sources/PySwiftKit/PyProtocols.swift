@@ -54,6 +54,10 @@ public protocol PyStrProtocol {
 	func __str__() -> String
 }
 
+public protocol PyReprProtocol {
+    func __repr__() -> String
+}
+
 public protocol PyIntProtocol {
 	func __int__() -> Int
 }

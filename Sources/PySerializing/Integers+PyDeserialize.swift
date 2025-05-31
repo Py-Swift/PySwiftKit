@@ -9,15 +9,21 @@ import PyComparable
 extension Int : PyDeserialize {
     
     public init(object: PyPointer) throws {
-        guard PyLong_Check(object) else { throw PythonError.long }
-        self = PyLong_AsLong(object)
+        //guard PyLong_Check(object) else { throw PythonError.long }
+        var overflow: Int32 = 0
+        self = PyLong_AsLongAndOverflow(object, &overflow)
+        if overflow == 1 { throw PyStandardException.overflowError }
+        if let _ = PyErr_Occurred() {
+            PyErr_Print()
+            throw PyStandardException.typeError
+        }
     }
 }
 
 extension UInt : PyDeserialize {
     
     public init(object: PyPointer) throws {
-        guard PyLong_Check(object) else { throw PythonError.long }
+        //guard PyLong_Check(object) else { throw PythonError.long }
         self = PyLong_AsUnsignedLong(object)
     }
 }
@@ -25,8 +31,13 @@ extension Int64: PyDeserialize {
     
     
     public init(object: PyPointer) throws {
-        guard PyLong_Check(object) else { throw PythonError.long }
-        self = PyLong_AsLongLong(object)
+        var overflow: Int32 = 0
+        self = PyLong_AsLongLongAndOverflow(object, &overflow)
+        if overflow == 1 { throw PyStandardException.overflowError }
+        if let _ = PyErr_Occurred() {
+            PyErr_Print()
+            throw PyStandardException.typeError
+        }
     }
 }
 
@@ -57,8 +68,13 @@ extension UInt32: PyDeserialize {
 extension Int16: PyDeserialize {
     
     public init(object: PyPointer) throws {
-        guard PyLong_Check(object) else { throw PythonError.long }
-        self.init(clamping: PyLong_AsLong(object))
+        var overflow: Int32 = 0
+        self.init(clamping:  PyLong_AsLongAndOverflow(object, &overflow))
+        if overflow == 1 { throw PyStandardException.overflowError }
+        if let _ = PyErr_Occurred() {
+            PyErr_Print()
+            throw PyStandardException.typeError
+        }
     }
     
 }
@@ -75,8 +91,13 @@ extension UInt16: PyDeserialize {
 extension Int8: PyDeserialize {
     
     public init(object: PyPointer) throws {
-        guard PyLong_Check(object) else { throw PythonError.long }
-        self.init(clamping: PyLong_AsUnsignedLong(object))
+        var overflow: Int32 = 0
+        self.init(clamping:  PyLong_AsLongAndOverflow(object, &overflow))
+        if overflow == 1 { throw PyStandardException.overflowError }
+        if let _ = PyErr_Occurred() {
+            PyErr_Print()
+            throw PyStandardException.typeError
+        }
     }
     
 }

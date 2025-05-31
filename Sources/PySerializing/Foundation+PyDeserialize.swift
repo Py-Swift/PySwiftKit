@@ -90,3 +90,10 @@ extension Data: PyDeserialize {
         return data
     }
 }
+
+extension UUID: PySerializing.PyDeserialize {
+    public init(object: PyPointer) throws {
+        guard let uuid = UUID(uuidString: try .init(object: object)) else { throw PyStandardException.typeError}
+        self = uuid
+    }
+}

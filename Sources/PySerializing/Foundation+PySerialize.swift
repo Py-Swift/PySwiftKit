@@ -155,35 +155,68 @@ extension Float32: PySerializing.PySerialize {
 extension Data: PySerializing.PySerialize {
     public var pyPointer: PyPointer {
         var data = self
-        let size = self.count //* uint8_size
-        let buffer = data.withUnsafeMutableBytes {$0.baseAddress}
-        var pybuf = Py_buffer()
-        PyBuffer_FillInfo(&pybuf, nil, buffer, size , 0, PyBUF_WRITE)
-        let mem = PyMemoryView_FromBuffer(&pybuf)
-        let bytes = PyBytes_FromObject(mem) ?? .None
-        Py_DecRef(mem)
-        return bytes
+        var element_size = MemoryLayout<UInt8>.size
+        var size = self.count //* uint8_size
+        //let buffer = data.withUnsafeMutableBytes {$0.baseAddress}
+        return data.withUnsafeMutableBytes { raw in
+            var buffer = Py_buffer()
+            
+            
+            buffer.buf = raw.baseAddress
+            
+            buffer.len = size
+            buffer.readonly = 0
+            buffer.itemsize = element_size
+            buffer.format = .ubyte_format
+            buffer.ndim = 1
+            buffer.shape = .init(&size)
+            buffer.strides = .init(&element_size)
+            
+            buffer.suboffsets = nil
+            buffer.internal = nil
+            
+            let mem = PyMemoryView_FromBuffer(&buffer)
+            let bytes = PyBytes_FromObject(mem) ?? .None
+            Py_DecRef(mem)
+            return bytes
+        }
+        
     }
 }
 
 extension Array: PySerializing.PySerialize where Element : PySerializing.PySerialize {
 
-    public var pyPointer: PyPointer {
+    @inlinable public var pyPointer: PyPointer {
         guard let list = PyList_New(count) else { fatalError("creating new list failed, make sure GIL is active")}
-        var _count = 0
-        for element in self {
-            PyList_SetItem(list, _count, element.pyPointer)
-            _count += 1
+        guard count > 0 else { return list}
+        list.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
+            var ob_item = pointer.pointee.ob_item!
+            //var _count = 0
+            for element in self {
+                //ob_item[_count] = element.pyPointer
+                ob_item.pointee = element.pyPointer
+                ob_item = ob_item.advanced(by: 1)
+                //_count += 1
+            }
         }
         return list
     }
     
     
     @inlinable public var pythonTuple: PythonPointer {
-        let tuple = PyTuple_New(self.count)
-        for (i, element) in self.enumerated() {
-            PyTuple_SetItem(tuple, i, element.pyPointer)
+        let tuple = PyTuple_New(self.count)!
+        
+        tuple.withMemoryRebound(to: PyTupleObject.self, capacity: 1) { pointer in
+            let obs = pointer.pointer(to: \.ob_item)!
+            var _count = 0
+            for element in self {
+                obs[_count] = element.pyPointer
+            }
         }
+//        
+//        for (i, element) in self.enumerated() {
+//            PyTuple_SetItem(tuple, i, element.pyPointer)
+//        }
         return tuple ?? .None
     }
     

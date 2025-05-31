@@ -63,7 +63,8 @@ extension RawRepresentable where RawValue: PySerialize {
     }
 }
 
-@inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PythonCore.PyPointer, _ key: String) throws -> T {
+@_disfavoredOverload
+@inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PythonCore.PyPointer, key: String) throws -> T {
     guard let result: PyPointer = key.withCString({ ckey in
         PyDict_GetItemString(dict, ckey)
     }) else {
@@ -73,12 +74,14 @@ extension RawRepresentable where RawValue: PySerialize {
     return try T(object: result)
 }
 
-@inlinable public func PyDict_GetItem<T: PyDeserializeObject>(_ dict: PythonCore.PyPointer, _ key: String) throws -> T {
-    guard let result: PyPointer = key.withCString({ ckey in
-        PyDict_GetItemString(dict, ckey)
-    }) else {
-        PyErr_Print()
-        throw PyStandardException.keyError
-    }
-    return try PyCast<T>.cast(from: result)
-}
+//@inlinable public func PyDict_GetItem<T: PyDeserializeObject>(_ dict: PythonCore.PyPointer, _ key: String) throws -> T {
+//    guard let result: PyPointer = key.withCString({ ckey in
+//        PyDict_GetItemString(dict, ckey)
+//    }) else {
+//        PyErr_Print()
+//        throw PyStandardException.keyError
+//    }
+//    return try PyCast<T>.cast(from: result)
+//}
+
+

@@ -52,6 +52,15 @@ public extension PyMethodDef {
             ml_doc: handleDocString(doc)
         )
     }
+    
+    static func noArgsKeywords(name: String, doc: String? = nil, ml_meth: PySwiftFunctionWithKeywords) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_flags: METH_VARARGS | METH_KEYWORDS,
+            ml_doc: handleDocString(doc)
+        )
+    }
 }
 
 public extension PyMethodDef {

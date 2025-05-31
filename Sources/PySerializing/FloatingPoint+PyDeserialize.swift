@@ -9,9 +9,16 @@ extension Double: PyDeserialize {
 
         switch object {
         case .PyFloat:
-            self = PyFloat_AsDouble(object)
+            //self = PyFloat_AsDouble(object)
+            self = unsafeBitCast(object, to: UnsafeMutablePointer<PyFloatObject>.self).pointee.ob_fval
         case .PyLong:
-            self = PyLong_AsDouble(object)
+            var overflow: Int32 = 0
+            let long = PyLong_AsLongAndOverflow(object, &overflow)
+            if overflow == 1 {
+                
+            }
+            self.init(long)
+            
         default:
             throw PythonError.float
         }
@@ -24,9 +31,20 @@ extension Float32: PyDeserialize {
     public init(object: PyPointer) throws {
         switch object {
         case .PyFloat:
-            self.init(PyFloat_AsDouble(object))
+            //self = PyFloat_AsDouble(object)
+            self.init(
+                object.withMemoryRebound(to: PyFloatObject.self, capacity: 1, { pointer in
+                    pointer.pointee.ob_fval
+                })
+            )
         case .PyLong:
-            self.init(PyLong_AsDouble(object))
+            var overflow: Int32 = 0
+            let long = PyLong_AsLongAndOverflow(object, &overflow)
+            if overflow == 1 {
+                
+            }
+            self.init(long)
+            
         default:
             throw PythonError.float
         }

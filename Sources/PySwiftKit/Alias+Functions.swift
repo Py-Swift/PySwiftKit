@@ -58,6 +58,9 @@ public typealias PySwiftFunctionFast = (@convention(c) (PySwiftObjectPointer, Ve
 // PyCFunction
 public typealias PySwiftFunction = (@convention(c) (PySwiftObjectPointer, PyPointer?) -> PyPointer?)?
 
+// PyCFunctionWithKeywords
+public typealias PySwiftFunctionWithKeywords = (@convention(c) (PySwiftObjectPointer, PyPointer?, PyPointer?) -> PyPointer?)?
+
 // PyCMethod
 public typealias PySwiftMethod = (@convention(c) (UnsafeMutablePointer<PyObject>?, UnsafeMutablePointer<PyTypeObject>?, VectorArgs, Int, PyPointer?) -> PyPointer?)?
 
