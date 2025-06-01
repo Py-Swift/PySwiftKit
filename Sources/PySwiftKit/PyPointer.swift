@@ -3,6 +3,10 @@ import CoreGraphics
 import PythonCore
 //import PythonTypeAlias
 
+extension PyPointer: @unchecked Swift.Sendable {
+    
+}
+
 extension PyPointer {
     @inlinable public static var None: PyPointer { Py_NewRef(Py_None) }
  
