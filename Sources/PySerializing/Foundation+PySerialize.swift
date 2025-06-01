@@ -211,13 +211,10 @@ extension Array: PySerializing.PySerialize where Element : PySerializing.PySeria
             var _count = 0
             for element in self {
                 obs[_count] = element.pyPointer
+                _count += 1
             }
         }
-//        
-//        for (i, element) in self.enumerated() {
-//            PyTuple_SetItem(tuple, i, element.pyPointer)
-//        }
-        return tuple ?? .None
+        return tuple
     }
     
 }

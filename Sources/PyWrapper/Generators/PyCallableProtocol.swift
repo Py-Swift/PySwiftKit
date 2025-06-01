@@ -81,7 +81,7 @@ extension PyCallableProtocol {
     }
     
     var code: CodeBlockItemListSyntax {
-        let manyArgs = parameters_count > 1
+        //let manyArgs = parameters_count > 1
         return .init {
             if gil {
                 "let gil = PyGILState_Ensure()"
@@ -93,7 +93,7 @@ extension PyCallableProtocol {
                 if gil {
                     "PyGILState_Release(gil)"
                 }
-                if let returnType {
+                if returnType != nil {
                     "fatalError()"
                 } else {
                     "return"
@@ -132,7 +132,7 @@ extension PyCallableProtocol {
         .init {
             if canThrow {
                 DoStmtSyntax(body: .init(statements: code), catchClauses: .standardPyCatchClauses)
-                if let returnType {
+                if returnType != nil {
                     "fatalError()"
                 } else {
                     "return"

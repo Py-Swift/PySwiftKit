@@ -147,6 +147,7 @@ extension Optional where Wrapped: PyDeserializeObject {
 }
 
 
+
 //@_disfavoredOverload
 @inlinable public func _PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T? {
     guard let result = Python.PyTuple_GetItem(o, index) else {

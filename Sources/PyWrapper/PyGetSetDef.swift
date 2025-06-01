@@ -24,12 +24,12 @@ public struct PyGetSetDefGenerator {
         read_only = decl.bindingSpecifier.trimmedDescription == "let"
         
         let bindings = decl.bindings
-        if let binding = bindings.first?.as(PatternBindingSyntax.self) {
+        if let binding = bindings.first {
             name = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier ?? ""
             if let t = binding.typeAnnotation?.type {
                 type = t
             }
-            if let initializer = binding.initializer {
+            if let _ = binding.initializer {
                 
             } else if let accessorBlock = binding.accessorBlock {
                 switch accessorBlock.accessors  {

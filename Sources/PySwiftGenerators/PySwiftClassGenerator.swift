@@ -430,11 +430,11 @@ enum PyPeerMacro: Error {
 extension PySwiftClassGenerator: PeerMacro {
     static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         let info = PyClassArguments(node: node)
-        let name =  switch declaration.kind {
-        case .classDecl: declaration.cast(ClassDeclSyntax.self).name.text
-        case .extensionDecl: declaration.cast(ExtensionDeclSyntax.self).extendedType.trimmedDescription
-        default: throw PyPeerMacro.wrongType(declaration.description)
-        }
+//        let name =  switch declaration.kind {
+//        case .classDecl: declaration.cast(ClassDeclSyntax.self).name.text
+//        case .extensionDecl: declaration.cast(ExtensionDeclSyntax.self).extendedType.trimmedDescription
+//        default: throw PyPeerMacro.wrongType(declaration.description)
+//        }
         if info.external {
             switch declaration.kind {
             case .classDecl:

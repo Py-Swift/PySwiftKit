@@ -46,7 +46,7 @@ public class ObjectInitializer {
     }
     
     func process() {
-        for parameter in parameters {
+        for _ in parameters {
             //parameter.type
         }
     }
@@ -58,36 +58,36 @@ extension ObjectInitializer {
         case pySerialize_init
     }
     
-    public var output: CodeBlockItemListSyntax { .init {
-        if pyInit {
-            let parameters_count = parameters.count
-            if parameters_count > 0 {
-                DoStmtSyntax(catchClauses: .standardPyCatchClauses) {
-                    for initvar in initVars { initvar }
-                    "let nkwargs = (kw == nil) ? 0 : PyDict_Size(kw)"
-                    if_nkwargs(elseCode: .init {
-                        "let nargs = PyTuple_Size(_args_)"
-                        GuardStmtSyntax.nargs_kwargs(parameters_count)
-                        handle_args_n_kwargs
-                        
-                    })
-                    setPointer()
-                    "return 0"
-                }
-            } else {
-                setPointer()
-                "return 0"
-            }
-        } else {
-            """
-            PyErr_SetString(PyExc_NotImplementedError,"\(raw: cls) can only be inited from swift")
-            """
-            "return -1"
-        }
-        
-    }}
-    
-    
+//    public var output: CodeBlockItemListSyntax { .init {
+//        if pyInit {
+//            let parameters_count = parameters.count
+//            if parameters_count > 0 {
+//                DoStmtSyntax(catchClauses: .standardPyCatchClauses) {
+//                    for initvar in initVars { initvar }
+//                    "let nkwargs = (kw == nil) ? 0 : PyDict_Size(kw)"
+//                    if_nkwargs(elseCode: .init {
+//                        "let nargs = PyTuple_Size(_args_)"
+//                        GuardStmtSyntax.nargs_kwargs(parameters_count)
+//                        handle_args_n_kwargs
+//                        
+//                    })
+//                    setPointer()
+//                    "return 0"
+//                }
+//            } else {
+//                setPointer()
+//                "return 0"
+//            }
+//        } else {
+//            """
+//            PyErr_SetString(PyExc_NotImplementedError,"\(raw: cls) can only be inited from swift")
+//            """
+//            "return -1"
+//        }
+//        
+//    }}
+//    
+//    
     /*
      { __self__, _args_, kw -> Int32 in
          do {
@@ -324,42 +324,42 @@ fileprivate extension ObjectInitializer {
         }
     }
     
-    var handle_args_n_kwargs: CodeBlockItemListSyntax {
-        
-        return .init {
-            for arg in parameters {
-                let con_list = ConditionElementListSyntax {
-                    .init {
-                        SequenceExprSyntax(elements: .init {
-                            //IdentifierExpr(stringLiteral: "__nargs__")
-                            "nargs".expr
-                            BinaryOperatorExprSyntax(operator: .rightAngleToken(leadingTrivia: .space))
-                            0.makeLiteralSyntax()
-                        })
-                    }
-                }
-                IfExprSyntax(
-                    conditions: con_list,
-                    body: .init {
-                        //SequenceExprSyntax(pyTuple: arg)
-                    },
-                    elseKeyword: .keyword(.else),
-                    elseBody: .codeBlock(.init {
-                        //SequenceExprSyntax(pyDict: arg)
-                    })
-                )
-                //                IfStmt(leadingTrivia: .newline, conditions: con_list) {
-                //                    SequenceExprSyntax(pyTuple: arg)
-                //                } elseBody: {
-                //                    SequenceExprSyntax(pyDict: arg)
-                //
-                //                }
-                
-            }
-        }
-        
-        
-    }
+//    var handle_args_n_kwargs: CodeBlockItemListSyntax {
+//        
+//        return .init {
+//            for arg in parameters {
+//                let con_list = ConditionElementListSyntax {
+//                    .init {
+//                        SequenceExprSyntax(elements: .init {
+//                            //IdentifierExpr(stringLiteral: "__nargs__")
+//                            "nargs".expr
+//                            BinaryOperatorExprSyntax(operator: .rightAngleToken(leadingTrivia: .space))
+//                            0.makeLiteralSyntax()
+//                        })
+//                    }
+//                }
+//                IfExprSyntax(
+//                    conditions: con_list,
+//                    body: .init {
+//                        //SequenceExprSyntax(pyTuple: arg)
+//                    },
+//                    elseKeyword: .keyword(.else),
+//                    elseBody: .codeBlock(.init {
+//                        //SequenceExprSyntax(pyDict: arg)
+//                    })
+//                )
+//                //                IfStmt(leadingTrivia: .newline, conditions: con_list) {
+//                //                    SequenceExprSyntax(pyTuple: arg)
+//                //                } elseBody: {
+//                //                    SequenceExprSyntax(pyDict: arg)
+//                //
+//                //                }
+//                
+//            }
+//        }
+//        
+//        
+//    }
     
     func setPointer() -> SequenceExprSyntax {
         //let _throws_ = __init__?.throws ?? false

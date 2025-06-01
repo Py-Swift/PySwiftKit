@@ -112,8 +112,8 @@ extension PySwiftModuleGenerator: ExtensionMacro {
         default:
             nil
         } else { fatalError()}
-        let _module_name = module_name.camelCaseToSnakeCase()
-        let members = declaration.members.members
+        //let _module_name = module_name.camelCaseToSnakeCase()
+        let members = declaration.memberBlock.members
         let var_decls = members.compactMap { member in
             let decl = member.decl
             return if decl.kind == .variableDecl {
@@ -124,7 +124,7 @@ extension PySwiftModuleGenerator: ExtensionMacro {
         }
         let classes_decl = (var_decls.first { decl in
             let bindings = decl.bindings
-            return if let binding = bindings.first?.as(PatternBindingSyntax.self) {
+            return if let binding = bindings.first {
                 binding.pattern.as(IdentifierPatternSyntax.self)?.description == "py_classes"
                 //binding.pattern.as(IdentifierPatternSyntax.self)?.identifier == "py_classes"
             } else {

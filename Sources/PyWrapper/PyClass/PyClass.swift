@@ -319,7 +319,7 @@ public extension PyClass {
         
         return .init(
             modifiers: [ .fileprivate ], .let,
-            name: .init(stringLiteral: "\(target ?? name)_tp_hash"),
+            name: .init(stringLiteral: "\(target)_tp_hash"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_hashfunc")),
             initializer: .init(value: expr).with(\.trailingTrivia, .newlines(2))
         )
@@ -342,7 +342,7 @@ public extension PyClass {
     func _tp_str(target: String) -> VariableDeclSyntax {
         return .init(
             modifiers: [ .fileprivate ], .let,
-            name: .init(stringLiteral: "\(target ?? name)_tp_str"),
+            name: .init(stringLiteral: "\(target)_tp_str"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
                 { __self__ in

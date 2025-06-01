@@ -15,7 +15,7 @@ class PyClassByExtensionUnpack {
     init(arguments: LabeledExprListSyntax) throws {
         for argument in arguments {
             guard let label = argument.label else { continue }
-            switch argument.label?.text {
+            switch label.text {
             case "expr":
                 if let expr = argument.expression.as(StringLiteralExprSyntax.self) {
                     let statements = Parser.parse(source: expr.segments.description).statements

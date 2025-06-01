@@ -56,38 +56,38 @@ public struct PyGetSetDefs {
 }
 
 
-struct PyGetSetProperty {
-    
-    var property: VariableDeclSyntax
-    var cls: String
-    var typeSyntax: TypeSyntax
-    
-    init(property: VariableDeclSyntax, cls: String) {
-        self.property = property
-        self.cls = cls
-        self.typeSyntax = property.bindings.last?.as(TypeAnnotationSyntax.self)?.type ?? .pyPointer
-        
-        
-    }
-    
-}
-
-extension PyGetSetProperty {
-    var getter: ClosureExprSyntax {
-        .getset_getter {
-            
-        }
-    }
-    
-    var setter: ClosureExprSyntax {
-        .getset_setter {
-            
-        }
-    }
-    
-    var pyGetSetDef: FunctionCallExprSyntax {
-        .init(calledExpression: "PyGetSetDef".expr) {
-            
-        }
-    }
-}
+//struct PyGetSetProperty {
+//    
+//    var property: VariableDeclSyntax
+//    var cls: String
+//    var typeSyntax: TypeSyntax
+//    
+//    init(property: VariableDeclSyntax, cls: String) {
+//        self.property = property
+//        self.cls = cls
+//        self.typeSyntax = property.bindings.last?.as(TypeAnnotationSyntax.self)?.type ?? .pyPointer
+//        
+//        
+//    }
+//    
+//}
+//
+//extension PyGetSetProperty {
+//    var getter: ClosureExprSyntax {
+//        .getset_getter {
+//            
+//        }
+//    }
+//    
+//    var setter: ClosureExprSyntax {
+//        .getset_setter {
+//            
+//        }
+//    }
+//    
+//    var pyGetSetDef: FunctionCallExprSyntax {
+//        .init(calledExpression: "PyGetSetDef".expr) {
+//            
+//        }
+//    }
+//}

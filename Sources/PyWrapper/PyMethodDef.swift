@@ -114,7 +114,7 @@ extension PyMethodDefGenerator {
                 let many = count > 1
                 let ex_label = many ? "__args__[\(i)]" : "__arg__"
                 return switch p.type.as(TypeSyntaxEnum.self) {
-                case .functionType(let functionTypeSyntax): "let _\((p.secondName ?? p.firstName).text) = \(ex_label)"
+                case .functionType(_): "let _\((p.secondName ?? p.firstName).text) = \(ex_label)"
                 default: nil
                 }
             })

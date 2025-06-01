@@ -87,7 +87,7 @@ class VectorArgs {
             switch option {
             case .arg:
                 "Py_DecRef(__args__[\(raw: index)])"
-            case .cls(let string):
+            case .cls(_):
                 ""
             }
         }
@@ -219,7 +219,7 @@ extension PyCallGenerator {
     }
     
     private var code: CodeBlockItemListSyntax {
-        let manyArgs = arg_count > 1
+        //let manyArgs = arg_count > 1
         return .init {
             if gil {
                 "let gil = PyGILState_Ensure()"
@@ -231,7 +231,7 @@ extension PyCallGenerator {
                 if gil {
                     "PyGILState_Release(gil)"
                 }
-                if let returnType {
+                if returnType != nil {
                     if funcThrows {
                         "throw PyStandardException.typeError"
                     } else {

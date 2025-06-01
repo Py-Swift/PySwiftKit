@@ -6,12 +6,6 @@ import CompilerPluginSupport
 let kivy = false
 let local = false
 
-let pykit: Package.Dependency = if local {
-    .package(path: "/Volumes/CodeSSD/PythonSwiftGithub/PyKit")
-} else {
-    .package(path: "/Volumes/CodeSSD/PythonSwiftGithub/PyKit")
-}
-
 let pythoncore: Package.Dependency = if kivy {
     .package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 } else {
@@ -21,7 +15,6 @@ let pythoncore: Package.Dependency = if kivy {
 let dependencies: [Package.Dependency] = [
     //.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
     pythoncore,
-    //pykit,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0"),
     //.package(url: "https://github.com/PythonSwiftLink/SwiftonizePlugin", .upToNextMajor(from: "0.0.0")),

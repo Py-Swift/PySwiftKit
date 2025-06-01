@@ -61,7 +61,7 @@ struct PyCallbackGenerator: MemberMacro {
             inheritedTypes.contains(where: {$0.trimmedDescription.contains("NSObject")})
         } else { false }
         
-        var initDeclModifiers: DeclModifierListSyntax = .init {
+        let initDeclModifiers: DeclModifierListSyntax = .init {
             if declaration.modifiers.contains(where: {$0.name.text == "public"}) {
                 DeclModifierSyntax(name: .keyword(.public))
             }

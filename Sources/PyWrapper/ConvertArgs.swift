@@ -36,13 +36,13 @@ enum PyConvertType {
             } else {
                 "__arg__"
             }
-        case .py_cast(let t):
+        case .py_cast(_):
             if let index {
                 "try pyCast(from: __args__, index: \(raw: index))"
             } else {
                 "try pyCast(from: __arg__)"
             }
-        case .optional_py_cast(let t):
+        case .optional_py_cast(_):
             if let index {
                 "optionalPyCast(from: __args__[\(raw: index)])"
             } else {
@@ -198,15 +198,15 @@ func getConvertType(_ t: TypeSyntax) -> PyConvertType {
     switch t.as(TypeSyntaxEnum.self) {
     case .identifierType(let identifierType):
         
-        if let raw = PyWrap.RawType(typeSyntax: identifierType) {
+        if let _ = PyWrap.RawType(typeSyntax: identifierType) {
             return .raw
-        } else if let int = PyWrap.IntegerType(typeSyntax: identifierType) {
+        } else if let _ = PyWrap.IntegerType(typeSyntax: identifierType) {
             return .py_cast(t)
-        } else if let float = PyWrap.FloatingPointType(typeSyntax: identifierType) {
+        } else if let _ = PyWrap.FloatingPointType(typeSyntax: identifierType) {
             return .py_cast(t)
-        } else if let foundation = PyWrap.FoundationType(typeSyntax: identifierType) {
+        } else if let _ = PyWrap.FoundationType(typeSyntax: identifierType) {
             return .py_cast(t)
-        } else if let objc = PyWrap.ObjcType(typeSyntax: identifierType) {
+        } else if let _ = PyWrap.ObjcType(typeSyntax: identifierType) {
             return .casted(t)
         } else {
             return .casted(t)
@@ -214,9 +214,11 @@ func getConvertType(_ t: TypeSyntax) -> PyConvertType {
 
     case .optionalType(let optionalType):
         return getConvertType(optionalType)
+    case .implicitlyUnwrappedOptionalType(let unwrappedOptType):
+        return getConvertType(unwrappedOptType.wrappedType)
     case .arrayType(let arrayType):
         return getConvertType(arrayType)
-    case .dictionaryType(let dictionaryType): return  .py_cast(t)
+    case .dictionaryType(_): return  .py_cast(t)
     case .functionType(let functionType): return  .functionType(functionType)
     case .attributedType(let attributedType):
         return getConvertType(attributedType.baseType)
@@ -243,6 +245,20 @@ func getConvertType(_ t: OptionalTypeSyntax) -> PyConvertType {
     switch PyWrap.RawType(typeSyntax: t.wrappedType) {
     case .PyPointer, .Void: .raw
     case .none: .casted(t)
+    }
+//    return switch PyWrap.SwiftType(rawValue: t.wrappedType) {
+//    case .PyPointer: .raw
+//    case .none: .casted(t)
+//    default: .optional_py_cast(t)
+//    }
+}
+
+func getConvertType(_ t: ForceUnwrapExprSyntax) -> PyConvertType {
+    let forcedType = t.expression.trimmedDescription.typeSyntax()
+    //return .py_cast(t)
+    return switch PyWrap.RawType(typeSyntax: forcedType) {
+    case .PyPointer, .Void: .raw
+    case .none: .casted(forcedType)
     }
 //    return switch PyWrap.SwiftType(rawValue: t.wrappedType) {
 //    case .PyPointer: .raw

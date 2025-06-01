@@ -36,7 +36,7 @@ public class PyCallableClosure {
 extension PyCallableClosure {
     private var parameters: ClosureParameterListSyntax {.init {
         
-        for (i, parameter) in funcType.parameters.enumerated() {
+        for (i, _) in funcType.parameters.enumerated() {
             "\(raw: pletters[i])"
         }
     }}
