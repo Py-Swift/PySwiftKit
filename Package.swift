@@ -12,6 +12,12 @@ let pythoncore: Package.Dependency = if kivy {
     .package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 }
 
+var platforms: [SupportedPlatform] = [.iOS(.v13)]
+
+if !kivy {
+    platforms.append(.macOS(.v11))
+}
+
 let dependencies: [Package.Dependency] = [
     //.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
     pythoncore,
@@ -24,7 +30,7 @@ let dependencies: [Package.Dependency] = [
 
 let package = Package(
     name: "PySwiftKit",
-    platforms: [.macOS(.v11), .iOS(.v13)],
+    platforms: platforms,
     products: [
         .library(
             name: "PySwiftKit",

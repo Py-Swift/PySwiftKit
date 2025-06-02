@@ -8,8 +8,10 @@ def get_package_swift() -> str:
 
 def write_package_swift(path, content):
     with open(path, "w") as f:
-        old = "PythonSwiftLink/PythonCore"
-        new = "KivySwiftLink/PythonCore"
+        #old = "PythonSwiftLink/PythonCore"
+        old = "let kivy = false"
+        #new = "KivySwiftLink/PythonCore"
+        new = "let kivy = true"
         package_text = content.replace(old, new)
         f.write(package_text)
     
