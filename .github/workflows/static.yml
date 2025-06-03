@@ -34,7 +34,17 @@ jobs:
       - name: build docc
         run: |
           swift package --allow-writing-to-directory ./docs \
-            generate-documentation --target PythonSwiftCore --output-path ./docs \
+            generate-documentation \
+            --target PySwiftKit \
+            --target PySwiftObject \
+            --target PyCollection \
+            --target PyUnpack \
+            --target PyExecute \
+            --target PyDictionary \
+            --target PyExpressible \
+            --target PySerializing \
+            --target PySwiftWrapper \
+            --output-path ./docs \
             --transform-for-static-hosting --hosting-base-path PythonSwiftCore
 
       - name: Commit Check Action
