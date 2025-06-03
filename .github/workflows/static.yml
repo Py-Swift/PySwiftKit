@@ -50,6 +50,8 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: commit-check/commit-check-action@a8a4d8a4e5fa8fc276db91abafcf168f4f2b90a5
         uses: commit-check/commit-check-action@v0.8.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.Homebrew }}
         with:
           branch: docc
         
