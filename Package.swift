@@ -7,9 +7,9 @@ let kivy = false
 let local = false
 
 let pythoncore: Package.Dependency = if kivy {
-    .package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+    .package(url: "https://github.com/kv-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 } else {
-    .package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 }
 
 var platforms: [SupportedPlatform] = [
