@@ -38,7 +38,7 @@ jobs:
         # uses: whyakari/github-repo-action@809aeef1050b89b6f64d36fb9893c5e9ceaecbba
         uses: whyakari/github-repo-action@v3.1
         with:
-          owner: KivySwiftLink
+          owner: kv-swift
           repository: PySwiftKit
           access-token: ${{ secrets.ksl }}
           branch: master
@@ -61,7 +61,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.ksl }}
         with:
           source-directory: 'PySwiftKit'
-          destination-github-username: 'kivyswiftlink'
+          destination-github-username: 'kv-swift'
           destination-repository-name: 'PySwiftKit'
           user-email: pythonswiftlink@gmail.com
           target-branch: master
@@ -70,7 +70,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.version.outputs.var }}
-          owner: kivyswiftlink
+          owner: kv-swift
           repo: PySwiftKit
           token: ${{ secrets.ksl }}
           makeLatest: true
