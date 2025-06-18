@@ -83,6 +83,12 @@ extension TypeSyntax {
         default: false
         }
     }
+    var isOptPyPointer: Bool {
+        switch self.trimmedDescription {
+        case "PyPointer?": true
+        default: false
+        }
+    }
 }
 
 extension FunctionParameterSyntax {

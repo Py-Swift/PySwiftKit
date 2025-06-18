@@ -24,6 +24,19 @@ public func withGIL(handle: @escaping ()->Void ) {
     handle()
     PyGILState_Release(gil)
 }
+
+@inlinable
+public func withGIL<T>(_ target: T ,handle: @escaping (T)->Void ) {
+    let gil = PyGILState_Ensure()
+    handle(target)
+    PyGILState_Release(gil)
+}
+
+@inlinable
+public func gilCheck() -> Bool {
+    PyGILState_Check() == 1
+}
+
 @discardableResult
 public func gilCheck(_ title: String) -> Bool {
     let state = PyGILState_Check() == 1
@@ -38,7 +51,6 @@ public func gilCheck(_ title: String) -> Bool {
 
 @inlinable
 public func withAutoGIL(handle: @escaping ()->Void ) {
-    print("autogil")
     if PyGILState_Check() == 0 {
         if let state = PyThreadState_Get() {
             print("getting thread state:", state.pointee)
@@ -53,35 +65,22 @@ public func withAutoGIL(handle: @escaping ()->Void ) {
         }
         
     } else {
-        
-        gilCheck("autogil")
-        //
         handle()
-        
-        PyEval_SaveThread()
     }
 }
 
 @inlinable
 public func withAutoGIL(handle: @escaping () throws -> Void ) rethrows {
     let has_gil = PyHasGIL()
-    //print("withAutoGIL has gil", has_gil)
-    //var state: PyThreadState = .init()
-    
-    
     if has_gil {
         try handle()
-        //PyGILState_Release(gil)
-        PyEval_SaveThread()
+        //PyEval_SaveThread()
         return
     }
 
-    //print("ensuring gil")
     let gil = PyGILState_Ensure()
     try handle()
-    //PyEval_SaveThread()
     PyGILState_Release(gil)
-    //print("gil removed")
 }
 
 extension DispatchQueue {

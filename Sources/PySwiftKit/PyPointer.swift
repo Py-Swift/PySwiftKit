@@ -82,6 +82,11 @@ extension PyPointer {
     return result
 }
 
+@inlinable public func PyTuple_GetItem(_ o: PyPointer, _ index: Int) throws -> PyPointer? {
+    guard let result: PyPointer? = Python.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
+    return result
+}
+
 extension PythonPointer {
     
 //    @inlinable
