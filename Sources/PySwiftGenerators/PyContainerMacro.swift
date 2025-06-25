@@ -32,6 +32,18 @@ class PyContainerArguments {
     }
 }
 
+fileprivate extension AttributeSyntax {
+    static var dynamicMemberLookup: Self {
+        .init(stringLiteral: "@dynamicMemberLookup")
+    }
+}
+
+fileprivate extension AttributeListSyntax.Element {
+    static var dynamicMemberLookup: Self {
+        .attribute(.dynamicMemberLookup)
+    }
+}
+
 
 struct PyContainerMacro: MemberMacro {
     static func expansion(of node: AttributeSyntax, providingMembersOf declaration: some DeclGroupSyntax, conformingTo protocols: [TypeSyntax], in context: some MacroExpansionContext) throws -> [DeclSyntax] {
@@ -94,6 +106,8 @@ struct PyContainerMacro: MemberMacro {
             if super_init {
                 "super.init()"
             }
+            
+            
         }
         
         output.append(.init(initDecl))
@@ -106,6 +120,39 @@ struct PyContainerMacro: MemberMacro {
         }
         
         output.append(.init(deinitializerDecl))
+        if declaration.attributes.contains(where: {$0.isDynamicMember}) {
+            output.append("""
+            subscript<T: PySerializable>(dynamicMember member: String) -> T? {
+                get {
+                    do {
+                        if let object = PyObject_GetAttr(py_target, member) {
+                           return try T(consuming: object)
+                        } else {
+                            print("\\(member) doesn't exist")
+                        }
+                    } catch let err as PyStandardException {
+                        err.pyExceptionError()
+                    } catch let err as PyException {
+                        err.pyExceptionError()
+                    } catch let other_error {
+                        other_error.anyErrorException()
+                    }
+                    return nil
+                }
+                set {
+                    _ = member.withCString { key in
+                        if let newValue {
+                            PyObject_SetAttrString(py_target, key, newValue.pyPointer)
+                        } else {
+                            PyObject_SetAttrString(py_target, key, .None)
+                        }
+                    }
+                    
+                }
+            }
+            
+            """)
+        }
         
         return output
     }
@@ -132,3 +179,5 @@ extension PyContainerMacro: ExtensionMacro {
         ]
     }
 }
+
+

@@ -63,6 +63,14 @@ extension RawRepresentable where RawValue: PySerialize {
     }
 }
 
+@inlinable public func PyObject_SetAttr<T>(_ o: PyPointer, _ key: String, _ value: T) where T: PySerialize {
+    key.withCString { string in
+        let object = value.pyPointer
+        PyObject_SetAttrString(o, string, object)
+        Py_DecRef(object)
+    }
+}
+
 @_disfavoredOverload
 @inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PythonCore.PyPointer, key: String) throws -> T {
     guard let result: PyPointer = key.withCString({ ckey in

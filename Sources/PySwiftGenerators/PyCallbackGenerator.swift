@@ -10,6 +10,7 @@ import PyWrapper
 
 extension AttributeListSyntax.Element {
     var isPyCall: Bool { trimmedDescription.contains("@PyCall") }
+    var isDynamicMember: Bool { trimmedDescription.contains("@dynamicMemberLookup") }
 }
 
 extension AttributeListSyntax {

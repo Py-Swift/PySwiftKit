@@ -165,7 +165,7 @@ extension ObjectInitializer {
                             initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
                         )
                     } else {
-                        if parameter.type.isOptPyPointer {
+                        if parameter.type.isOptPyPointer || parameter.type.isPyPointer {
                             VariableDeclSyntax(
                                 .var,
                                 name: .init(stringLiteral: name.text),
@@ -177,7 +177,7 @@ extension ObjectInitializer {
                                 .var,
                                 name: .init(stringLiteral: name.text),
                                 type: .init(type: parameter.type),
-                                initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
+                                initializer: .init(value: "try PySerializing.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), index: 0)".expr)
                             )
                         }
 //                        VariableDeclSyntax(
@@ -203,7 +203,9 @@ extension ObjectInitializer {
             ReturnStmtSyntax(expression: 0.makeLiteralSyntax())
         }
         return .init {
+            // if @PyInit detected
             if pyInit {
+                // if init or an argument can throw when error  
                 if self.canThrow {
                     DoStmtSyntax(body: .init(statements: code), catchClauses: .standardPyCatchClauses)
                     ReturnStmtSyntax(expression: (-1).makeLiteralSyntax())
