@@ -23,7 +23,7 @@ soon as the shortest argument is exhausted.
 from ..pgen2 import token
 from .. import fixer_base
 from ..fixer_util import Name, ArgList, Call, ListComp, in_special_context
-from ..pygram import python_symbols as syms
+from ..pygram import PythonCore_symbols as syms
 from ..pytree import Node
 
 

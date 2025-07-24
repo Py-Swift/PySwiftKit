@@ -1,6 +1,7 @@
 import Foundation
 import PyWrapperInfo
 import PySerializing
+import PySwiftKit
 
 @attached(peer, names: arbitrary)
 public macro PyFunction(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftFuncWrapper")
@@ -67,8 +68,7 @@ public macro PyStaticMethod(name: String? = nil) = #externalMacro(module: "PySwi
 public macro ImportableModules(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftFuncWrapper")
 
 
-@attached(body)
-public macro PyCall(name: String? = nil, gil: Bool = true, method: Bool = false, cast_options: [ArgumentCast] = []) = #externalMacro(module: "PySwiftGenerators", type: "PyCallFiller")
+
 
 @attached(member, names: arbitrary)
 public macro PyCallback(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PyCallbackGenerator")
@@ -86,12 +86,11 @@ public macro PyContainer(name: String? = nil, weak_ref: Bool = false) = #externa
 public macro ExtractPySwiftObject() = #externalMacro(module: "PySwiftGenerators", type: "ExtractPySwiftObject")
 
 @freestanding(expression)
-public macro withNoGIL(code: @escaping () -> Void) = #externalMacro(module: "PySwiftGenerators", type: "AttachedTestMacro")
-
+public macro withNoGIL(code: @escaping () -> Void) = #externalMacro(module: "PySwiftGenerators", type: "WithGilTestMacro")
 
 
 @freestanding(expression)
-public macro PyListNew(_ elements: Any...) = #externalMacro(module: "PySwiftGenerators", type: "PyListGenerator")
+public macro PyListNew(_ elements: (any PySerialize)...) -> PyPointer = #externalMacro(module: "PySwiftGenerators", type: "PyListGenerator")
 
 
 public protocol PyModuleProtocol {
@@ -107,3 +106,9 @@ public extension PyModuleProtocol {
 public protocol PyClassProtocol {
     
 }
+
+
+public protocol PyCallTarget {}
+
+extension PyPointer: PyCallTarget {}
+extension String: PyCallTarget {}

@@ -110,12 +110,16 @@ public class PyCallGenerator {
     var funcThrows: Bool
     var gil: Bool
     var method: Bool
+    var once: Bool
+    var target: String?
     
-    public init(function: FunctionDeclSyntax, gil: Bool, method: Bool) {
+    public init(function: FunctionDeclSyntax, gil: Bool, method: Bool, target: String? = nil, once: Bool) {
         //self.function = function
+        self.target = target
         self.call_name = function.name.trimmedDescription
         self.gil = gil
         self.method = method
+        self.once = once
         let signature = function.signature
         let parameters = Array(signature.parameterClause.parameters)
         self.parameters = parameters
@@ -133,10 +137,50 @@ public class PyCallGenerator {
         }
     }
     
+    public init(target: String, parameters: LabeledExprListSyntax,returnType: TypeSyntax? = nil , gil: Bool, method: Bool, canThrow: Bool, once: Bool) {
+        //self.function = function
+        self.target = target
+        self.call_name = ""
+        self.gil = gil
+        self.method = method
+        self.once = once
+        //let parameters = Array(signature.parameterClause.parameters)
+        let letters = Array("abcdefghijk")
+        
+        self.parameters = parameters.enumerated().map({ i, parameter in
+                .init(firstName: .identifier(.init(letters[i])), type: TypeSyntax("Any"))
+        })
+        arg_count = parameters.count
+        self.canThrow = canThrow
+        self.funcThrows = canThrow
+        self.gil = gil
+        self.method = method
+        self.returnType = returnType
+//        let rtn = signature.returnClause
+//        canThrow = function.throws
+//        funcThrows = function.throws
+//        if let rtn {
+//            returnType = rtn.type
+//            if rtn.canThrow {
+//                canThrow = true
+//            }
+//        } else {
+//            returnType = nil
+//        }
+        
+    }
+    
+    
+}
+
+protocol PyCallParameterKind {
     
 }
 
 extension PyCallGenerator {
+    
+    
+    
     public enum Mode {
         case single
         case multi
@@ -152,7 +196,7 @@ extension PyCallGenerator {
     
     var call: FunctionCallExprSyntax {
         return .init(callee: callee) {
-            "_\(call_name)".labelExpr
+            call_target.labelExpr
             if arg_count > 0 {
                 switch arg_count {
                 case 1:
@@ -164,6 +208,10 @@ extension PyCallGenerator {
                 }
             }
         }
+    }
+    
+    var call_target: String {
+        target ?? "_\(call_name)"
     }
 }
 
@@ -247,6 +295,9 @@ extension PyCallGenerator {
                 
             }
             post_call
+            if once {
+                call_target.decref()
+            }
             if let returnType {
                 if returnType.isPyPointer {
                     if gil {
@@ -254,7 +305,7 @@ extension PyCallGenerator {
                     }
                     "return result"
                 } else {
-                    "let _result = try \(raw: returnType)(object: result)"
+                    "let _result = try \(raw: returnType).casted(from: result)"
                     "Py_DecRef(result)"
                     if gil {
                         "PyGILState_Release(gil)"

@@ -18,9 +18,8 @@ extension Array where Element: PyDeserialize {
         
         self = try object.map {
             guard let element = $0 else { throw PyStandardException.indexError }
-            //return try Element(object: element)
             return try Element.casted(from: element)
-        }//(Element.init)
+        }
         
     }
     

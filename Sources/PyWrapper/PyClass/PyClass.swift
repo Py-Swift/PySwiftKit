@@ -8,6 +8,15 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import PyWrapperInfo
 
+
+//@resultBuilder
+//struct OverLoadsBuilder {
+//    
+//    static func buildExpression(_ expression: VariableDecl) -> VariableDecl {
+//        expression
+//    }
+//}
+
 public class PyClass {
     let name: String
     var initDecl: InitializerDeclSyntax?
@@ -43,7 +52,7 @@ public class PyClass {
         }
     }
     
-    public init(name: String, ext: ExtensionDeclSyntax, bases: [PyClassBase] = [], unretained: Bool = false, external: Bool = false) {
+    public init(name: String, ext: ExtensionDeclSyntax, ext_init: InitializerDeclSyntax? = nil, bases: [PyClassBase] = [], unretained: Bool = false, external: Bool = false) {
         self.name = name
         self.bases = bases
         self.unretained = unretained
@@ -55,7 +64,7 @@ public class PyClass {
             }
             return nil
         }
-        initDecl = inits.first
+        initDecl = ext_init ?? inits.first
     }
     
 }
@@ -126,11 +135,16 @@ extension PyClass {
                         tp_str(target: name)
                     case .repr:
                         tp_repr(target: name)
+                    case .iterator:
+                        tp_iter(target: name)
+                        tp_iternext(target: name)
                     default:
                         ""
                     }
                 }
             }
+       
+            
             self.asPyPointer(nil)
             self.asUnretainedPyPointer(nil)
         }
@@ -142,6 +156,11 @@ extension PyClass {
             _tp_init(nil),
             _tp_dealloc()
         ]
+        
+        for base in bases {
+            
+        }
+        
         output.append(
             contentsOf: self.bases.compactMap{ base -> VariableDeclSyntax? in
                 switch base {
@@ -166,6 +185,11 @@ extension PyClass {
                 }
             }
         )
+        
+        if bases.contains(.iterator) {
+            output.append(_tp_iter(target: name))
+            output.append(_tp_iternext(target: name))
+        }
         
         return output.map(DeclSyntax.init)
     }
@@ -381,4 +405,65 @@ public extension PyClass {
         )
     }
     
+    func tp_iter(target: String) -> VariableDeclSyntax {
+        return .init(
+            modifiers: [ .static ], .var,
+            name: .init(stringLiteral: "tp_iter"),
+            type: .init(type: TypeSyntax(stringLiteral: "PySwift_getiterfunc")),
+            initializer: .init(value: ExprSyntax(stringLiteral: """
+                { __self__ in
+                    guard let __self__ else { return .None }
+                    return Unmanaged<\(target)>.fromOpaque(__self__.pointee.swift_ptr).takeUnretainedValue().__iter__(
+                        __self__: unsafeBitCast(__self__, to: PyPointer.self)
+                    )
+                }
+                """)
+            )//.with(\.trailingTrivia, .newlines(2))
+        )
+    }
+    
+    func _tp_iter(target: String) -> VariableDeclSyntax {
+        return .init(
+            modifiers: [ .fileprivate ], .let,
+            name: .init(stringLiteral: "\(target)_tp_iter"),
+            type: .init(type: TypeSyntax(stringLiteral: "PySwift_getiterfunc")),
+            initializer: .init(value: ExprSyntax(stringLiteral: """
+                { __self__ in
+                    guard let __self__ else { return .None }
+                    return Unmanaged<\(target)>.fromOpaque(__self__.pointee.swift_ptr).takeUnretainedValue().__iter__(
+                        __self__: unsafeBitCast(__self__, to: PyPointer.self)
+                    )
+                }
+                """)
+            )
+        )
+    }
+    
+    func tp_iternext(target: String) -> VariableDeclSyntax {
+        return .init(
+            modifiers: [ .static ], .var,
+            name: .init(stringLiteral: "tp_iternext"),
+            type: .init(type: TypeSyntax(stringLiteral: "PySwift_iternextfunc")),
+            initializer: .init(value: ExprSyntax(stringLiteral: """
+                { __self__ in
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__next__()
+                }
+                """)
+            )//.with(\.trailingTrivia, .newlines(2))
+        )
+    }
+    
+    func _tp_iternext(target: String) -> VariableDeclSyntax {
+        return .init(
+            modifiers: [ .fileprivate ], .let,
+            name: .init(stringLiteral: "\(target)_tp_iternext"),
+            type: .init(type: TypeSyntax(stringLiteral: "PySwift_iternextfunc")),
+            initializer: .init(value: ExprSyntax(stringLiteral: """
+                { __self__ in
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__next__()
+                }
+                """)
+            )
+        )
+    }
 }

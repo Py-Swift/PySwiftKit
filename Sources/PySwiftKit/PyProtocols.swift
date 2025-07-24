@@ -1,10 +1,15 @@
 import Foundation
 import PythonCore
-//import PythonTypeAlias
+
 
 
 public protocol PyBytesProtocol {
 	func __bytes__() -> PyPointer?
+}
+
+public protocol PyIteratorProtocol {
+    func __iter__(__self__: PyPointer) -> PyPointer?
+    func __next__() -> PyPointer?
 }
 
 public protocol PySequenceProtocol {
@@ -79,4 +84,10 @@ public protocol PyAsyncIteratorProtocol {
 public protocol PyAsyncProtocol: PyAsyncIteratorProtocol, PyAsyncIterableProtocol {
 	func __am_await__(_self_: _PySwiftObjectPointer) -> PyPointer?
 	func __am_send__(_ arg: PyPointer?, _ kwargs: UnsafeMutablePointer<PyPointer?>?) -> PySendResultFlag
+}
+
+
+
+extension PyIteratorProtocol where Self: IteratorProtocol {
+    
 }

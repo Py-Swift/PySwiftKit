@@ -4,12 +4,16 @@ import PackageDescription
 import CompilerPluginSupport
 
 let kivy = false
-let local = false
+let local = true
 
 let pythoncore: Package.Dependency = if kivy {
     .package(url: "https://github.com/kv-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 } else {
-    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+    if local {
+        .package(path: "/Volumes/CodeSSD/GitHub/PythonCore")
+    } else {
+        .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+    }
 }
 
 var platforms: [SupportedPlatform] = [

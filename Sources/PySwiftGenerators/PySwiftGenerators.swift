@@ -41,7 +41,9 @@ struct PySwiftGeneratorsPlugin: CompilerPlugin {
         PyCallbackGenerator.self,
         PyCallFiller.self,
         PeerDummy.self,
-        PyContainerMacro.self
+        PyContainerMacro.self,
+        WithGilTestMacro.self,
+        PyListGenerator.self
         //PyMethodGenerator.self
     ]
 }

@@ -10,6 +10,7 @@ import Foundation
 public enum PyClassBase: String, CaseIterable {
     case async
     case sequence
+    case iterator
     case mapping
     case buffer
     case number

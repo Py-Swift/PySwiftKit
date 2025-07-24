@@ -89,30 +89,63 @@ struct PyCallbackGenerator: MemberMacro {
 }
 
 class PyCallArguments {
+    var name: String
     var gil = true
     var method = false
+    var target: String?
+    //var once: Bool = false
     
     init(node: AttributeSyntax) {
+        let macroName = node.attributeName.trimmedDescription
+        name = macroName
+        //once = macroName.contains("Once")
         if let arguments = node.arguments {
             switch arguments {
             case .argumentList(let labeledExprList):
-                for arg in labeledExprList {
-                    guard let label = arg.label, let argument = Argument(rawValue: label.text) else { continue }
-                    switch argument {
-                    case .gil:
-                        gil = .init(arg.expression.description) ?? true
-         
-                        
-                    case .method:
-                        method = .init(arg.expression.description) ?? false
-                    }
-                }
+                setAttributes(arguments: labeledExprList)
             default: break
             }
         }
     }
     
+    init(node: FreestandingMacroExpansionSyntax) {
+        let macroName = node.macroName.text
+        
+        name = macroName
+        //once = macroName.contains("Once")
+        setAttributes(arguments: node.arguments)
+        
+    }
+    
+    private func setAttributes(arguments: LabeledExprListSyntax) {
+        for arg in arguments {
+            guard let label = arg.label, let argument = Argument(rawValue: label.text) else { continue }
+            switch argument {
+            case .target:
+                
+                switch arg.expression.as(ExprSyntaxEnum.self) {
+                case .stringLiteralExpr(let string):
+                    target = string.segments.trimmedDescription
+                case .simpleStringLiteralExpr(let string):
+                    target = string.segments.trimmedDescription
+                default:
+                    target = arg.expression.trimmedDescription
+                }
+                
+            case .gil:
+                gil = .init(arg.expression.description) ?? true
+ 
+                
+            case .method:
+                method = .init(arg.expression.description) ?? false
+            }
+        }
+    }
+    
+    
+    
     enum Argument: String {
+        case target
         case gil
         case method
     }
@@ -123,7 +156,16 @@ struct PyCallFiller: BodyMacro {
     static func expansion(of node: AttributeSyntax, providingBodyFor declaration: some DeclSyntaxProtocol & WithOptionalCodeBlockSyntax, in context: some MacroExpansionContext) throws -> [CodeBlockItemSyntax] {
         guard let fdecl = declaration.as(FunctionDeclSyntax.self) else { return [] }
         let info = PyCallArguments(node: node)
-        let pycall = PyCallGenerator(function: fdecl, gil: info.gil, method: info.method)
+        
+        
+        let pycall = PyCallGenerator(
+            function: fdecl,
+            gil: info.gil,
+            method: info.method,
+            target: info.target,
+            once: false
+        )
+        
         return .init(pycall.output)
 //
 //        return ["""
@@ -149,4 +191,115 @@ struct PyCallFiller: BodyMacro {
         """)
         return output
     }
+}
+
+class PyCallableArguments {
+    var gil = true
+    var method = false
+    var target: ExprSyntax = "Void"
+    var types: [TypeSyntax]
+    var macroName: String
+    var once: Bool = false
+    
+    init(node: FreestandingMacroExpansionSyntax) {
+        let _macroName = node.macroName.text
+        macroName = _macroName
+        
+        types = node.genericArgumentClause?.arguments.map({ generic in
+            generic.argument
+        }) ?? []
+        setAttributes(arguments: node.arguments)
+        
+    }
+    
+    private func setAttributes(arguments: LabeledExprListSyntax) {
+        for arg in arguments {
+            if let label = arg.label {
+                guard let argument = Argument(rawValue: label.text) else { continue }
+                switch argument {
+                case .target:
+                    break
+                case .gil:
+                    break
+                case .method:
+                    break
+                case .once:
+                    once = .init(arg.expression.description) ?? false
+                }
+            } else {
+                target = arg.expression
+            }
+            
+        }
+    }
+    
+    enum Argument: String {
+        case target
+        case gil
+        case method
+        case once
+    }
+}
+
+extension PyCallFiller: ExpressionMacro {
+    static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> SwiftSyntax.ExprSyntax {
+        let info = PyCallableArguments(node: node)
+        let macroName = info.macroName
+        let (types, rtype): ([TypeSyntax], TypeSyntax?) = switch macroName {
+        case let v where v.hasSuffix("_V"):
+            (info.types, nil)
+        case let pp where pp.hasSuffix("_P"):
+            (info.types, TypeSyntax(stringLiteral: "PyPointer"))
+        default:
+            (Array(info.types.dropLast()), info.types.last)
+        }
+        
+        let letters = "abcdefghijklmnop".map(String.init)
+        let args: LabeledExprListSyntax = .init {
+            for i in 0..<types.count {
+                LabeledExprSyntax(label: letters[i], expression: ExprSyntax(stringLiteral: "Void"))
+            }
+        }
+        let pycall = PyCallGenerator(
+            target: "__call__",
+            parameters: args ,
+            returnType: rtype,
+            gil: info.gil,
+            method: info.method,
+            canThrow: false,
+            once: info.once
+        )
+        
+        
+        let parameters: ClosureSignatureSyntax.ParameterClause = .parameterClause(.init(parameters: .init {
+            //.init(firstName: .identifier("__call__"))
+            if types.count > 0 {
+                for i in (0..<types.count) {
+                    ClosureParameterSyntax(firstName: .identifier(letters[i]))
+                }
+            }
+        }))
+        let returnClause: ReturnClauseSyntax? = if let rtype {
+            .init(type: rtype)
+        } else {
+            nil
+        }
+        let signature = ClosureSignatureSyntax(
+            parameterClause: parameters,
+            returnClause: returnClause
+        )
+        let inner = ClosureExprSyntax(
+            signature: signature,
+            statements: pycall.output
+        )
+        return """
+        {
+        let __call__: PyPointer = \(raw: info.target)\(raw: info.once ? ".newRef" : "")
+        
+        return \(raw: inner.formatted())
+        }()
+        """
+    }
+    
+    
 }

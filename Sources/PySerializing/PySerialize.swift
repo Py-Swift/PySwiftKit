@@ -1,4 +1,5 @@
 //import PyKit
+import PythonCore
 import PySwiftKit
 import Foundation
 
@@ -72,7 +73,7 @@ extension RawRepresentable where RawValue: PySerialize {
 }
 
 @_disfavoredOverload
-@inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PythonCore.PyPointer, key: String) throws -> T {
+@inlinable public func PyDict_GetItem<T: PyDeserialize>(_ dict: PyPointer, key: String) throws -> T {
     guard let result: PyPointer = key.withCString({ ckey in
         PyDict_GetItemString(dict, ckey)
     }) else {

@@ -36,11 +36,11 @@ enum PyConvertType {
             } else {
                 "__arg__"
             }
-        case .py_cast(_):
+        case .py_cast(let t):
             if let index {
-                "try pyCast(from: __args__, index: \(raw: index))"
+                "try pyCast(from: __args__, index: \(raw: index)) as \(raw: t)"
             } else {
-                "try pyCast(from: __arg__)"
+                "try pyCast(from: __arg__) as \(raw: t)"
             }
         case .optional_py_cast(_):
             if let index {

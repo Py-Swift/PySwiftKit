@@ -1,8 +1,8 @@
 //
 //import Foundation
-//import PythonSwiftCore
+//import PythonCoreSwiftCore
 //import PySwiftObject
-//import Python
+//import PythonCore
 //
 //public struct PyMappingWrap {
 //	

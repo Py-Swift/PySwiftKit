@@ -15,6 +15,8 @@ enum PyMethodDefFlag: String {
 
 extension String {
     var typeSyntax: TypeSyntax { .init(stringLiteral: self) }
+    
+    var decref: ExprSyntax { "Py_DecRef(\(raw: self))" }
 }
 
 extension FunctionCallExprSyntax {

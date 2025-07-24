@@ -48,7 +48,7 @@ def start_color():
         curses.COLOR_PAIRS = _curses.COLOR_PAIRS
     return retval
 
-# Import Python has_key() implementation if _curses doesn't contain has_key()
+# import PythonCore has_key() implementation if _curses doesn't contain has_key()
 
 try:
     has_key

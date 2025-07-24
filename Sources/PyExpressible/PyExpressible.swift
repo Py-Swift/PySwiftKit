@@ -1,6 +1,6 @@
 import Foundation
 import PySwiftKit
-//import PythonTypeAlias
+
 import PythonCore
 
 //extension StringInterpolationProtocol {

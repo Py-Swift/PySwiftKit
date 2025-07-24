@@ -2,8 +2,8 @@ import Foundation
 @_exported import _PySwiftObject
 import PySwiftKit
 import PythonCore
-//import PythonSwiftCore
-//import PythonTypeAlias
+//import PythonCoreSwiftCore
+
 
 
 //@inlinable func makeCString(from str: String) -> UnsafeMutablePointer<Int8> {

@@ -103,9 +103,9 @@ extension PyTypeObjectStruct {
         case .tp_weaklistoffset:
             0.makeLiteralSyntax()
         case .tp_iter:
-            nil
+            bases.contains(.iterator) ? "unsafeBitCast(\(label), to: getiterfunc.self)".expr : nil
         case .tp_iternext:
-            nil
+            bases.contains(.iterator) ? "unsafeBitCast(\(label), to: iternextfunc.self)".expr : nil
         case .tp_methods:
             hasMethods ? ".init(&\(name)\(dot_or)PyMethodDefs)".expr : nil
         case .tp_members:

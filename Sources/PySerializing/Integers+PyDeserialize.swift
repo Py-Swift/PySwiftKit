@@ -4,7 +4,9 @@ import PythonCore
 import PyTypes
 import PyComparable
 
-
+extension BinaryInteger where Self: PyDeserialize {
+    public static var pyType: UnsafeMutablePointer<PyTypeObject> { .PyLong }
+}
 
 extension Int : PyDeserialize {
     
@@ -18,7 +20,22 @@ extension Int : PyDeserialize {
             throw PyStandardException.typeError
         }
     }
+    
+    public static func casted(from object: PyPointer) throws -> Int {
+        var overflow: Int32 = 0
+        let this = PyLong_AsLongAndOverflow(object, &overflow)
+        if overflow == 0 {
+            return this
+        } else { throw PyStandardException.overflowError }
+        if let _ = PyErr_Occurred() {
+            PyErr_Print()
+            throw PyStandardException.typeError
+        }
+    }
+    
 }
+
+
 
 extension UInt : PyDeserialize {
     
@@ -26,7 +43,13 @@ extension UInt : PyDeserialize {
         //guard PyLong_Check(object) else { throw PythonError.long }
         self = PyLong_AsUnsignedLong(object)
     }
+    
+    public static func casted(from object: PyPointer) throws -> UInt {
+        PyLong_AsUnsignedLong(object)
+    }
+    
 }
+
 extension Int64: PyDeserialize {
     
     
@@ -38,6 +61,10 @@ extension Int64: PyDeserialize {
             PyErr_Print()
             throw PyStandardException.typeError
         }
+    }
+    
+    public static func casted(from object: PyPointer) throws -> Int64 {
+        PyLong_AsLongLong(object)
     }
 }
 

@@ -5,7 +5,9 @@ import Foundation
 
 public protocol PyDeserialize {
     init(object: PyPointer) throws
+    static func new(from object: PyPointer) throws -> Self
     static func casted(from object: PyPointer) throws -> Self
+    //static var pyType: UnsafeMutablePointer<PyTypeObject> { get }
 }
 
 public typealias PyDeserializeObject = PyDeserialize & AnyObject
@@ -14,6 +16,10 @@ public extension PyDeserialize {
     
     init(object: PyPointer) throws {
         fatalError("\(Self.self)(object: PyPointer) not implemented")
+    }
+    
+    static func new(from object: PyPointer) throws -> Self {
+        try Self(object: object)
     }
     
     static func casted(from object: PyPointer) throws -> Self {
@@ -48,6 +54,13 @@ extension PyDeserialize where Self: AnyObject {
 
 extension Optional: PyDeserialize where Wrapped: PyDeserialize {
     
+    public static func new(from object: PyPointer) throws -> Optional<Wrapped> {
+        if object == PySwiftKit.Py_None {
+            nil
+        } else {
+            try Wrapped.new(from: object)
+        }
+    }
     
     @_disfavoredOverload
     public init(object: PyPointer) throws {

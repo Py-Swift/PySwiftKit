@@ -314,6 +314,7 @@ struct PySwiftClassGenerator: MemberMacro {
                 }
             }
             var bases: [PyClassBase] = []
+            var ext_init: InitializerDeclSyntax? = nil
             if let arguments = node.arguments {
                 switch arguments {
                 case .argumentList(let listexpr):
@@ -321,6 +322,7 @@ struct PySwiftClassGenerator: MemberMacro {
                     bases = py_ext.bases
                     methods.append(contentsOf: py_ext.functions)
                     py_properties.append(contentsOf: py_ext.properties)
+                    ext_init = py_ext.inits.first
                 default: break
                 }
                 
@@ -344,6 +346,7 @@ struct PySwiftClassGenerator: MemberMacro {
             let py_cls = PyClass(
                 name: cls_name,
                 ext: extDecl,
+                ext_init: ext_init,
                 bases: bases,
                 unretained: info.unretained,
                 external: info.external

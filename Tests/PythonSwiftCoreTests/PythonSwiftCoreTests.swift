@@ -3,7 +3,7 @@ import XCTest
 @testable import PythonCore
 @testable import PyExecute
 @testable import PyDictionary
-//@testable import PythonTestSuite
+//@testable import PythonCoreTestSuite
 fileprivate extension PyPointer {
     
     var refCount: Int { Py_REFCNT(self) }

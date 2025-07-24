@@ -16,7 +16,7 @@ Python 2.6 figure it out.
 # Local imports
 from .. import fixer_base
 from ..pytree import Node
-from ..pygram import python_symbols as syms
+from ..pygram import PythonCore_symbols as syms
 from ..fixer_util import Name, ArgList, ListComp, in_special_context, parenthesize
 
 

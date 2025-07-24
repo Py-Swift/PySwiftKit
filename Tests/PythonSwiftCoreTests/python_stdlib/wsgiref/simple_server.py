@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import sys
 import urllib.parse
 from wsgiref.handlers import SimpleHandler
-from platform import python_implementation
+from platform import PythonCore_implementation
 
 __version__ = "0.2"
 __all__ = ['WSGIServer', 'WSGIRequestHandler', 'demo_app', 'make_server']

@@ -54,6 +54,7 @@ extension Data: PyDeserialize {
     @inlinable public static func fromBytes(bytes: PyPointer) throws -> Self {
         let data_size = PyBytes_Size(bytes)
         // PyBytes to MemoryView
+        
         guard let mview = PyMemoryView_FromObject(bytes) else { throw PythonError.type("not bytes") }
         // fetch PyBuffer from MemoryView
         let py_buf = PyMemoryView_GetBuffer(mview)

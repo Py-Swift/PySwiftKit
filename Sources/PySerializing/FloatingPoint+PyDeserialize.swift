@@ -3,6 +3,10 @@ import PythonCore
 import PyTypes
 import PyComparable
 
+extension FloatingPoint where Self: PyDeserialize {
+    public static var pyType: UnsafeMutablePointer<PyTypeObject> { .PyFloat }
+}
+
 extension Double: PyDeserialize {
     
     public init(object: PyPointer) throws {

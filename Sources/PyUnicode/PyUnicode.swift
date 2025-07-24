@@ -14,10 +14,11 @@ extension PyPointer {
 		
 		guard
 			PyUnicode_Check(self),
-			let ptr = PyUnicode_DATA(self),
-			let kind = PyUnicode_AsKind(rawValue: PyUnicode_GetKind(self))
+			let ptr = PyUnicode_DATA(self)
+            //let kind = PyUnicode_AsKind(rawValue: PyUnicode_GetKind(self))
+            
 		else { return nil }
-		
+        let kind = PyUnicode_GetKind(self)
 		
 		let length = PyUnicode_GetLength(self)
 		switch kind {

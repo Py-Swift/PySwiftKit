@@ -131,8 +131,20 @@ extension PySwiftModuleGenerator: ExtensionMacro {
                 false
             }
         })
+        let modules_decl = (var_decls.first { decl in
+            let bindings = decl.bindings
+            return if let binding = bindings.first {
+                binding.pattern.as(IdentifierPatternSyntax.self)?.description == "modules"
+                //binding.pattern.as(IdentifierPatternSyntax.self)?.identifier == "py_classes"
+            } else {
+                false
+            }
+        })
         
         let classes = classes_decl?.bindings.first?.initializer?.value.as(ArrayExprSyntax.self)?.elements.compactMap({ element in
+            element.expression.as(MemberAccessExprSyntax.self)!.base!.as(DeclReferenceExprSyntax.self)!.baseName.text
+        }) ?? []
+        let modules = modules_decl?.bindings.first?.initializer?.value.as(ArrayExprSyntax.self)?.elements.compactMap({ element in
             element.expression.as(MemberAccessExprSyntax.self)!.base!.as(DeclReferenceExprSyntax.self)!.baseName.text
         }) ?? []
         //guard classes_decl != nil else { throw PyModuleError.classes(classes.description) }

@@ -1,7 +1,7 @@
 import Foundation
 import CoreGraphics
 import PythonCore
-//import PythonTypeAlias
+
 
 extension PyPointer: @unchecked Swift.Sendable {
     

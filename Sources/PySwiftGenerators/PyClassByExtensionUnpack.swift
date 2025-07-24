@@ -10,6 +10,7 @@ class PyClassByExtensionUnpack {
     //var unretained = false
     var functions: [FunctionDeclSyntax] = []
     var properties: [VariableDeclSyntax] = []
+    var inits: [InitializerDeclSyntax] = []
     //var type: TypeSyntax
     
     init(arguments: LabeledExprListSyntax) throws {
@@ -36,6 +37,14 @@ class PyClassByExtensionUnpack {
                         }
                     }
                     properties = varDecls
+                    
+                    inits = statements.compactMap { blockItem in
+                        let item = blockItem.item
+                        return switch item.kind {
+                        case .initializerDecl: item.as(InitializerDeclSyntax.self)
+                        default: nil
+                        }
+                    }
                 }
             case "bases":
                 switch argument.expression.kind {

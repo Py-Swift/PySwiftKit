@@ -5,6 +5,8 @@
 //  Created by CodeBuilder on 03/05/2025.
 //
 import Foundation
+import SwiftSyntax
+import SwiftSyntaxBuilder
 
 extension String {
     public func camelCaseToSnakeCase() -> String {
@@ -19,5 +21,9 @@ extension String {
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
         let range = NSRange(location: 0, length: count)
         return regex?.stringByReplacingMatches(in: self, options: [], range: range, withTemplate: "$1_$2")
+    }
+    
+    func decref() -> ExprSyntax {
+        "Py_DecRef(\(raw: self))"
     }
 }

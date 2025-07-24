@@ -5,7 +5,19 @@ import Foundation
 import PythonCore
 import _PySwiftObject
 
+public typealias PyPointer = UnsafeMutablePointer<PyObject>
 public typealias PythonType = UnsafeMutablePointer<PyTypeObject>?
+
+
+
+
+
+public extension PyUnicode_Kind {
+    static let utf8 = PyUnicode_1BYTE_KIND
+    static let uft16 = PyUnicode_2BYTE_KIND
+    static let utf32 = PyUnicode_4BYTE_KIND
+}
+
 public typealias _PySwiftObjectPointer = UnsafeMutablePointer<PySwiftObject>
 public typealias PySwiftObjectPointer = UnsafeMutablePointer<PySwiftObject>?
 //public typealias PythonPointer = UnsafeMutablePointer<PyObject>//?
