@@ -3,12 +3,12 @@
 import PackageDescription
 import CompilerPluginSupport
 
-let local = true
+let local = false
 
 let pythoncore: Package.Dependency = if local {
     .package(path: "/Volumes/CodeSSD/GitHub/PythonCore")
 } else {
-    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMinor(from: .init(311, 11, 0)))
 }
 
 
