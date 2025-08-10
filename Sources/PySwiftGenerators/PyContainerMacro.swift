@@ -116,7 +116,9 @@ struct PyContainerMacro: MemberMacro {
             for py_call in py_calls {
                 "Py_DecRef(_\(raw: py_call.name))"
             }
-            "Py_DecRef(py_target)"
+            if !weak_ref {
+                "Py_DecRef(py_target)"
+            }
         }
         
         output.append(.init(deinitializerDecl))

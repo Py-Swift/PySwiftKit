@@ -14,6 +14,7 @@ extension Bool : PyDeserialize {
         } else if object == PySwiftKit.Py_False {
             self = false
         } else {
+            print(object, "is not a boolean")
             throw PyStandardException.typeError
         }
         

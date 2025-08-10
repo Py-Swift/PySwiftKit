@@ -5,16 +5,20 @@
 //  Created by CodeBuilder on 16/05/2025.
 //
 import PythonCore
+import CDefines
 
 public let Py_None: PyPointer = .init(&_Py_NoneStruct)
 
-public let Py_True: PyPointer = withUnsafeMutablePointer(to: &_Py_TrueStruct) { ptr in
-    ptr.withMemoryRebound(to: PyPointer.self, capacity: 1, \.pointee)
-}
+//public let Py_True: PyPointer = withUnsafeMutablePointer(to: &_Py_TrueStruct) { ptr in
+//    ptr.withMemoryRebound(to: PyPointer.self, capacity: 1, \.pointee)
+//}
+public let Py_True: PyPointer = CDefines._Py_True
 
-public let Py_False: PyPointer = withUnsafeMutablePointer(to: &_Py_FalseStruct) { ptr in
-    ptr.withMemoryRebound(to: PyPointer.self, capacity: 1, \.pointee)
-}
+//public let Py_False: PyPointer = withUnsafeMutablePointer(to: &_Py_FalseStruct) { ptr in
+//    ptr.withMemoryRebound(to: PyPointer.self, capacity: 1, \.pointee)
+//}
+
+public let Py_False: PyPointer = CDefines._Py_False
 
 public func PyUnicode_GetKind(_ o: PyPointer) -> PyUnicode_AsKind {
     o.withMemoryRebound(to: PyASCIIObject.self, capacity: 1) { pointer in

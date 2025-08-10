@@ -3,18 +3,14 @@
 import PackageDescription
 import CompilerPluginSupport
 
-let kivy = false
 let local = true
 
-let pythoncore: Package.Dependency = if kivy {
-    .package(url: "https://github.com/kv-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
+let pythoncore: Package.Dependency = if local {
+    .package(path: "/Volumes/CodeSSD/GitHub/PythonCore")
 } else {
-    if local {
-        .package(path: "/Volumes/CodeSSD/GitHub/PythonCore")
-    } else {
-        .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
-    }
+    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0)))
 }
+
 
 var platforms: [SupportedPlatform] = [
     .iOS(.v13),
@@ -96,6 +92,10 @@ let package = Package(
                 name: "PySerializing",
                 targets: ["PySerializing"]
             ),
+        .library(
+            name: "CDefines",
+            targets: ["CDefines"]
+        ),
         //        .library(
         //            name: //"PyDeserializing",
         //            targets: [//"PyDeserializing"]
@@ -139,6 +139,12 @@ let package = Package(
     dependencies: dependencies,
     
     targets: [
+        .target(
+            name: "CDefines",
+            dependencies: [
+                "PythonCore"
+            ]
+        ),
         .target(
             name: "PyExecute",
             dependencies: [
@@ -231,7 +237,8 @@ let package = Package(
             dependencies: [
                 "PySwiftKit",
                 "PyTypes",
-                "PyComparable"
+                "PyComparable",
+                
             ]
         ),
         .target(
@@ -272,7 +279,8 @@ let package = Package(
             name: "PySwiftKit",
             dependencies: [
                 "PythonCore",
-                "_PySwiftObject"
+                "_PySwiftObject",
+                "CDefines"
                 //"PythonTypeAlias"
             ],
             resources: [
