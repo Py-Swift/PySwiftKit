@@ -17,7 +17,8 @@ class PyClassArguments {
     var name: String?
     var bases: [PyClassBase] = []
     var unretained = false
-    var base_type: TypeSyntax?
+    //var base_type: TypeSyntax?
+    var base_type: PyTypeObjectBaseType = .none
     var external: Bool = false
     
     init(node: AttributeSyntax) {
@@ -50,16 +51,38 @@ class PyClassArguments {
                         }
                     case .base_type:
                         switch arg.expression.as(ExprSyntaxEnum.self) {
-                        case .memberAccessExpr(let memberAccessExpr):
-                            if let base = memberAccessExpr.base {
-                                switch base.as(ExprSyntaxEnum.self) {
-                                case .declReferenceExpr(let declRef):
-                                    base_type = declRef.baseName.text.typeSyntax()
-                                default: break
+                        case .functionCallExpr(let functionCall):
+                            switch functionCall.calledExpression.as(ExprSyntaxEnum.self) {
+                            case .memberAccessExpr(let memberAccessExpr):
+                                switch BaseTypeInput(token: memberAccessExpr.declName.baseName) {
+                                case .pyobject:
+                                    if let arg = functionCall.arguments.first {
+                                        switch arg.expression.as(ExprSyntaxEnum.self) {
+                                        case .declReferenceExpr(let declReference):
+                                            base_type = .pyobject(declReference.baseName.text)
+                                        case .memberAccessExpr(let memberAccess):
+                                            switch memberAccess.declName.baseName {
+                                            case "self":
+                                                break
+                                            case "PyType":
+                                                break
+                                            default:
+                                                break
+                                            }
+                                        default:
+                                            break
+                                        }
+                                    }
+                                case .pyswift:
+                                    break
+                                case .none:
+                                    break
                                 }
+                            default: break
                             }
                         default: break
                         }
+                        
                     case .external:
                         if let bool = arg.expression.as(BooleanLiteralExprSyntax.self) {
                             external = Bool(bool.literal.text) ?? false
@@ -79,6 +102,16 @@ class PyClassArguments {
         case base_type
         case external
     }
+        
+        enum BaseTypeInput: String {
+            case pyobject
+            case pyswift
+            case none
+            
+            init(token: TokenSyntax) {
+                self = .init(rawValue: token.text) ?? .none
+            }
+        }
 }
 
 final class PyClassResult {
@@ -120,6 +153,7 @@ final class PyClassResult {
             name: cls_name,
             pyname: info.name ?? cls_name,
             bases: info.bases,
+            base_type: info.base_type,
             unretained: info.unretained,
             hasMethods: hasMethods,
             hasGetSets: hasGetSets,
@@ -142,7 +176,7 @@ final class PyClassResult {
             decls.append(getsets.output)
         }
         if hasMethods {
-            decls.append(PyMethods(cls: cls_name, input: py_functions, external: info.external).output)
+            decls.append(PyMethods(cls: cls_name, input: py_functions, external: info.external, base_type: info.base_type).output)
         }
         
         return .init(py_functions: py_functions, py_properties: py_properties, py_cls: py_cls, type_struct: type_struct, decls: decls)
@@ -176,6 +210,7 @@ final class PyClassResult {
             name: cls_name,
             pyname: info.name ?? cls_name,
             bases: info.bases,
+            base_type: info.base_type,
             unretained: info.unretained,
             hasMethods: hasMethods,
             hasGetSets: hasGetSets,
@@ -200,7 +235,7 @@ final class PyClassResult {
             decls.append(getsets.output)
         }
         if hasMethods {
-            decls.append(PyMethods(cls: cls_name, input: py_functions, external: info.external).output)
+            decls.append(PyMethods(cls: cls_name, input: py_functions, external: info.external, base_type: info.base_type).output)
         }
         
         return .init(py_functions: py_functions, py_properties: py_properties, py_cls: py_cls, type_struct: type_struct, decls: decls)
@@ -250,6 +285,7 @@ struct PySwiftClassGenerator: MemberMacro {
                 name: cls_name,
                 pyname: info.name ?? cls_name,
                 bases: info.bases,
+                base_type: info.base_type,
                 unretained: info.unretained,
                 hasMethods: hasMethods,
                 hasGetSets: hasGetSets,
@@ -271,7 +307,7 @@ struct PySwiftClassGenerator: MemberMacro {
                 decls.append(getsets.output)
             }
             if hasMethods {
-                decls.append(PyMethods(cls: cls_decl.name.text, input: py_functions).output)
+                decls.append(PyMethods(cls: cls_decl.name.text, input: py_functions, base_type: info.base_type).output)
             }
                 
             return decls
@@ -348,10 +384,11 @@ struct PySwiftClassGenerator: MemberMacro {
                 ext: extDecl,
                 ext_init: ext_init,
                 bases: bases,
+                base_type: info.base_type,
                 unretained: info.unretained,
                 external: info.external
             )
-            let py_methods = PyMethods(cls: cls_name, input: methods)
+            let py_methods = PyMethods(cls: cls_name, input: methods, base_type: info.base_type)
             
             var decls = try py_cls.decls()
             
@@ -404,6 +441,7 @@ extension PySwiftClassGenerator: ExtensionMacro {
                 name: cls.name.text,
                 cls: cls,
                 bases: pyclass_args.bases,
+                base_type: pyclass_args.base_type,
                 unretained: pyclass_args.unretained,
                 external: external
             )

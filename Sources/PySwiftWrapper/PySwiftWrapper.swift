@@ -28,8 +28,10 @@ public macro PyModule(name: String? = nil) = #externalMacro(module: "PySwiftGene
         suffixed(_PyMethodDefs),
         suffixed(_PyGetSetDefs),
         suffixed(_PyType),
-        suffixed(_pyTypeObject)
+        suffixed(_pyTypeObject),
+        named(shared)
 )
+
 @attached(member, names: arbitrary)
 @attached(
     extension,
@@ -37,11 +39,24 @@ public macro PyModule(name: String? = nil) = #externalMacro(module: "PySwiftGene
         PyClassProtocol,
     names: arbitrary
 )
+
 @attached(memberAttribute)
-public macro PyClass(name: String? = nil, unretained: Bool = false, bases: [PyClassBase] = [], external: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
+public macro PyClass(
+    name: String? = nil,
+    unretained: Bool = false,
+    bases: [PyClassBase] = [],
+    base_type: PyClassBaseType = .none,
+    external: Bool = false
+) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
 
 @attached(member, names: arbitrary)
-public macro PyClassByExtension(name: String? = nil, unretained: Bool = false, bases: [PyClassBase] = [], expr: String? = nil, external: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
+public macro PyClassByExtension(
+    name: String? = nil,
+    unretained: Bool = false,
+    bases: [PyClassBase] = [],
+    expr: String? = nil,
+    external: Bool = false
+) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
 
 
 @attached(peer)
@@ -112,3 +127,12 @@ public protocol PyCallTarget {}
 
 extension PyPointer: PyCallTarget {}
 extension String: PyCallTarget {}
+
+
+public enum PyClassBaseType {
+    case pyswift(PyTypePointer)
+    case pyobject(PyTypePointer)
+    case none
+    
+    public typealias PyTypePointer = UnsafeMutablePointer<PyTypeObject>
+}

@@ -303,21 +303,19 @@ let package = Package(
         .testTarget(
             name: "PythonSwiftCoreTests",
             dependencies: [
-                "PythonCore",
                 "PySwiftKit",
                 "PySwiftObject",
-                "PyExecute",
-                "PyCollection",
-                "PyDictionary",
-                "PyUnwrap",
                 "PyUnpack",
-                "PyWrap",
-                //"PyDeserializing",
+                //"PyEncode",
+                "PySerializing",
                 "PyCallable",
+                "PyDictionary",
+                "PyTuples",
+                "PySwiftWrapper"
                 
             ],
             resources: [
-                .copy("python_stdlib"),
+                .copy("python3.11"),
             ],
             plugins: [
                 // .plugin(name: "Swiftonize", package: "SwiftonizePlugin")
@@ -337,6 +335,7 @@ let package = Package(
             name: "PyWrapper",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 "PyWrapperInfo"
             ]

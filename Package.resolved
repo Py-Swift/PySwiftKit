@@ -3,10 +3,10 @@
     {
       "identity" : "pythoncore",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PythonSwiftLink/PythonCore",
+      "location" : "https://github.com/py-swift/PythonCore",
       "state" : {
-        "revision" : "98d767de5b72e4d6505a47448e6f2cf9e506cfdf",
-        "version" : "311.0.3"
+        "revision" : "08987e1b5e4ba712bd4e968f270372845c477eb8",
+        "version" : "311.11.1"
       }
     },
     {
@@ -28,12 +28,12 @@
       }
     },
     {
-      "identity" : "swiftonizeplugin",
+      "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PythonSwiftLink/SwiftonizePlugin",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "d2ee81f1f002148315faea68e7fc44d81157634d",
-        "version" : "0.1.5"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     }
   ],

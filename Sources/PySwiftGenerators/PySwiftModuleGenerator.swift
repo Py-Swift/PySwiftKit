@@ -89,7 +89,7 @@ struct PySwiftModuleGenerator: MemberMacro {
         
         
         return [
-            PyMethods(cls: module_name.text, input: module_functions, module_or_class: true).output,
+            PyMethods(cls: module_name.text, input: module_functions, module_or_class: true, base_type: .none).output,
             .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count).variDecl)
         ]
     }

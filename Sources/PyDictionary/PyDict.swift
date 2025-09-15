@@ -9,9 +9,9 @@ public func _PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer? {
 	key.withCString { PyDict_GetItemString(dict, $0) }
 }
 
-public func PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer {
-	key.withCString { PyDict_GetItemString(dict, $0) ?? .None }
-}
+//public func PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer {
+//	key.withCString { PyDict_GetItemString(dict, $0) ?? .None }
+//}
 
 public func PyDict_GetItem(_ dict: PyPointer?, _ key: String) throws -> PyPointer {
     guard let dict else { throw PyStandardException.keyError }

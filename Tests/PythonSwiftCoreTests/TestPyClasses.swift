@@ -2,15 +2,17 @@
 //  TestPyClasses.swift
 //  PySwiftKit
 //
-//  Created by CodeBuilder on 17/05/2025.
+//@testable\nimport PySwiftKit
+//@testable\nimport PySwiftObject
+//@testable\nimport PySwiftWrapper
+//@testable\nimport PySerializing
+
+
+//@PyClass()
+class TestClassA {
+
+}
 //
-
-
-
-class TestClassA: PyUnwrapable {
-
-}
-
-class TestClassB: PyUnwrapable, PyTypeProtocol {
-    
-}
+//class TestClassB: PyUnwrapable, PyTypeProtocol {
+//    
+//}

@@ -21,12 +21,21 @@ public class PyClass {
     let name: String
     var initDecl: InitializerDeclSyntax?
     var bases: [PyClassBase]
+    var base_type: PyTypeObjectBaseType
     var unretained: Bool
     var external: Bool
     
-    public init(name: String, cls: ClassDeclSyntax, bases: [PyClassBase] = [], unretained: Bool = false, external: Bool = false) {
+    public init(
+        name: String,
+        cls: ClassDeclSyntax,
+        bases: [PyClassBase] = [],
+        base_type: PyTypeObjectBaseType = .none,
+        unretained: Bool = false,
+        external: Bool = false
+    ) {
         self.name = name
         self.bases = bases
+        self.base_type = base_type
         self.unretained = unretained
         self.external = external
         if cls.isPyContainer {
@@ -52,9 +61,18 @@ public class PyClass {
         }
     }
     
-    public init(name: String, ext: ExtensionDeclSyntax, ext_init: InitializerDeclSyntax? = nil, bases: [PyClassBase] = [], unretained: Bool = false, external: Bool = false) {
+    public init(
+        name: String,
+        ext: ExtensionDeclSyntax,
+        ext_init: InitializerDeclSyntax? = nil,
+        bases: [PyClassBase] = [],
+        base_type: PyTypeObjectBaseType = .none,
+        unretained: Bool = false,
+        external: Bool = false
+    ) {
         self.name = name
         self.bases = bases
+        self.base_type = base_type
         self.unretained = unretained
         self.external = external
         let inits = ext.memberBlock.members.compactMap { member in
@@ -218,20 +236,35 @@ public extension PyClass {
     }
     
     func tp_init(_ external_name: String?) -> VariableDeclSyntax {
-        
+        let init_type: TypeSyntax = switch base_type {
+        case .pyobject(let t):
+            "initproc"
+        case .pyswift(let t):
+            "PySwift_initproc"
+        case .none:
+            "PySwift_initproc"
+        }
         return .init(
             modifiers: [ .static ], .var,
             name: .init(stringLiteral: external_name ?? "tp_init"),
-            type: .init(type: TypeSyntax(stringLiteral: "PySwift_initproc")),
+            type: .init(type: init_type),
             initializer: .init(value: create_tp_init)
         ).with(\.trailingTrivia, .newlines(2))
     }
     
     func _tp_init(_ target: String?) -> VariableDeclSyntax {
+        let init_type: TypeSyntax = switch base_type {
+        case .pyobject(let t):
+            "initproc"
+        case .pyswift(let t):
+            "PySwift_initproc"
+        case .none:
+            "PySwift_initproc"
+        }
         return .init(
             modifiers: [ .fileprivate ], .let,
             name:  .init(stringLiteral: "\(target ?? name)_tp_init"),
-            type: .init(type: TypeSyntax(stringLiteral: "PySwift_initproc")),
+            type: .init(type: init_type),
             initializer: .init(value: create_tp_init)
         ).with(\.trailingTrivia, .newlines(2))
     }

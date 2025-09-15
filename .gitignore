@@ -3,12 +3,7 @@
 .build/
 .swiftpm/
 
-.*resolved
-Package.resolved
-Package.resolved
 *.resolved
-Package.resolved
-*.resolved
+
 /docs
-Package.resolved
-Package.resolved
+

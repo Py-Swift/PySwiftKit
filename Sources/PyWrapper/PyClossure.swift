@@ -26,6 +26,8 @@ public class PyClossure {
     
     var kwargs: Kwargs
     
+    let base_type: PyTypeObjectBaseType
+    
     public init(
         par_count: Int,
         callExpr: FunctionCallExprSyntax,
@@ -34,16 +36,32 @@ public class PyClossure {
         no_self: Bool = false,
         return_type: TypeSyntax? = nil,
         ex_parameters: [String] = [],
-        kwargs: Kwargs = .none
+        kwargs: Kwargs = .none,
+        base_type: PyTypeObjectBaseType
     ) {
-        self.par_count = par_count
+        self.par_count = switch base_type {
+        case .pyswift(_):
+            par_count
+        case .pyobject(_):
+            par_count //> 0 ? par_count - 1 : 0
+        case .none:
+            par_count
+        }
         self.callExpr = callExpr
         self.argsThrows = argsThrows
         self.funcThrows = funcThrows
-        self.no_self = no_self
+        self.no_self = switch base_type {
+        case .pyswift(_):
+            no_self
+        case .pyobject(_):
+            false
+        case .none:
+            no_self
+        }
         self.return_type = return_type
         self.ex_parameters = ex_parameters
         self.kwargs = kwargs
+        self.base_type = base_type
     }
     
     
@@ -95,11 +113,23 @@ extension PyClossure {
 
 extension PyClossure {
     private var parameters: ClosureParameterListSyntax {.init {
-        if no_self {
-            "_"
-        } else {
+        switch base_type {
+        case .pyobject(_):
             "__self__"
+        case .pyswift(_):
+            if no_self {
+                "_"
+            } else {
+                "__self__"
+            }
+        default:
+            if no_self {
+                "_"
+            } else {
+                "__self__"
+            }
         }
+        
         switch par_count {
         case 0: 
             "_"

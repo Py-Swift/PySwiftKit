@@ -44,6 +44,15 @@ public extension PyMethodDef {
         )
     }
     
+    static func pyObjectNoArgs(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: ml_meth,
+            ml_flags: METH_NOARGS | METH_CLASS,
+            ml_doc: handleDocString(doc)
+        )
+    }
+    
     static func moduleNoArgs(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
         .init(
             ml_name: cString(name),
@@ -91,6 +100,15 @@ public extension PyMethodDef {
         )
     }
     
+    static func pyObjectOneArg(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_flags: METH_O | METH_CLASS,
+            ml_doc: handleDocString(doc)
+        )
+    }
+    
     static func moduleOneArg(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
         .init(
             ml_name: cString(name),
@@ -121,6 +139,15 @@ public extension PyMethodDef {
     }
 
     static func classWithArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunctionFast) -> Self {
+        .init(
+            ml_name: cString(name),
+            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_flags: METH_FASTCALL | METH_CLASS,
+            ml_doc: handleDocString(doc)
+        )
+    }
+    
+    static func pyObjectWithArgs(name: String, doc: String? = nil,  ml_meth: _PyCFunctionFast) -> Self {
         .init(
             ml_name: cString(name),
             ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),

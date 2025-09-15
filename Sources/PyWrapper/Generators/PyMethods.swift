@@ -6,7 +6,7 @@
 //
 
 import SwiftSyntax
-
+import PyWrapperInfo
 
 public class PyMethods {
     
@@ -14,12 +14,14 @@ public class PyMethods {
     var input: [FunctionDeclSyntax]
     let module_or_class: Bool
     let external: Bool
+    let base_type: PyTypeObjectBaseType
     
-    public init(cls: String, input: [FunctionDeclSyntax], module_or_class: Bool = false, external: Bool = false) {
+    public init(cls: String, input: [FunctionDeclSyntax], module_or_class: Bool = false, external: Bool = false, base_type: PyTypeObjectBaseType) {
         self.cls = cls
         self.input = input
         self.module_or_class = module_or_class
         self.external = external
+        self.base_type = base_type
     }
     
 }
@@ -30,7 +32,7 @@ extension PyMethods {
         
         return .init {
             for f in input {
-                ArrayElementSyntax(leadingTrivia: .newline, expression: PyMethodDefGenerator(target: cls ,f: f, module_or_class: module_or_class).method)
+                ArrayElementSyntax(leadingTrivia: .newline, expression: PyMethodDefGenerator(target: cls ,f: f, module_or_class: module_or_class, base_type: base_type).method)
             }
             ArrayElementSyntax(leadingTrivia: .newline, expression: "PyMethodDef()".expr)
         }

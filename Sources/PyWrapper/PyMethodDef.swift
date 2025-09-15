@@ -38,13 +38,29 @@ public struct PyMethodDefGenerator {
     let is_static: Bool
     let module_or_class: Bool
     let kwargs: Kwargs
+    let base_type: PyTypeObjectBaseType
+    let self_name: TokenSyntax?
     
-    public init(target: String, f: FunctionDeclSyntax, module_or_class: Bool = false) {
+    public init(target: String, f: FunctionDeclSyntax, module_or_class: Bool = false, base_type: PyTypeObjectBaseType) {
         self.f = f
         let kwargs = kwarg_option(f: f)
         self.kwargs = kwargs
         self.module_or_class = module_or_class
-        let parameters = Array(f.signature.parameterClause.parameters)
+        self.base_type = base_type
+        
+        var parameters: [FunctionParameterListSyntax.Element] = Array(f.signature.parameterClause.parameters)
+        var self_name: TokenSyntax? = nil
+        switch base_type {
+        case .pyswift(_):
+            break
+        case .pyobject(_):
+            self_name = parameters.first?.firstName
+            parameters = .init(parameters.dropFirst())
+        case .none:
+            break
+        }
+        
+        self.self_name = self_name
         let nargs = parameters.count
         let multi = nargs > 1
         
@@ -61,32 +77,76 @@ public struct PyMethodDefGenerator {
             mod.name.text == "static"
         }
         let type: ExprSyntax = target.expr
-        let call: ExprSyntaxProtocol = MemberAccessExprSyntax(
-            base: (is_static || module_or_class) ? type : "Unmanaged<\(raw: type)>.fromOpaque(\(raw: "__self__").pointee.swift_ptr).takeUnretainedValue()",
-            name: f.name
-        )
+        let call: ExprSyntaxProtocol = switch base_type {
+        case .pyswift(let string):
+            MemberAccessExprSyntax(
+                base: (is_static || module_or_class) ? type : "Unmanaged<\(raw: type)>.fromOpaque(\(raw: "__self__").pointee.swift_ptr).takeUnretainedValue()",
+                name: f.name
+            )
+        case .pyobject(let string):
+            MemberAccessExprSyntax(
+                base: type,
+                name: f.name
+            )
+        case .none:
+            MemberAccessExprSyntax(
+                base: (is_static || module_or_class) ? type : "Unmanaged<\(raw: type)>.fromOpaque(\(raw: "__self__").pointee.swift_ptr).takeUnretainedValue()",
+                name: f.name
+            )
+        }
         //FunctionParameterSyntax.init(stringLiteral: "").firstName.text
         
         self.call = .init(
             calledExpression: call,
             leftParen: .leftParenToken(),
             arguments: .init {
-                if kwargs == .kw_only {
-                    LabeledExprSyntax(leadingTrivia: .newline, label: "kwargs", colon: .colonToken(), expression: ExprSyntax(stringLiteral: "try .init(object: __kwargs__)"))
-                } else {
-                    for (i, parameter) in f.signature.parameterClause.parameters.lazy.enumerated() {
-                        if let s_name = parameter.secondName, s_name.trimmed.text == "_" {
-                            LabeledExprSyntax(leadingTrivia: .newline, expression: handleTypes(parameter.type, nil))
-                        } else {
-                            LabeledExprSyntax(leadingTrivia: .newline,label: parameter.firstName, colon: .colonToken(), expression: handleTypes(
-                                parameter.type,
-                                multi ? i : nil,
-                                target: parameter.firstName.text
+                switch base_type {
+                case .pyobject(_):
+                    if kwargs == .kw_only {
+                        LabeledExprSyntax(leadingTrivia: .newline, label: "kwargs", colon: .colonToken(), expression: ExprSyntax(stringLiteral: "try .init(object: __kwargs__)"))
+                    } else {
+                        if let self_name {
+                            LabeledExprSyntax(
+                                leadingTrivia: .newline,
+                                label: self_name,
+                                colon: .colonToken(),
+                                expression: "__self__".expr
                             )
-                            )
+                        }
+                        for (i, parameter) in parameters.lazy.enumerated() {
+                            if let s_name = parameter.secondName,
+                               s_name.trimmed.text == "_" {
+                                LabeledExprSyntax(leadingTrivia: .newline, expression: handleTypes(parameter.type, nil))
+                            } else {
+                                LabeledExprSyntax(leadingTrivia: .newline,label: parameter.firstName, colon: .colonToken(), expression: handleTypes(
+                                    parameter.type,
+                                    multi ? i : nil,
+                                    target: parameter.firstName.text
+                                )
+                                )
+                            }
+                        }
+                    }
+                default:
+                    if kwargs == .kw_only {
+                        LabeledExprSyntax(leadingTrivia: .newline, label: "kwargs", colon: .colonToken(), expression: ExprSyntax(stringLiteral: "try .init(object: __kwargs__)"))
+                    } else {
+                        for (i, parameter) in f.signature.parameterClause.parameters.lazy.enumerated() {
+                            if let s_name = parameter.secondName,
+                               s_name.trimmed.text == "_" {
+                                LabeledExprSyntax(leadingTrivia: .newline, expression: handleTypes(parameter.type, nil))
+                            } else {
+                                LabeledExprSyntax(leadingTrivia: .newline,label: parameter.firstName, colon: .colonToken(), expression: handleTypes(
+                                    parameter.type,
+                                    multi ? i : nil,
+                                    target: parameter.firstName.text
+                                )
+                                )
+                            }
                         }
                     }
                 }
+                
             },
             rightParen: nargs > 0 ? .rightParenToken(leadingTrivia: .newline) : .rightParenToken()
         )
@@ -117,7 +177,8 @@ extension PyMethodDefGenerator {
                 case .functionType(_): "let _\((p.secondName ?? p.firstName).text) = \(ex_label)"
                 default: nil
                 }
-            })
+            }),
+            base_type: base_type
         ).output
     return .init {
         LabeledExprSyntax(leadingTrivia: .newline ,label: label, colon: .colonToken(), expression: f.name.text.makeLiteralSyntax())
@@ -128,29 +189,42 @@ extension PyMethodDefGenerator {
     }}
     
     fileprivate func methodName(_ count: Int) -> MemberAccessExprSyntax {
-        let label: TokenSyntax = if module_or_class {
+        let label: TokenSyntax = switch base_type {
+        case .pyobject(_):
             switch count {
             case 0:
-                "moduleNoArgs"
+                "pyObjectNoArgs"
             case 1:
-                "moduleOneArg"
+                "pyObjectOneArg"
             default:
-                "moduleWithArgs"
+                "pyObjectWithArgs"
             }
-        } else {
-            if kwargs == .kw_only {
-                "noArgsKeywords"
-            } else {
+        default:
+            if module_or_class {
                 switch count {
                 case 0:
-                    is_static ? "staticNoArgs" : "noArgs"
+                    "moduleNoArgs"
                 case 1:
-                    is_static ? "staticOneArg" : "oneArg"
+                    "moduleOneArg"
                 default:
-                    is_static ? "staticWithArgs" : "withArgs"
+                    "moduleWithArgs"
+                }
+            } else {
+                if kwargs == .kw_only {
+                    "noArgsKeywords"
+                } else {
+                    switch count {
+                    case 0:
+                        is_static ? "staticNoArgs" : "noArgs"
+                    case 1:
+                        is_static ? "staticOneArg" : "oneArg"
+                    default:
+                        is_static ? "staticWithArgs" : "withArgs"
+                    }
                 }
             }
         }
+        
         return .init(name: label)
     }
     
@@ -181,7 +255,8 @@ extension PyMethodDefGenerator {
                 default: nil
                 }
             }),
-            kwargs: kwarg_option(f: f)
+            kwargs: kwarg_option(f: f),
+            base_type: base_type
         ).output
     return .init {
         LabeledExprSyntax(leadingTrivia: .newline ,label: "name", colon: .colonToken(), expression: f.name.text.makeLiteralSyntax())

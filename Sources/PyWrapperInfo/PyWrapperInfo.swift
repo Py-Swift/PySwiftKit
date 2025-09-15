@@ -87,3 +87,9 @@ public enum Kwargs: String {
 }
 
 
+public enum PyTypeObjectBaseType {
+    case pyswift(String)
+    case pyobject(String)
+    case none
+}
+
