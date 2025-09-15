@@ -93,4 +93,13 @@ extension DispatchQueue {
             PyGILState_Release(gil)
         }
     }
+    
+    @inlinable
+    public func delayWithGIL(deadline: DispatchTime, handle: @escaping ()->Void ) {
+        self.asyncAfter(deadline: deadline) {
+            let gil = PyGILState_Ensure()
+            handle()
+            PyGILState_Release(gil)
+        }
+    }
 }

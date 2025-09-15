@@ -370,8 +370,8 @@ extension PyTypeObjectStruct {
     
     func tp_init(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
         switch base_type {
-        case .pyobject(_):
-            //"\(name)\(sep)tp_init".expr
+        case .pyobject(let t):
+            //"\(raw: t).pointee.tp_init"
             nil
         default:
             "unsafeBitCast(\(name)\(sep)tp_init, to: initproc.self)".expr
@@ -386,7 +386,8 @@ extension PyTypeObjectStruct {
     
     func tp_new(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
         switch base_type {
-        case .pyobject(_):
+        case .pyobject(let t):
+            //"\(raw: t).pointee.tp_new"
             nil
         default:
             "\(name)\(sep)tp_new".expr

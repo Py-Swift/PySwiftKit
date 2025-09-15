@@ -67,7 +67,7 @@ class PyClassArguments {
                                             case "PyType":
                                                 break
                                             default:
-                                                break
+                                                base_type = .pyobject(".\(memberAccess.declName.baseName.text)")
                                             }
                                         default:
                                             break

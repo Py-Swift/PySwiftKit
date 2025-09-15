@@ -122,6 +122,18 @@ struct PyContainerMacro: MemberMacro {
         }
         
         output.append(.init(deinitializerDecl))
+        
+        
+        if declaration.attributes.isPyClass {
+            
+        } else {
+            output.append("""
+            public static func casted(from object: PyPointer) throws -> Self {
+                try .init(object: object)
+            }
+            """)
+        }
+        
         if declaration.attributes.contains(where: {$0.isDynamicMember}) {
             output.append("""
             subscript<T: PySerializable>(dynamicMember member: String) -> T? {
