@@ -80,7 +80,7 @@ extension Int32: PyDeserialize {
     
     public init(object: PyPointer) throws {
         guard PyLong_Check(object) else { throw PythonError.long }
-        self = _PyLong_AsInt(object)
+        self = PyLong_AsInt(object)
     }
 }
 

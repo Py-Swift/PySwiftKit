@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/py-swift/PythonCore",
       "state" : {
-        "revision" : "08987e1b5e4ba712bd4e968f270372845c477eb8",
-        "version" : "311.11.1"
+        "revision" : "483a17dd39bd8dffe2b6bf199c2545996e3ee103",
+        "version" : "313.0.0"
       }
     },
     {

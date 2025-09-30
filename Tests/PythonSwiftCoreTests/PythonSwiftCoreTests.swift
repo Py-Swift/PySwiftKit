@@ -2,7 +2,7 @@ import XCTest
 //@testable
 import PySwiftKit
 //@testable
-import PythonCore
+//import PythonCore
 //@testable
 import PyExecute
 import PyDictionary
@@ -32,7 +32,7 @@ private func createPyTestFunction(name: String, _ code: String) throws -> PyPoin
 private var pythonIsRunning = false
 
 var pystdlib: URL {
-    Bundle.module.url(forResource: "python3.11", withExtension: nil)!
+    Bundle.module.url(forResource: "python3.13", withExtension: nil)!
 }
 func initPython() {
     if pythonIsRunning { return }

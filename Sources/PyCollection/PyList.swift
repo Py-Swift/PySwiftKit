@@ -80,10 +80,11 @@ extension PythonList: RangeReplaceableCollection {
     }
     
     public mutating func append(contentsOf newElements: PyPointer) {
-        
-        _ = ref.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
-            _PyList_Extend(pointer, newElements)
-        }
+        PyList_Extend(ref, newElements)
+//        _ = ref.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
+//            
+//        
+//        }
         buffer = Self.newBuffer(ref)
     }
 }

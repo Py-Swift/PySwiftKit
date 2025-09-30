@@ -157,6 +157,10 @@ extension PyTypeObjectStruct {
             tp_finalize(label: label, sep: dot_or)
         case .tp_vectorcall:
             tp_vectorcall(label: label, sep: dot_or)
+        case .tp_watched:
+            tp_watched(label: label, sep: dot_or)
+        case .tp_versions_used:
+            tp_versions_used(label: label, sep: dot_or)
         }
         
         if label == .tp_vectorcall {
@@ -440,6 +444,14 @@ extension PyTypeObjectStruct {
         nil
     }
 
+    
+    func tp_watched(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
+        .init(literal: 0)
+    }
+    
+    func tp_versions_used(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
+        .init(literal: 0)
+    }
 }
 
 

@@ -1,14 +1,16 @@
 // swift-tools-version:5.9
-
+import Foundation
 import PackageDescription
 import CompilerPluginSupport
+
+let env = ProcessInfo.processInfo.environment
 
 let local = false
 
 let pythoncore: Package.Dependency = if local {
-    .package(path: "/Volumes/CodeSSD/GitHub/PythonCore")
+    .package(path: "../PythonCore")
 } else {
-    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMinor(from: .init(311, 11, 0)))
+    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMinor(from: .init(313, 7, 0)))
 }
 
 
@@ -19,11 +21,9 @@ var platforms: [SupportedPlatform] = [
 
 
 let dependencies: [Package.Dependency] = [
-    //.package(url: "https://github.com/PythonSwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
     pythoncore,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0"),
-    //.package(url: "https://github.com/PythonSwiftLink/SwiftonizePlugin", .upToNextMajor(from: "0.0.0")),
 ]
 
 
@@ -84,34 +84,22 @@ let package = Package(
             name: "PyComparable",
             targets: ["PyComparable"]
         ),
-        //		.library(
-        //			name: "PyEncode",
-        //			targets: ["PyEncode"]
-        //		),
-            .library(
-                name: "PySerializing",
-                targets: ["PySerializing"]
-            ),
+        .library(
+            name: "PySerializing",
+            targets: ["PySerializing"]
+        ),
         .library(
             name: "CDefines",
             targets: ["CDefines"]
         ),
-        //        .library(
-        //            name: //"PyDeserializing",
-        //            targets: [//"PyDeserializing"]
-        //        ),
-            .library(
-                name: "PyBuffering",
-                targets: ["PyBuffering"]
-            ),
-        //		.library(
-        //			name: "PyDecode",
-        //			targets: ["PyDecode"]
-        //		),
-            .library(
-                name: "PyTypes",
-                targets: ["PyTypes"]
-            ),
+        .library(
+            name: "PyBuffering",
+            targets: ["PyBuffering"]
+        ),
+        .library(
+            name: "PyTypes",
+            targets: ["PyTypes"]
+        ),
         .library(
             name: "PyTuples",
             targets: ["PyTuples"]
@@ -122,7 +110,6 @@ let package = Package(
                 "PySwiftKit",
                 "PySwiftObject",
                 "PyUnpack",
-                //"PyEncode",
                 "PySerializing",
                 "PyCallable",
                 "PyDictionary",
@@ -255,26 +242,24 @@ let package = Package(
                 "PySwiftKit",
             ]
         ),
-        
-            .target(
-                name: "PyObjc",
-                dependencies: [
-                    "PySerializing",
-                    "PySwiftKit",
-                ]
-            ),
-        
-            .target(
-                name: "PySwiftObject",
-                dependencies: [
-                    "PythonCore",
-                    "PySwiftKit",
-                ],
-                resources: [
-                    
-                ],
-                swiftSettings: []
-            ),
+        .target(
+            name: "PyObjc",
+            dependencies: [
+                "PySerializing",
+                "PySwiftKit",
+            ]
+        ),
+        .target(
+            name: "PySwiftObject",
+            dependencies: [
+                "PythonCore",
+                "PySwiftKit",
+            ],
+            resources: [
+                
+            ],
+            swiftSettings: []
+        ),
         .target(
             name: "PySwiftKit",
             dependencies: [
@@ -288,10 +273,6 @@ let package = Package(
             ],
             swiftSettings: [],
             linkerSettings: [
-//                .linkedLibrary("bz2"),
-//                .linkedLibrary("z"),
-//                .linkedLibrary("ncurses"),
-//                .linkedLibrary("sqlite3"),
             ]
         ),
         .target(
@@ -303,19 +284,20 @@ let package = Package(
         .testTarget(
             name: "PythonSwiftCoreTests",
             dependencies: [
+                "PythonCore",
                 "PySwiftKit",
                 "PySwiftObject",
                 "PyUnpack",
-                //"PyEncode",
                 "PySerializing",
                 "PyCallable",
                 "PyDictionary",
                 "PyTuples",
-                "PySwiftWrapper"
+                "PyWrapper",
+                "PySwiftWrapper",
                 
             ],
             resources: [
-                .copy("python3.11"),
+                .copy("python3.13"),
             ],
             plugins: [
                 // .plugin(name: "Swiftonize", package: "SwiftonizePlugin")
@@ -349,24 +331,5 @@ let package = Package(
                 "PySerializing"
             ]
         ),
-        //			.target(
-        //				name: "Python",
-        //				dependencies: ["Python"],
-        //				path: "Sources/Python",
-        //				linkerSettings: [
-        //					.linkedLibrary("ncurses"),
-        //					.linkedLibrary("sqlite3"),
-        //					.linkedLibrary("z"),
-        //				]
-        //			),
-        //			.target(
-        //				name: "PythonTypeAlias",
-        //				dependencies: [
-        //					"Python",
-        //				]
-        //			),
-        
-        //		.binaryTarget(name: "Python", path: "Sources/Python/Python.xcframework"),
-        //.binaryTarget(name: "Python", url: "https://github.com/PythonSwiftLink/PythonCore/releases/download/311.0.2/Python.zip", checksum: "410d57419f0ccbc563ab821e3aa241a4ed8684888775f4bdea0dfc70820b9de6")
     ]
 )

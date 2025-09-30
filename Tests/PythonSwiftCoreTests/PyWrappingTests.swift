@@ -1,19 +1,18 @@
-import XCTest
-//@testable
-import PySwiftKit
-//@testable
-import PyExecute
-//@testable
-import PyDictionary
-//@testable
-import PyUnwrap
-//@testable
-import PyTypes
-//@testable
-import PySwiftObject
-//@testable
-import PyCallable
-
+//import XCTest
+////@testable
+//import PySwiftKit
+////@testable
+//import PyExecute
+////@testable
+//import PyDictionary
+////@testable
+//import PyUnwrap
+////@testable
+//import PyTypes
+////@testable
+//import PySwiftObject
+////@testable
+//import PyCallable
 
 
 fileprivate struct TestStruct {
@@ -58,25 +57,25 @@ fileprivate struct TestStruct {
 //    }
 //}
 
-fileprivate func testWrapObject<O: AnyObject>(cls: O) -> PyPointer.Pointee {
-    var new = PySwiftObject()
-    new.swift_ptr = Unmanaged<O>.passRetained(cls).toOpaque()
-    return unsafeBitCast(new, to: PyPointer.Pointee.self)
-}
-
-extension PyPointer {
-    @inlinable
-    public func pyMap<T>() throws -> [T] where T: PyUnwrapable {
-        try self.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
-            let o = pointer.pointee
-            print("pyMap ob_size", o.ob_base.ob_size)
-            return try PySequenceBuffer(start: o.ob_item, count: o.ob_base.ob_size).map { element in
-                guard let element = element else { throw PythonError.sequence }
-                return try T.unpack(with: element)
-            }
-        }
-    }
-}
+//fileprivate func testWrapObject<O: AnyObject>(cls: O) -> PyPointer.Pointee {
+//    var new = PySwiftObject()
+//    new.swift_ptr = Unmanaged<O>.passRetained(cls).toOpaque()
+//    return unsafeBitCast(new, to: PyPointer.Pointee.self)
+//}
+//
+//extension PyPointer {
+//    @inlinable
+//    public func pyMap<T>() throws -> [T] where T: PyUnwrapable {
+//        try self.withMemoryRebound(to: PyListObject.self, capacity: 1) { pointer in
+//            let o = pointer.pointee
+//            print("pyMap ob_size", o.ob_base.ob_size)
+//            return try PySequenceBuffer(start: o.ob_item, count: o.ob_base.ob_size).map { element in
+//                guard let element = element else { throw PythonError.sequence }
+//                return try T.unpack(with: element)
+//            }
+//        }
+//    }
+//}
 //
 //final class PyWrappingTests {
 //    

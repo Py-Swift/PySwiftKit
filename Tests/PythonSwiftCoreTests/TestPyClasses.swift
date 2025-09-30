@@ -2,16 +2,20 @@
 //  TestPyClasses.swift
 //  PySwiftKit
 //
-//@testable\nimport PySwiftKit
-//@testable\nimport PySwiftObject
-//@testable\nimport PySwiftWrapper
-//@testable\nimport PySerializing
-
-
+//@testable
+//import PySwiftKit
+//@testable
+//import PySwiftObject
+//@testable
+//import PySwiftWrapper
+//@testable
+//import PySerializing
+//
+//
 //@PyClass()
-class TestClassA {
-
-}
+//class TestClassA {
+//
+//}
 //
 //class TestClassB: PyUnwrapable, PyTypeProtocol {
 //    

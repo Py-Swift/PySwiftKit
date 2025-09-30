@@ -75,7 +75,9 @@ public extension PyTypeObject {
 			tp_del: nil,
 			tp_version_tag: 11,
 			tp_finalize: nil,
-			tp_vectorcall: nil
+			tp_vectorcall: nil,
+            tp_watched: 0,
+            tp_versions_used: 0
 		)
 	}
 	
@@ -130,7 +132,9 @@ public extension PyTypeObject {
 			tp_del: nil,
 			tp_version_tag: 11,
 			tp_finalize: nil,
-			tp_vectorcall: nil
+			tp_vectorcall: nil,
+            tp_watched: 0,
+            tp_versions_used: 0
 		)
 	}
 }

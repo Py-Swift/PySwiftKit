@@ -62,6 +62,8 @@ public enum PyTypeObjectLabels: String, CaseIterable {
 	case tp_version_tag
 	case tp_finalize
 	case tp_vectorcall
+    case tp_watched
+    case tp_versions_used
 	
 }
 
