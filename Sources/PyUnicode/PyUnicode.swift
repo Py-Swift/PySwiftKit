@@ -7,7 +7,7 @@
 
 import Foundation
 import PySwiftKit
-import PythonCore
+import CPython
 
 extension PyPointer {
 	@inlinable public var unicodeString: String? {

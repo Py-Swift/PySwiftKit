@@ -182,11 +182,11 @@ extension PyCallableProtocol where S == FunctionTypeSyntax, P == TupleTypeElemen
             switch parameters_count {
             case 0: ""
             case 1:
-                let parameter = parameters.first!
+                //let parameter = parameters.first!
                 "let arg = a.pyPointer"
             default:
                 "let __args__ = VectorCallArgs.allocate(capacity: \(raw: parameters_count))"
-                for (index, parameter) in parameters.enumerated() {
+                for (index, _) in parameters.enumerated() {
                     let pname = pletters[index]
                     "__args__[\(raw: index)] = \(raw: pname).pyPointer"
                 }

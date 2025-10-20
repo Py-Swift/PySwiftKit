@@ -2,7 +2,7 @@
 //  Array+PyPoinger.swift
 //  PySwiftKit
 //
-import PythonCore
+import CPython
 
 extension PyPointer {
     

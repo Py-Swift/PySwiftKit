@@ -6,7 +6,7 @@
 //
 
 import PySwiftKit
-import PythonCore
+import CPython
 
 public protocol PyBuffer {
     //func pyBuffer() -> UnsafeMutablePointer<PyBufferProcs>

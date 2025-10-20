@@ -78,12 +78,12 @@ public struct PyMethodDefGenerator {
         }
         let type: ExprSyntax = target.expr
         let call: ExprSyntaxProtocol = switch base_type {
-        case .pyswift(let string):
+        case .pyswift(_):
             MemberAccessExprSyntax(
                 base: (is_static || module_or_class) ? type : "Unmanaged<\(raw: type)>.fromOpaque(\(raw: "__self__").pointee.swift_ptr).takeUnretainedValue()",
                 name: f.name
             )
-        case .pyobject(let string):
+        case .pyobject(_):
             MemberAccessExprSyntax(
                 base: type,
                 name: f.name

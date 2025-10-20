@@ -4,7 +4,7 @@ import Foundation
 import PySwiftKit
 import PyCollection
 //import PyDeserializing
-import PythonCore
+import CPython
 
 @inlinable
 public func UnPackPyPointer<T: AnyObject>(with type: PythonType, from self: PyPointer?) throws -> [T] {

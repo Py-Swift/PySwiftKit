@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PythonCore
+import CPython
 
 
 public typealias PySequenceBuffer = UnsafeBufferPointer<PyPointer?>

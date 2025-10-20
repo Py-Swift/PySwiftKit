@@ -1,7 +1,7 @@
 //import Foundation
-//import PythonCoreSwiftCore
+//import CPythonSwiftCore
 //
-//import PythonCore
+//import CPython
 //
 //
 //public extension PyMethodDef {

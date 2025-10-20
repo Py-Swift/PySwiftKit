@@ -1,6 +1,6 @@
 import Foundation
-import PythonCore
+import CPython
 
-//import PythonCoreSwiftCore
+//import CPythonSwiftCore
 
 //

@@ -7,7 +7,7 @@
 
 import Foundation
 import PySwiftKit
-import PythonCore
+import CPython
 import PyTypes
 
 public protocol PyTypeProtocol {

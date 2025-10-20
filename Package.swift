@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version: 5.10
 import Foundation
 import PackageDescription
 import CompilerPluginSupport
@@ -7,10 +7,10 @@ let env = ProcessInfo.processInfo.environment
 
 let local = false
 
-let pythoncore: Package.Dependency = if local {
-    .package(path: "../PythonCore")
+let CPython: Package.Dependency = if local {
+    .package(path: "../CPython")
 } else {
-    .package(url: "https://github.com/py-swift/PythonCore", .upToNextMinor(from: .init(313, 7, 0)))
+    .package(url: "https://github.com/py-swift/CPython", .upToNextMinor(from: .init(313, 7, 0)))
 }
 
 
@@ -21,7 +21,7 @@ var platforms: [SupportedPlatform] = [
 
 
 let dependencies: [Package.Dependency] = [
-    pythoncore,
+    CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0"),
 ]
@@ -89,10 +89,6 @@ let package = Package(
             targets: ["PySerializing"]
         ),
         .library(
-            name: "CDefines",
-            targets: ["CDefines"]
-        ),
-        .library(
             name: "PyBuffering",
             targets: ["PyBuffering"]
         ),
@@ -121,17 +117,24 @@ let package = Package(
             name: "PySwiftWrapper",
             targets: ["PySwiftWrapper"]
         ),
-        
+        .library(
+            name: "libPySwiftKit",
+            type: .dynamic,
+            targets: [
+                "PySwiftKit",
+                "PySwiftObject",
+                "PyUnpack",
+                "PySerializing",
+                "PyCallable",
+                "PyDictionary",
+                "PyTuples",
+                "PySwiftWrapper"
+            ]
+        )
     ],
     dependencies: dependencies,
     
     targets: [
-        .target(
-            name: "CDefines",
-            dependencies: [
-                "PythonCore"
-            ]
-        ),
         .target(
             name: "PyExecute",
             dependencies: [
@@ -252,7 +255,7 @@ let package = Package(
         .target(
             name: "PySwiftObject",
             dependencies: [
-                "PythonCore",
+                .product(name: "CPython", package: "CPython"),
                 "PySwiftKit",
             ],
             resources: [
@@ -263,9 +266,9 @@ let package = Package(
         .target(
             name: "PySwiftKit",
             dependencies: [
-                "PythonCore",
+                .product(name: "CPython", package: "CPython"),
                 "_PySwiftObject",
-                "CDefines"
+                .product(name: "CPython", package: "CPython"),
                 //"PythonTypeAlias"
             ],
             resources: [
@@ -278,22 +281,24 @@ let package = Package(
         .target(
             name: "_PySwiftObject",
             dependencies: [
-                "PythonCore"
+                "CPython"
             ]
         ),
         .testTarget(
             name: "PythonSwiftCoreTests",
             dependencies: [
-                "PythonCore",
+                .product(name: "CPython", package: "CPython"),
                 "PySwiftKit",
                 "PySwiftObject",
                 "PyUnpack",
+                "PyUnwrap",
                 "PySerializing",
                 "PyCallable",
                 "PyDictionary",
                 "PyTuples",
                 "PyWrapper",
                 "PySwiftWrapper",
+                "PyExecute"
                 
             ],
             resources: [

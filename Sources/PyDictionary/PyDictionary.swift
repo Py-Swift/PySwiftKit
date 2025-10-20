@@ -7,7 +7,7 @@
 
 import Foundation
 import PySwiftKit
-import PythonCore
+import CPython
 
 public extension Dictionary where Key == String, Value == PyPointer {
 	var pyDict: PyPointer { self.reduce(PyDict_New()!, PyDict_SetItem_ReducedIncRef) }

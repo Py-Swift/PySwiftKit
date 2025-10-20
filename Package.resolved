@@ -1,12 +1,13 @@
 {
+  "originHash" : "aab4cff044cf0a46d25d5341cde29168a485ba0f7f7d504e484f32f2244bad0b",
   "pins" : [
     {
-      "identity" : "pythoncore",
+      "identity" : "cpython",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/py-swift/PythonCore",
+      "location" : "https://github.com/py-swift/CPython",
       "state" : {
-        "revision" : "483a17dd39bd8dffe2b6bf199c2545996e3ee103",
-        "version" : "313.0.0"
+        "revision" : "24981fc411270c31cec1fbbab312d27ae36fa838",
+        "version" : "313.7.0"
       }
     },
     {
@@ -37,5 +38,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

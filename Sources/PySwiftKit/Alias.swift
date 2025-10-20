@@ -2,7 +2,7 @@
 
 import Foundation
 
-import PythonCore
+import CPython
 import _PySwiftObject
 
 public typealias PyPointer = UnsafeMutablePointer<PyObject>

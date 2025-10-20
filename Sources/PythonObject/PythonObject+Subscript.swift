@@ -8,7 +8,7 @@
 import Foundation
 import CoreGraphics
 #if BEEWARE
-import PythonCore
+import CPython
 #endif
 
 

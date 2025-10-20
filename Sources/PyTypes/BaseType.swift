@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PythonCore
+import CPython
 import PySwiftObject
 import PySwiftKit
 

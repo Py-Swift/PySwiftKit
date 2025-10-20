@@ -2,7 +2,7 @@ import Foundation
 import PySwiftKit
 //import PyEncode
 import PySerializing
-import PythonCore
+import CPython
 
 //import _PySwiftObject
 

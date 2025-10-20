@@ -1,4 +1,4 @@
-import PythonCore
+import CPython
 import PySwiftKit
 import Foundation
 
@@ -144,7 +144,7 @@ extension Optional where Wrapped: PyDeserializeObject {
 
 @_disfavoredOverload
 @inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T {
-    guard let result = Python.PyTuple_GetItem(o, index) else {
+    guard let result = CPython.PyTuple_GetItem(o, index) else {
         PyErr_Print()
         throw PyStandardException.indexError
     }
@@ -152,7 +152,7 @@ extension Optional where Wrapped: PyDeserializeObject {
 }
 
 @inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T where T: AnyObject {
-    guard let result = Python.PyTuple_GetItem(o, index) else {
+    guard let result = CPython.PyTuple_GetItem(o, index) else {
         PyErr_Print()
         throw PyStandardException.indexError
     }
@@ -163,7 +163,7 @@ extension Optional where Wrapped: PyDeserializeObject {
 
 //@_disfavoredOverload
 @inlinable public func _PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T? {
-    guard let result = Python.PyTuple_GetItem(o, index) else {
+    guard let result = CPython.PyTuple_GetItem(o, index) else {
         PyErr_Print()
         throw PyStandardException.indexError
     }

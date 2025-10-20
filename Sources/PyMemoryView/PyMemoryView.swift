@@ -7,7 +7,7 @@
 
 import Foundation
 import PySwiftKit
-import PythonCore
+import CPython
 
 public extension Data {
 	init(memoryviewNoCopy o: PyPointer) throws {
@@ -27,7 +27,7 @@ public extension Data {
 func createMemoryView(data: inout [UInt8],_ completion: @escaping (PythonPointer)->Void )  {
 	let size = data.count //* uint8_size
 	data.withUnsafeMutableBytes { buffer in
-		var pybuf = Py_buffer()
+        var pybuf = CPython.Py_buffer()
 		PyBuffer_FillInfo(&pybuf, nil, buffer.baseAddress, size , 0, PyBUF_WRITE)
 		pybuf.format = nil
 		guard let view = PyMemoryView_FromBuffer(&pybuf) else { return }

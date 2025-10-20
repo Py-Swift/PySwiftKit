@@ -2,6 +2,7 @@ import Foundation
 import PyWrapperInfo
 import PySerializing
 import PySwiftKit
+import CPython
 
 @attached(peer, names: arbitrary)
 public macro PyFunction(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftFuncWrapper")

@@ -5,7 +5,7 @@
 //  Created by CodeBuilder on 07/05/2025.
 //
 
-import PythonCore
+import CPython
 
 fileprivate func handleDocString(_ string: String?) -> UnsafePointer<CChar>? {
     if let string { return cString(string) }

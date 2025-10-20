@@ -1,5 +1,5 @@
 import Foundation
-import PythonCore
+import CPython
 
 import Accelerate
 

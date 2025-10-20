@@ -175,9 +175,9 @@ extension PyClass {
             _tp_dealloc()
         ]
         
-        for base in bases {
-            
-        }
+//        for base in bases {
+//            
+//        }
         
         output.append(
             contentsOf: self.bases.compactMap{ base -> VariableDeclSyntax? in
@@ -237,9 +237,9 @@ public extension PyClass {
     
     func tp_init(_ external_name: String?) -> VariableDeclSyntax {
         let init_type: TypeSyntax = switch base_type {
-        case .pyobject(let t):
+        case .pyobject(_):
             "initproc"
-        case .pyswift(let t):
+        case .pyswift(_):
             "PySwift_initproc"
         case .none:
             "PySwift_initproc"
@@ -254,9 +254,9 @@ public extension PyClass {
     
     func _tp_init(_ target: String?) -> VariableDeclSyntax {
         let init_type: TypeSyntax = switch base_type {
-        case .pyobject(let t):
+        case .pyobject(_):
             "initproc"
-        case .pyswift(let t):
+        case .pyswift(_):
             "PySwift_initproc"
         case .none:
             "PySwift_initproc"

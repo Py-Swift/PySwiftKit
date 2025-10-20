@@ -5,7 +5,7 @@
 //  Created by CodeBuilder on 05/01/2025.
 //
 
-import PythonCore
+import CPython
 import PySwiftKit
 import Foundation
 

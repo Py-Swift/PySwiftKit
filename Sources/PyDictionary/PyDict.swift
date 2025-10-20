@@ -3,7 +3,7 @@ import PySwiftKit
 import PySerializing
 //import PyDeserializing
 
-import PythonCore
+import CPython
 
 public func _PyDict_GetItem(_ dict: PyPointer, _ key: String) -> PyPointer? {
 	key.withCString { PyDict_GetItemString(dict, $0) }

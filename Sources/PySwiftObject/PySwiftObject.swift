@@ -1,8 +1,8 @@
 import Foundation
 @_exported import _PySwiftObject
 import PySwiftKit
-import PythonCore
-//import PythonCoreSwiftCore
+import CPython
+//import CPythonSwiftCore
 
 
 

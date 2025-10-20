@@ -386,10 +386,10 @@ fileprivate extension ObjectInitializer {
 //        
 //    }
     
-    func setPointer() -> SequenceExprSyntax {
+    func setPointer(cls_unretained: Bool = false) -> SequenceExprSyntax {
         //let _throws_ = __init__?.throws ?? false
         let _throws_ = funcThrows
-        let cls_unretained = false
+        //let cls_unretained = false
         //let unmanaged = IdentifierExpr(stringLiteral: "Unmanaged")
         let unmanaged = ExprSyntax(stringLiteral: "Unmanaged")
 //        let _passRetained = MemberAccessExprSyntax(base: unmanaged, dot: .periodToken(), name: .identifier(cls_unretained ? "passUnretained" : "passRetained"))

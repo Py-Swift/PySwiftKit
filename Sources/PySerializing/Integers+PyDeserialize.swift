@@ -1,6 +1,6 @@
 import Foundation
 import PySwiftKit
-import PythonCore
+import CPython
 import PyTypes
 import PyComparable
 
@@ -26,11 +26,12 @@ extension Int : PyDeserialize {
         let this = PyLong_AsLongAndOverflow(object, &overflow)
         if overflow == 0 {
             return this
-        } else { throw PyStandardException.overflowError }
+        }
         if let _ = PyErr_Occurred() {
             PyErr_Print()
             throw PyStandardException.typeError
         }
+        throw PyStandardException.overflowError
     }
     
 }

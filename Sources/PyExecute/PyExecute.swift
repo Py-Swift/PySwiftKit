@@ -1,7 +1,7 @@
 import Foundation
 import PySwiftKit
 
-import PythonCore
+import CPython
 public enum PyEvalFlag: Int32 {
     case single = 256
     case file = 257

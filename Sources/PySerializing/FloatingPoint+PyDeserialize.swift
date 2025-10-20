@@ -1,5 +1,5 @@
 import PySwiftKit
-import PythonCore
+import CPython
 import PyTypes
 import PyComparable
 
@@ -13,8 +13,8 @@ extension Double: PyDeserialize {
 
         switch object {
         case .PyFloat:
-            //self = PyFloat_AsDouble(object)
-            self = unsafeBitCast(object, to: UnsafeMutablePointer<PyFloatObject>.self).pointee.ob_fval
+            self = PyFloat_AsDouble(object)
+            //self = unsafeBitCast(object, to: UnsafeMutablePointer<PyFloatObject>.self).pointee.ob_fval
         case .PyLong:
             var overflow: Int32 = 0
             let long = PyLong_AsLongAndOverflow(object, &overflow)

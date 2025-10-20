@@ -374,7 +374,7 @@ extension PyTypeObjectStruct {
     
     func tp_init(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
         switch base_type {
-        case .pyobject(let t):
+        case .pyobject(_):
             //"\(raw: t).pointee.tp_init"
             nil
         default:
@@ -390,7 +390,7 @@ extension PyTypeObjectStruct {
     
     func tp_new(label: PyTypeObjectLabels, sep: String) -> ExprSyntax? {
         switch base_type {
-        case .pyobject(let t):
+        case .pyobject(_):
             //"\(raw: t).pointee.tp_new"
             nil
         default:

@@ -1,6 +1,6 @@
 import Foundation
 import CoreGraphics
-import PythonCore
+import CPython
 
 
 extension PyPointer: @unchecked Swift.Sendable {
@@ -8,16 +8,25 @@ extension PyPointer: @unchecked Swift.Sendable {
 }
 
 extension PyPointer {
-    @inlinable public static var None: PyPointer { Py_NewRef(Py_None) }
+    @inlinable public static var None: PyPointer {
+        //Py_NewRef(Py_None)
+        Py_None
+    }
  
 //        Py_IncRef(PyNone)
 //        return PyNone
 //    }
-    @inlinable public static var True: PyPointer { Py_NewRef(Py_True) }
+    @inlinable public static var True: PyPointer {
+        //Py_NewRef(Py_True)
+        Py_True
+    }
 //        //Py_IncRef(PyTrue)
 //        return PyTrue
 //    }
-    @inlinable public static var False: PyPointer { Py_NewRef(Py_False) }
+    @inlinable public static var False: PyPointer {
+        //Py_NewRef(Py_False)
+        Py_False
+    }
 //        Py_IncRef(PyFalse)
 //        return PyFalse
 //        
@@ -72,18 +81,18 @@ extension PyPointer {
 
 @inlinable public func PyDict_GetItem(_ mp: PyPointer, _ key: String) throws -> PyPointer {
     try key.withCString { ckey in
-        guard let result = Python.PyDict_GetItemString(mp, ckey) else { throw PyStandardException.keyError }
+        guard let result = CPython.PyDict_GetItemString(mp, ckey) else { throw PyStandardException.keyError }
         return result
     }
 }
 
 @inlinable public func PyTuple_GetItem(_ o: PyPointer, _ index: Int) throws -> PyPointer {
-    guard let result: PyPointer = Python.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
+    guard let result: PyPointer = CPython.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
     return result
 }
 
 @inlinable public func PyTuple_GetItem(_ o: PyPointer, _ index: Int) throws -> PyPointer? {
-    guard let result: PyPointer? = Python.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
+    guard let result: PyPointer = CPython.PyTuple_GetItem(o, index) else { throw PyStandardException.indexError }
     return result
 }
 

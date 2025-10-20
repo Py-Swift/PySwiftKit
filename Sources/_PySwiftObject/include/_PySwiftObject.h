@@ -8,7 +8,8 @@
 #ifndef _PySwiftObject_h
 #define _PySwiftObject_h
 
-#include "Python.h"
+//#include <Python/Python.h>
+#include "CPython.h"
 
 typedef struct {
 	PyObject_HEAD

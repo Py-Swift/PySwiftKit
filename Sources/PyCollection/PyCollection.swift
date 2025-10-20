@@ -1,6 +1,6 @@
 
 import PySwiftKit
-import PythonCore
+import CPython
 import Foundation
 //import PyDeserializing
 import PySerializing
@@ -178,7 +178,7 @@ extension PyPointer {
 				return nil
 			}
 			if PyTuple_Check(self) {
-                if let element = Python.PyTuple_GetItem(self, index) {
+                if let element = CPython.PyTuple_GetItem(self, index) {
 					return try? R(object: element)
 				}
 				return nil

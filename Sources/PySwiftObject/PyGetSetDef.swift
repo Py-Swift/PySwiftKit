@@ -1,8 +1,8 @@
 //
 //import Foundation
-//import PythonCoreSwiftCore
+//import CPythonSwiftCore
 //
-//import PythonCore
+//import CPython
 //
 //public final class PyGetSetDefWrap {
 //    let name: UnsafePointer<CChar>

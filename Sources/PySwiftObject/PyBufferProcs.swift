@@ -1,10 +1,10 @@
 
 
 import Foundation
-//import PythonCoreSwiftCore
+//import CPythonSwiftCore
 
 import PySwiftKit
-import PythonCore
+import CPython
 
 public class PyBufferProcsHandler {
     

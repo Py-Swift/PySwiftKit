@@ -1,6 +1,6 @@
 
 @_exported
-import PythonCore
+import CPython
 
 
 

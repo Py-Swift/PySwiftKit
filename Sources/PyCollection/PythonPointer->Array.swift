@@ -2,7 +2,7 @@
 //import PySwiftKit
 //import PySerializing
 //
-//import PythonCore
+//import CPython
 //extension PyPointer {
 //
 ////    @inlinable

@@ -5,7 +5,7 @@
 //  Created by CodeBuilder on 03/05/2025.
 //
 
-import PythonCore
+import CPython
 
 
 public extension PyModuleDef_Base {

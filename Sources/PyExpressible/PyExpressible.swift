@@ -1,7 +1,7 @@
 import Foundation
 import PySwiftKit
 
-import PythonCore
+import CPython
 
 //extension StringInterpolationProtocol {
 //	public mutating func appendLiteral(_ literal: PyPointer) {

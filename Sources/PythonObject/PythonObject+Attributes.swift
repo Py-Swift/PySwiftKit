@@ -7,7 +7,7 @@
 //
 //import Foundation
 //#if BEEWARE
-//import PythonCore
+//import CPython
 //#endif
 //
 //extension PythonPointer {

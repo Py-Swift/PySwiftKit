@@ -1,5 +1,5 @@
 //import PyKit
-import PythonCore
+import CPython
 import PySwiftKit
 import Foundation
 

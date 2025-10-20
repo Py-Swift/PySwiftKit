@@ -1,5 +1,6 @@
-import PythonCore
+import CPython
 
+//public typealias PyMethodDef = CPython.PyModuleDef
 
 fileprivate func handleDocString(_ string: String?) -> UnsafePointer<CChar>? {
     if let string { return cString(string) }
@@ -15,7 +16,9 @@ fileprivate func handleMLFlag(flag: Int32, class_static: Bool? = nil) -> Int32 {
 }
 
 
-public extension PyMethodDef {
+
+
+public extension CPython.PyMethodDef {
     
     static func noArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
@@ -72,7 +75,18 @@ public extension PyMethodDef {
     }
 }
 
-public extension PyMethodDef {
+public func PyMethodDef_oneArg(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> CPython.PyMethodDef {
+    .oneArg(name: name, doc: doc, ml_meth: ml_meth)
+}
+
+extension PyMethodDef {
+    public func hmm() {}
+    public static func hello() {
+        
+    }
+}
+
+public extension CPython.PyMethodDef {
     static func oneArg(name: String, doc: String? = nil,  ml_meth: PySwiftFunction) -> Self {
         .init(
             ml_name: cString(name),
@@ -103,7 +117,7 @@ public extension PyMethodDef {
     static func pyObjectOneArg(name: String, doc: String? = nil,  ml_meth: PyCFunction) -> Self {
         .init(
             ml_name: cString(name),
-            ml_meth: unsafeBitCast(ml_meth, to: PyCFunction.self),
+            ml_meth: ml_meth,
             ml_flags: METH_O | METH_CLASS,
             ml_doc: handleDocString(doc)
         )
@@ -119,7 +133,7 @@ public extension PyMethodDef {
     }
 }
 
-public extension PyMethodDef {
+public extension CPython.PyMethodDef {
     static func withArgs(name: String, doc: String? = nil,  ml_meth: PySwiftFunctionFast) -> Self {
         .init(
             ml_name: cString(name),
@@ -181,7 +195,7 @@ extension Array where Element == PyMethodDef {
 
 
 
-public extension PyMethodDef {
+public extension CPython.PyMethodDef {
     
     init(ml_name: String, class_static: Bool? = nil, ml_doc: String? = nil,  ml_meth: PySwiftFunctionFast) {
         self.init(
@@ -220,7 +234,7 @@ public extension PyMethodDef {
     }
 }
 
-public extension PyMethodDef {
+public extension CPython.PyMethodDef {
     
     init(ml_name: String, ml_flags: Int32, ml_doc: String? = nil,  ml_meth: PySwiftFunctionFast) {
         self.init(

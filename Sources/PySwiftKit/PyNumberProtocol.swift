@@ -1,5 +1,5 @@
 
-import PythonCore
+import CPython
 
 public protocol PyNumberProtocol {
     func nb_add(_ other: PyPointer) -> PyPointer?

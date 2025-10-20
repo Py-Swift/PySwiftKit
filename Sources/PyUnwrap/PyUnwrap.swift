@@ -2,7 +2,7 @@ import Foundation
 import PySwiftKit
 import _PySwiftObject
 import PyCollection
-import PythonCore
+import CPython
 import PyTypes
 
 

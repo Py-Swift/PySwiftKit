@@ -2,11 +2,13 @@ import XCTest
 //@testable
 import PySwiftKit
 //@testable
-//import PythonCore
+import CPython
 //@testable
 import PyExecute
 import PyDictionary
-//@testable\nimport PythonCoreTestSuite
+import PyUnwrap
+import PyUnpack
+//@testable\nimport CPythonTestSuite
 fileprivate extension PyPointer {
     
     var refCount: Int { Py_REFCNT(self) }
@@ -33,6 +35,7 @@ private var pythonIsRunning = false
 
 var pystdlib: URL {
     Bundle.module.url(forResource: "python3.13", withExtension: nil)!
+    //.init(fileURLWithPath: "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13")
 }
 func initPython() {
     if pythonIsRunning { return }

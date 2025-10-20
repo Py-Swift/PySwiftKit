@@ -5,7 +5,7 @@
 
 import Foundation
 //#if BEEWARE
-import PythonCore
+import CPython
 
 //#endif
 @inlinable
