@@ -33,6 +33,42 @@ final class PyRefCountTests: XCTestCase {
     }
 }
 
+final class PyDeserializingTests: XCTestCase {
+    
+    func noTest() throws {
+        try initPy()
+        try withGIL {
+            
+        }
+    }
+    
+    func test_Intergere_Signed() throws {
+        try initPy()
+        try withGIL {
+            let pyint = 1.pyPointer()
+            
+            _ = try Int.casted(from: pyint)
+            _ = try Int64.casted(from: pyint)
+            _ = try Int32.casted(from: pyint)
+            _ = try Int16.casted(from: pyint)
+            _ = try Int8.casted(from: pyint)
+        }
+    }
+    
+    func test_Intergere_Unsigned() throws {
+        try initPy()
+        try withGIL {
+            let pyint = 1.pyPointer()
+            
+            _ = try UInt.casted(from: pyint)
+            _ = try UInt64.casted(from: pyint)
+            _ = try UInt32.casted(from: pyint)
+            _ = try UInt16.casted(from: pyint)
+            _ = try UInt8.casted(from: pyint)
+        }
+    }
+}
+
 final class PySerializingTests: XCTestCase {
     
     
@@ -86,6 +122,18 @@ final class PySerializingTests: XCTestCase {
             let pyrange2 = (0...10).pyPointer()
             pyPrint(pyrange2)
             pyrange2.decRef()
+            PyErr_XCTAssert()
+        }
+    }
+    
+    func test_Date() throws {
+        try initPy()
+        withGIL {
+            
+            let pydatetime: PyPointer = Date().pyPointer()
+            pyPrint(pydatetime)
+            
+            pydatetime.decRef()
             PyErr_XCTAssert()
         }
     }

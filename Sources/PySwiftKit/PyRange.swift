@@ -20,7 +20,7 @@ public func PyRange_new(start: Int, stop: Int) throws -> PyPointer {
         let pyrange = PyObject_Vectorcall(PyRange, [pystart, pystop], 2, nil)
     else {
         PyErr_Print()
-        fatalError()
+        throw PyStandardException.typeError
     }
     
     Py_DecRef(pystart)

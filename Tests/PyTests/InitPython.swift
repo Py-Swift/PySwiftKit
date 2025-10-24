@@ -5,11 +5,14 @@
 import XCTest
 import CPython
 
+func PyStatus_Exception(_ status: PyStatus) -> Bool {
+    PyStatus_Exception(status) == 1
+}
 
 
 var pystdlib: URL {
-    Bundle.module.url(forResource: "python3.13", withExtension: nil)!
-    //.init(fileURLWithPath: "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13")
+    //Bundle.module.url(forResource: "python3.13", withExtension: nil)!
+    .init(fileURLWithPath: "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13")
 }
 
 private var pythonIsRunning = false
@@ -69,6 +72,16 @@ func initPython() {
     PyMem_RawFree(wtmp_str)
     
     
+    let dyn_path = "\(path)lib-dynload"
+    print(" - \(dyn_path)")
+    wtmp_str = Py_DecodeLocale(dyn_path, nil)
+    status = PyWideStringList_Append(&config.module_search_paths, wtmp_str)
+    if PyStatus_Exception(status) {
+        //crash_dialog("Unable to set PYTHONHOME: \(status.error)")
+        PyConfig_Clear(&config)
+        Py_ExitStatusException(status)
+    }
+    PyMem_RawFree(wtmp_str)
     //PyImport_AppendInittab(makeCString(from: "fib"), PyInitFib)
     
     //PyErr_Print()
