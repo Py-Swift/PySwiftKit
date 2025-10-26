@@ -8,7 +8,7 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = true
+let local = false
 let dev_mode = true
 
 let CPython: Package.Dependency = if local {
