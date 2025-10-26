@@ -14,6 +14,6 @@ extension Range: PySerialize where Self.Bound == Int{
 
 extension ClosedRange: PySerialize where Self.Bound == Int{
     public func pyPointer() -> PyPointer {
-        (try? PyRange_new(start: lowerBound, stop: upperBound + 1))!
+        (try? PyRange_new(start: lowerBound, stop: upperBound))!
     }
 }

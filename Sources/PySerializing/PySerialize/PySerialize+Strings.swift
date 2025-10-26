@@ -13,7 +13,7 @@ public extension PySerialize where Self: StringProtocol {
 }
 
 extension String: PySerialize {}
-
+extension Substring: PySerialize {}
 
 extension DefaultStringInterpolation: PySerialize {
     public func pyPointer() -> PyPointer {
@@ -21,3 +21,4 @@ extension DefaultStringInterpolation: PySerialize {
         fatalError()
     }
 }
+

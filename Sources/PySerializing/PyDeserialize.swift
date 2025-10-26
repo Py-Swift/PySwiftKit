@@ -33,14 +33,22 @@ public func PyDict_GetItem<T>(_ dict: PyPointer, key: String) throws -> T where 
     return try T.casted(from: result)
 }
 
-
-extension PyDeserialize where Self: RawRepresentable, Self.RawValue: PyDeserialize {
-    public init(object: PyPointer) throws {
-        //guard let raw = Self(rawValue: try RawValue(object: object)) else {
-        guard let raw = Self(rawValue: try RawValue.casted(from: object)) else {
-            //throw PythonError.type("\(RawValue.self)")
-            throw PyStandardException.keyError
-        }
-        self = raw
+public func PyObject_GetAttr<T>(_ object: PyPointer, key: String) throws -> T where T: PyDeserialize {
+    guard let result = key.withCString({PyObject_GetAttrString(object, $0)}) else {
+        PyErr_Print()
+        throw PyStandardException.attributeError
     }
+    defer { Py_DecRef(result)}
+    return try T.casted(from: result)
 }
+
+//extension PyDeserialize where Self: RawRepresentable, Self.RawValue: PyDeserialize {
+//    public init(object: PyPointer) throws {
+//        //guard let raw = Self(rawValue: try RawValue(object: object)) else {
+//        guard let raw = Self(rawValue: try RawValue.casted(from: object)) else {
+//            //throw PythonError.type("\(RawValue.self)")
+//            throw PyStandardException.keyError
+//        }
+//        self = raw
+//    }
+//}

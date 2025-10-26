@@ -5,7 +5,6 @@
 import CPython
 
 
-public typealias PyPointer = UnsafeMutablePointer<_object>
 
 
 public extension PyPointer {

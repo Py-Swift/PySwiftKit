@@ -4,7 +4,6 @@
 //
 import CPython
 
-public typealias PySequenceBuffer = UnsafeBufferPointer<PyPointer?>
 
 extension PyPointer: Swift.Sequence {
     

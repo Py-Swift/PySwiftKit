@@ -5,8 +5,8 @@
 //  Created by CodeBuilder on 21/01/2024.
 //
 
-#ifndef _PySwiftObject_h
-#define _PySwiftObject_h
+#ifndef CPySwiftObject_h
+#define CPySwiftObject_h
 
 //#include <Python/Python.h>
 #include "CPython.h"
@@ -71,4 +71,4 @@ typedef struct {
     int swift_info;
 } PySwiftObject2;
 
-#endif /* _PySwiftObject_h */
+#endif /* CPySwiftObject_h */

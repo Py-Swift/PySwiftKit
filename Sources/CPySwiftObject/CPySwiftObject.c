@@ -5,7 +5,7 @@
 //  Created by CodeBuilder on 21/01/2024.
 //
 
-#include "_PySwiftObject.h"
+#include "CPySwiftObject.h"
 
 PyModuleDef_Base _PyModuleDef_HEAD_INIT = PyModuleDef_HEAD_INIT;
 

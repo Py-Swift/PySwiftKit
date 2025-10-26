@@ -5,7 +5,6 @@
 
 import XCTest
 import CPython
-import PyDateTime
 @testable import PySwiftKit
 @testable import PySerializing
 
@@ -65,6 +64,37 @@ final class PyDeserializingTests: XCTestCase {
             _ = try UInt32.casted(from: pyint)
             _ = try UInt16.casted(from: pyint)
             _ = try UInt8.casted(from: pyint)
+        }
+    }
+    
+    private enum PyTestEnumString: String, PyDeserialize {
+        case one
+        case two
+        case tree
+    }
+    
+    private enum PyTestEnumInt: Int, PyDeserialize {
+        case one = 1
+        case two
+        case tree
+    }
+    
+    func test_RawPresentable() throws {
+        try initPy()
+        try withGIL {
+            let test_str = "one".pyPointer()
+            
+            print(try PyTestEnumString.casted(from: test_str))
+            test_str.decRef()
+            PyErr_XCTAssert()
+            
+            let test_int = 2.pyPointer()
+            
+            print(try PyTestEnumInt.casted(from: test_int))
+            
+            test_int.decRef()
+            
+            PyErr_XCTAssert()
         }
     }
 }

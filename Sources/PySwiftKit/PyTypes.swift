@@ -1,7 +1,8 @@
 
 import Foundation
+@preconcurrency
 import CPython
-import PySwiftKit
+
 //import PyEncode
 
 
