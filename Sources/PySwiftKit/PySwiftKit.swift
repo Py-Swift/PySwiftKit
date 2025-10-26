@@ -1,20 +1,17 @@
 //
-//  Untitled.swift
+//  PySwiftKit.swift
 //  PySwiftKit
 //
 import CPython
-
-
+@_exported import PyProtocols
+@_exported import CPySwiftObject
 
 
 public extension PyPointer {
     func decRef() { Py_DecRef(self) }
 }
 
-public func pyPrint(_ o: PyPointer) {
-    PyObject_Print(o, stdout, Py_PRINT_RAW)
-    print()
-}
+
 
 @inlinable
 public func PyHasGIL() -> Bool {

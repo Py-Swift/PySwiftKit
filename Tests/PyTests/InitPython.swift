@@ -4,6 +4,7 @@
 //
 import XCTest
 import CPython
+import PySwiftKit
 
 func PyStatus_Exception(_ status: PyStatus) -> Bool {
     PyStatus_Exception(status) == 1
@@ -85,6 +86,7 @@ func initPython() {
     //PyImport_AppendInittab(makeCString(from: "fib"), PyInitFib)
     
     //PyErr_Print()
+    PyImport_AppendInittab(makeCString(from: "pyswiftwrapper"), PySwiftTesterModule.py_init)
     
     //let new_obj = NewPyObject(name: "fib", cls: Int.self, _methods: FibMethods)
     print("Initializing Python runtime...")

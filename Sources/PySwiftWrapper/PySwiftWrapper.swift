@@ -75,5 +75,11 @@ public macro PyInit() = #externalMacro(module: "PySwiftGenerators", type: "PeerD
 @attached(peer)
 public macro PyProperty(readonly: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyPropertyAttribute")
 
-
+@attached(member, names: arbitrary)
+@attached(
+    extension,
+    conformances:
+        PyDeserialize,
+    names: arbitrary
+)
 public macro PyContainer(name: String? = nil, weak_ref: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyContainerMacro")

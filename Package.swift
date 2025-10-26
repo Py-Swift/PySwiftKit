@@ -9,6 +9,7 @@ import CompilerPluginSupport
 let env = ProcessInfo.processInfo.environment
 
 let local = true
+let dev_mode = true
 
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
@@ -50,24 +51,62 @@ let package_targets: [Target] = [
         name: "PySwiftKit",
         dependencies: [
             .product(name: "CPython", package: "CPython"),
-            "CPySwiftObject"
-        ],
-        resources: [
-            
-        ],
-        swiftSettings: [],
-        linkerSettings: [
+            "CPySwiftObject",
+            "PyProtocols"
         ]
     ),
+    // PyWrapping Related
+    .target(
+        name: "PyProtocols",
+        dependencies: ["CPython"]
+    ),
+    .target(name: "PyWrapperInfo"),
+    .target(
+        name: "PySwiftWrapper",
+        dependencies: [
+            "PySwiftGenerators",
+            "CPython",
+            "PyWrapperInfo",
+            "PySerializing",
+            "PyProtocols"
+        ]
+    ),
+    
 ]
 
 
 func get_targets() -> [Target] {
     var targets = package_targets
     
+    add_macro_targets(&targets)
     add_test_targets(&targets)
     
     return targets
+}
+
+func add_macro_targets(_ targets: inout [Target]) {
+    targets.append(
+        .target(
+            name: "PyWrapperInternal",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                "PyWrapperInfo"
+            ]
+        ),
+    )
+    targets.append(
+        .macro(
+            name: "PySwiftGenerators",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                "PyWrapperInternal",
+                "PyWrapperInfo"
+            ]
+        ),
+    )
 }
 
 func add_test_targets(_ targets: inout [Target]) {
@@ -77,9 +116,12 @@ func add_test_targets(_ targets: inout [Target]) {
             "CPython",
             "PySwiftKit",
             "PySerializing",
+            "PyWrapperInternal",
+            "PySwiftWrapper"
         ],
         resources: [
             .copy("python3.13"),
+            .copy("pyswiftwrapper_tests.py")
         ],
     ))
 }
@@ -89,10 +131,16 @@ func get_products() -> [Product] {
     
     products.add_library("PySerializing")
     products.add_library("PySwiftKit")
+    products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitBase", targets: [
         "PySwiftKit",
         "PySerializing"
     ])
+    
+    if dev_mode {
+        //products.add_library("PyWrapperInternal")
+        //products.add_library("PySwiftGenerators")
+    }
     
     return products
 }
