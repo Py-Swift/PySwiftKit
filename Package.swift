@@ -134,7 +134,8 @@ func get_products() -> [Product] {
     products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitBase", targets: [
         "PySwiftKit",
-        "PySerializing"
+        "PySerializing",
+        "PySwiftWrapper"
     ])
     
     if dev_mode {
