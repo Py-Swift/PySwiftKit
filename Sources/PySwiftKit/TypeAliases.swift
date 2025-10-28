@@ -46,8 +46,8 @@ public typealias PySequence_Inplace_Repeat_func = (@convention(c) (_ s: PyPointe
 
 // PySwiftObject
 
-public typealias PySwiftCFunc = (@convention(c) (_ s: PySwiftObjectPointer, _ args: PyPointer?) -> PyPointer?)?
-public typealias PySwiftCVectorCall = (@convention(c) ( _ s: PySwiftObjectPointer, _ args: VectorArgs, _ count: Int ) -> PyPointer? )?
+public typealias PySwiftCFunc = (@convention(c) (_ s: PySwiftObjectPointer?, _ args: PyPointer?) -> PyPointer?)?
+public typealias PySwiftCVectorCall = (@convention(c) ( _ s: PySwiftObjectPointer?, _ args: VectorArgs, _ count: Int ) -> PyPointer? )?
 public typealias PySwiftCVectorCallKeywords = (@convention(c) ( _ s: PySwiftObjectPointer?, _ args: VectorArgs, _ count: Int, _ kwnames: PyPointer? ) -> PyPointer? )?
 public typealias PySwiftCMethodVectorCall = (@convention(c) ( _ s: PySwiftObjectPointer?, _ type: PyTypePointer?, _ args: VectorArgs, _ count: Int, _ kwnames: PyPointer? ) -> PyPointer? )?
 
@@ -116,16 +116,16 @@ public typealias PySwift_setter = (@convention(c) (_ s: PySwiftObjectPointer?,_ 
 
 
 // _PyCFunctionFastWithKeywords
-public typealias PySwiftFunctionFastWithKeywords = (@convention(c) (PySwiftObjectPointer, VectorArgs, Py_ssize_t, PyPointer?) -> PyPointer?)?
+public typealias PySwiftFunctionFastWithKeywords = (@convention(c) (PySwiftObjectPointer?, VectorArgs, Py_ssize_t, PyPointer?) -> PyPointer?)?
 
 // _PyCFunctionFast
-public typealias PySwiftFunctionFast = (@convention(c) (PySwiftObjectPointer, VectorArgs, Py_ssize_t) -> PyPointer?)?
+public typealias PySwiftFunctionFast = (@convention(c) (PySwiftObjectPointer?, VectorArgs, Py_ssize_t) -> PyPointer?)?
 
 // PyCFunction
-public typealias PySwiftFunction = (@convention(c) (PySwiftObjectPointer, PyPointer?) -> PyPointer?)?
+public typealias PySwiftFunction = (@convention(c) (PySwiftObjectPointer?, PyPointer?) -> PyPointer?)?
 
 // PyCFunctionWithKeywords
-public typealias PySwiftFunctionWithKeywords = (@convention(c) (PySwiftObjectPointer, PyPointer?, PyPointer?) -> PyPointer?)?
+public typealias PySwiftFunctionWithKeywords = (@convention(c) (PySwiftObjectPointer?, PyPointer?, PyPointer?) -> PyPointer?)?
 
 // PyCMethod
 public typealias PySwiftMethod = (@convention(c) (UnsafeMutablePointer<PyObject>?, UnsafeMutablePointer<PyTypeObject>?, VectorArgs, Int, PyPointer?) -> PyPointer?)?
