@@ -25,3 +25,12 @@ extension Float: PySerialize {}
 @available(iOS 16,macOS 11, *)
 extension Float16: PySerialize {}
 #endif
+
+#if canImport(CoreFoundation)
+import CoreFoundation
+extension CGFloat: PySerialize {
+    public func pyPointer() -> PyPointer {
+        PyFloat_FromDouble(self)
+    }
+}
+#endif
