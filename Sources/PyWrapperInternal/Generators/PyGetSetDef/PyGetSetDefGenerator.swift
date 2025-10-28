@@ -51,7 +51,7 @@ public struct PyGetSetDefGenerator {
             ReturnStmtSyntax(
                 expression:  MemberAccessExprSyntax(
                     base: cast_cls,
-                    name: "\(raw: name).pyPointer"
+                    name: "\(raw: name).pyPointer()"
                 )
             )
         }

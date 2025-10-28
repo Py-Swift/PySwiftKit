@@ -156,7 +156,7 @@ struct PyContainerMacro: MemberMacro {
                 set {
                     _ = member.withCString { key in
                         if let newValue {
-                            PyObject_SetAttrString(py_target, key, newValue.pyPointer)
+                            PyObject_SetAttrString(py_target, key, newValue.pyPointer())
                         } else {
                             PyObject_SetAttrString(py_target, key, .None)
                         }

@@ -155,12 +155,12 @@ extension PyCallableProtocol where S == FunctionDeclSyntax, P == FunctionParamet
             case 0: ""
             case 1:
                 let parameter = parameters.first!
-                "let arg = \(raw: (parameter.secondName ?? parameter.firstName)).pyPointer"
+                "let arg = \(raw: (parameter.secondName ?? parameter.firstName)).pyPointer()"
             default:
                 "let __args__ = VectorCallArgs.allocate(capacity: \(raw: parameters_count))"
                 for (index, parameter) in parameters.enumerated() {
                     let pname = (parameter.secondName ?? parameter.firstName)
-                    "__args__[\(raw: index)] = \(raw: pname).pyPointer"
+                    "__args__[\(raw: index)] = \(raw: pname).pyPointer()"
                 }
             }
         }
@@ -188,7 +188,7 @@ extension PyCallableProtocol where S == FunctionTypeSyntax, P == TupleTypeElemen
                 "let __args__ = VectorCallArgs.allocate(capacity: \(raw: parameters_count))"
                 for (index, _) in parameters.enumerated() {
                     let pname = pletters[index]
-                    "__args__[\(raw: index)] = \(raw: pname).pyPointer"
+                    "__args__[\(raw: index)] = \(raw: pname).pyPointer()"
                 }
             }
         }

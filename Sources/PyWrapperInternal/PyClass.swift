@@ -381,7 +381,7 @@ public extension PyClass {
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
                 { __self__ in
-                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__str__().pyPointer
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__str__().pyPointer()
                 }
                 """)
             )//.with(\.trailingTrivia, .newlines(2))
@@ -395,7 +395,7 @@ public extension PyClass {
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
                 { __self__ in
-                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__str__().pyPointer
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__str__().pyPointer()
                 }
                 """)
             )
@@ -409,7 +409,7 @@ public extension PyClass {
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
                 { __self__ in
-                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__repr__().pyPointer
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__repr__().pyPointer()
                 }
                 """)
             )//.with(\.trailingTrivia, .newlines(2))
@@ -423,7 +423,7 @@ public extension PyClass {
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
                 { __self__ in
-                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__repr__().pyPointer
+                    Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__repr__().pyPointer()
                 }
                 """)
             )

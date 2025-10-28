@@ -165,12 +165,12 @@ extension PyClossure {
             if let return_type {
                 let rtn_call: ExprSyntaxProtocol = switch return_type.kind {
                 case .optionalType:
-                    MemberAccessExprSyntax(base: OptionalChainingExprSyntax(expression: call), name: .identifier("pyPointer"))
+                    MemberAccessExprSyntax(base: OptionalChainingExprSyntax(expression: call), name: .identifier("pyPointer()"))
                 default:
                     if return_type.isPyPointer {
                         call
                     } else {
-                        MemberAccessExprSyntax(base: call, name: .identifier("pyPointer"))
+                        MemberAccessExprSyntax(base: call, name: .identifier("pyPointer()"))
                     }
                 }
                     
