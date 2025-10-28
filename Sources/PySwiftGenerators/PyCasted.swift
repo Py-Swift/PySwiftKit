@@ -43,7 +43,7 @@ public struct PyCastMacroVectorArgs: ExpressionMacro {
             fatalError("wasnt a member acceess expr")
         }
         let index = args[1]
-        return "try (\(base)).casted(from: \(src.trimmed)[\(index)])"
+        return "try (\(base)).casted(from: \(src.trimmed)[\(index)]!)"
         
     }
 }
