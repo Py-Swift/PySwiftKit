@@ -25,7 +25,4 @@ public func PyTuple_SetItem<T>(_ object: PyPointer, index: Int, value: T) throws
 }
 
 
-fileprivate var _ubyte_format: CChar = 66
-extension UnsafeMutablePointer where Pointee == CChar {
-    public static var ubyte_format: Self { .init(&_ubyte_format) }
-}
+
