@@ -22,13 +22,8 @@ public struct PyCastMacro: ExpressionMacro {
         else {
             fatalError("wasnt a member acceess expr")
         }
-        if labels.contains(where: {$0 == "index"}) {
-            let index = args[1]
-            return "try (\(base)).casted(\(src.trimmed)[\(index)])"
-        } else {
-            return "try (\(base)).casted(\(src))"
-        }
         
+        return "try (\(base)).casted(from: \(src))"
     }
 }
 
@@ -48,7 +43,7 @@ public struct PyCastMacroVectorArgs: ExpressionMacro {
             fatalError("wasnt a member acceess expr")
         }
         let index = args[1]
-        return "try \(base).casted(\(src.trimmed)[\(index)])"
+        return "try \(base).casted(from: \(src.trimmed)[\(index)])"
         
     }
 }
