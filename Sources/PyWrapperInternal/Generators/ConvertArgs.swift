@@ -42,19 +42,19 @@ extension PyConvertType {
             }
         case .py_cast(let t):
             if let index {
-                "#PyCasted(__arg__, index: \(raw: index), to: \(t).self)"
+                "#PyCasted(__args__, index: \(raw: index), to: \(t).self)"
             } else {
                 "#PyCasted(__arg__, to: \(t).self)"
             }
         case .optional_py_cast(let t):
             if let index {
-                "#PyCasted(__arg__, index: \(raw: index), to: \(t).self)"
+                "#PyCasted(__args__, index: \(raw: index), to: \(t).self)"
             } else {
                 "#PyCasted(__arg__, to: \(t).self)"
             }
         case .casted(let t):
             if let index {
-                "#PyCasted(__arg__, index: \(raw: index), to: \(t).self)"
+                "#PyCasted(__args__, index: \(raw: index), to: \(t).self)"
             } else {
                 "#PyCasted(__arg__, to: \(t).self)"
             }
