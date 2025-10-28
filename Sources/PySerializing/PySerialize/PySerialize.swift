@@ -12,8 +12,3 @@ public protocol PySerialize {
     func pyPointer() -> PyPointer
     
 }
-
-
-func test() {
-    
-}
