@@ -13,7 +13,7 @@ public struct PyCastMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) -> ExprSyntax {
         let args = node.arguments.compactMap(\.expression)
-        
+        let labels = node.arguments.compactMap(\.label?.text)
         let src = args[0]
         
         guard
@@ -22,14 +22,13 @@ public struct PyCastMacro: ExpressionMacro {
         else {
             fatalError("wasnt a member acceess expr")
         }
-        
-        switch src.as(ExprSyntaxEnum.self) {
-        case .arrayExpr(let arrayExpr):
+        if labels.contains(where: {$0 == "index"}) {
             let index = args[1]
-            return "try \(base).casted(\(src.trimmed)[\(index)])"
-        default:
-            return "try \(base).casted(\(src))"
+            return "try (\(base)).casted(\(src.trimmed)[\(index)])"
+        } else {
+            return "try (\(base)).casted(\(src))"
         }
+        
     }
 }
 
