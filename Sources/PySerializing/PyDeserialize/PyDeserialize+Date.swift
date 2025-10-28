@@ -9,6 +9,7 @@ import Foundation
 
 extension DateComponents: PyDeserialize {
     public static func casted(from object: PyPointer) throws -> DateComponents {
+        
         var year: Int32 = 0
         var month: Int32 = 0
         var day: Int32 = 0
@@ -71,14 +72,40 @@ extension DateComponents: PyDeserialize {
 
 extension Date: PyDeserialize {
     public static func casted(from object: PyPointer) throws -> Date {
-        let calender = Calendar.current
-        let components = try DateComponents.casted(unsafe: object)
-        return calender.date(from: components)!
+        switch object {
+        case .PyDateTime:
+            let calender = Calendar.current
+            let components = try DateComponents.casted(from: object)
+            return calender.date(from: components)!
+        case .PyFloat:
+            return .init(timeIntervalSince1970: try Double.casted(from: object))
+        case .PyUnicode:
+            let dateFormatter = ISO8601DateFormatter()
+            guard let date = dateFormatter.date(from: try String.casted(from: object)) else {
+                throw PyStandardException.unicodeError
+            }
+            return date
+        default: throw PyStandardException.typeError
+        }
+        
     }
     
     public static func casted(unsafe object: PyPointer) throws -> Date {
-        let calender = Calendar.current
-        let components = try DateComponents.casted(unsafe: object)
-        return calender.date(from: components)!
+        switch object {
+        case .PyDateTime:
+            let calender = Calendar.current
+            let components = try DateComponents.casted(unsafe: object)
+            return calender.date(from: components)!
+        case .PyFloat:
+            return .init(timeIntervalSince1970: try Double.casted(unsafe: object))
+        case .PyUnicode:
+            let dateFormatter = ISO8601DateFormatter()
+            guard let date = dateFormatter.date(from: try String.casted(unsafe: object)) else {
+                throw PyStandardException.unicodeError
+            }
+            return date
+        default: throw PyStandardException.typeError
+        }
+        
     }
 }

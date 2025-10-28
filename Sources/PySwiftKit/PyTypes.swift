@@ -135,5 +135,5 @@ public extension UnsafeMutablePointer where Pointee == PyTypeObject {
 	static let PyFilter: Self = .init(&PyFilter_Type)
 	static let PyMap: Self = .init(&PyMap_Type)
 	static let PyZip: Self = .init(&PyZip_Type)
-	
+    static let PyDateTime: Self = .init(PyDateTime)
 }
