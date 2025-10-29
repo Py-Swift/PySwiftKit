@@ -75,13 +75,13 @@ extension Date: PyDeserialize {
         switch object {
         case .PyDateTime:
             let calender = Calendar.current
-            let components = try DateComponents.casted(from: object)
+            let components = try DateComponents.casted(unsafe: object)
             return calender.date(from: components)!
         case .PyFloat:
-            return .init(timeIntervalSince1970: try Double.casted(from: object))
+            return .init(timeIntervalSince1970: try Double.casted(unsafe: object))
         case .PyUnicode:
             let dateFormatter = ISO8601DateFormatter()
-            guard let date = dateFormatter.date(from: try String.casted(from: object)) else {
+            guard let date = dateFormatter.date(from: try String.casted(unsafe: object)) else {
                 throw PyStandardException.unicodeError
             }
             return date
