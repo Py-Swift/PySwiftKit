@@ -206,9 +206,11 @@ class PyCallableArguments {
     init(node: FreestandingMacroExpansionSyntax) {
         let _macroName = node.macroName.text
         macroName = _macroName
-        
-        types = node.genericArgumentClause?.arguments.map({ generic in
-            generic.argument
+        types = node.genericArgumentClause?.arguments.compactMap({ generic in
+            switch generic.argument {
+            case .type(let t): t
+            default: nil
+            }
         }) ?? []
         setAttributes(arguments: node.arguments)
         

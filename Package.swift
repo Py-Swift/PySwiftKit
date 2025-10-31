@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 import Foundation
 import PackageDescription
 import CompilerPluginSupport
@@ -27,56 +27,78 @@ var platforms: [SupportedPlatform] = [
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.0"),
 ]
 
-let package_targets: [Target] = [
-    .target(
-        name: "CPySwiftObject",
-        dependencies: [
-            "CPython"
-        ],
-        path: "Sources/CPySwiftObject",
-        publicHeadersPath: ".",
+func package_targets() -> [Target] {
+    [
+        .target(
+            name: "CPySwiftObject",
+            dependencies: [
+                "CPython"
+            ],
+            path: "Sources/CPySwiftObject",
+            publicHeadersPath: ".",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySerializing",
+            dependencies: [
+                "CPython",
+                "PySwiftKit",
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySwiftKit",
+            dependencies: [
+                .product(name: "CPython", package: "CPython"),
+                "CPySwiftObject",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        // PyWrapping Related
+        .target(
+            name: "PyProtocols",
+            dependencies: ["CPython"],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PyWrapperInfo",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySwiftWrapper",
+            dependencies: [
+                "PySwiftGenerators",
+                "CPython",
+                "PyWrapperInfo",
+                "PySerializing",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
         
-    ),
-    .target(
-        name: "PySerializing",
-        dependencies: [
-            "CPython",
-            "PySwiftKit",
-        ]
-    ),
-    .target(
-        name: "PySwiftKit",
-        dependencies: [
-            .product(name: "CPython", package: "CPython"),
-            "CPySwiftObject",
-            "PyProtocols"
-        ]
-    ),
-    // PyWrapping Related
-    .target(
-        name: "PyProtocols",
-        dependencies: ["CPython"]
-    ),
-    .target(name: "PyWrapperInfo"),
-    .target(
-        name: "PySwiftWrapper",
-        dependencies: [
-            "PySwiftGenerators",
-            "CPython",
-            "PyWrapperInfo",
-            "PySerializing",
-            "PyProtocols"
-        ]
-    ),
-    
-]
+    ]
+}
+
 
 
 func get_targets() -> [Target] {
-    var targets = package_targets
+    var targets = package_targets()
     
     add_macro_targets(&targets)
     add_test_targets(&targets)

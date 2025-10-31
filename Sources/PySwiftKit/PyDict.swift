@@ -4,6 +4,6 @@
 //
 import CPython
 
-public func PyDict_GetItem() throws -> PyPointer {
-    
-}
+//public func PyDict_GetItem() throws -> PyPointer {
+//    
+//}
