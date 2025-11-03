@@ -6,6 +6,9 @@ import CPython
 import PySwiftKit
 
 
+public typealias PySerializable = PySerialize & PyDeserialize
+
+
 public func PyObject_SetAttr<T>(_ object: PyPointer, key: String, value: T) where T: PySerialize {
     let py_value = value.pyPointer()
     _ = key.withCString { PyObject_SetAttrString(object, $0, py_value) }
