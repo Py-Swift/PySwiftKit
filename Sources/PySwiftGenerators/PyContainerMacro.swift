@@ -178,9 +178,15 @@ struct PyContainerMacro: MemberMacro {
 
 extension PyContainerMacro: ExtensionMacro {
     static func expansion(of node: AttributeSyntax, attachedTo declaration: some DeclGroupSyntax, providingExtensionsOf type: some TypeSyntaxProtocol, conformingTo protocols: [TypeSyntax], in context: some MacroExpansionContext) throws -> [ExtensionDeclSyntax] {
-        
+        let attr_type = AttributedTypeSyntax(
+            specifiers: [],
+            attributes: [.attribute(.init(stringLiteral: "@preconcurrency"))],
+            baseType: TypeSyntax(stringLiteral: "PyDeserialize")
+        )
         let inheritedTypes = InheritedTypeListSyntax {
-            InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "PyDeserialize"))
+            InheritedTypeSyntax(
+                type: attr_type
+            )
             //InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "PyCallProtocol"))
             
         }
