@@ -394,7 +394,8 @@ extension PyTypeObjectStruct {
             //"\(raw: t).pointee.tp_new"
             nil
         default:
-            "\(name)\(sep)tp_new".expr
+            //"\(name)\(sep)tp_new".expr
+            "PySwiftObject_New".expr
         }
     }
     
@@ -465,15 +466,18 @@ extension PyTypeObjectStruct {
         )
     }
     
-    public func createPyType() -> VariableDeclSyntax {
+    public func createPyType(swift_mode: SwiftMode) -> VariableDeclSyntax {
         let modifiers: DeclModifierListSyntax = .init {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             DeclModifierSyntax.public
             if !external {
                 DeclModifierSyntax.static
             }
         }
         let pytype_name = external ? "\(name)_PyType" : "PyType"
-        let pyTypeObject = external ? "\(name)_pyTypeObject" : "pyTypeObject"
+        let pyTypeObject = external ? "\(swift_mode == .v6 ? "@MainActor" : "")\(name)_pyTypeObject" : "pyTypeObject"
         return .init(
             modifiers: modifiers, .let,
             name: .init(stringLiteral: pytype_name),

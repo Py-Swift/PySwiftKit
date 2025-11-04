@@ -76,7 +76,7 @@ class VectorArgs {
         func insert() -> CodeBlockItemSyntax {
             switch option {
             case .arg:
-                "__args__[\(raw: index)] = \(raw: name).pyPointer"
+                "__args__[\(raw: index)] = \(raw: name).pyPointer()"
             case .cls(let string):
                 "__args__[\(raw: index)] = \(raw: string)"
             }
@@ -228,7 +228,7 @@ extension PyCallGenerator {
             case 0: ""
             case 1:
                 let parameter = parameters.first!
-                "let arg = \(raw: (parameter.secondName ?? parameter.firstName)).pyPointer"
+                "let arg = \(raw: (parameter.secondName ?? parameter.firstName)).pyPointer()"
             default:
                 VectorArgs(parameters: parameters, method: method).pre
 //                "let __args__ = VectorCallArgs.allocate(capacity: \(raw: arg_count))"

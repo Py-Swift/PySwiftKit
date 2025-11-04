@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftSyntax
-
+import PyWrapperInfo
 
 
 public struct PyGetSetDefs {
@@ -15,11 +15,13 @@ public struct PyGetSetDefs {
     var cls: TypeSyntax
     var properties: [ VariableDeclSyntax ]
     var external: Bool
+    var swift_mode: SwiftMode
     
-    public init(cls: TypeSyntax, properties: [VariableDeclSyntax], external: Bool = false) {
+    public init(cls: TypeSyntax, properties: [VariableDeclSyntax], external: Bool = false, swift_mode: SwiftMode) {
         self.cls = cls
         self.properties = properties
         self.external = external
+        self.swift_mode = swift_mode
     }
     
     public var arrayExpr: ArrayExprSyntax {
@@ -37,6 +39,9 @@ public struct PyGetSetDefs {
         let name = external ? "\(cls.trimmedDescription)_PyGetSetDefs" : "PyGetSetDefs"
         let modifiers = DeclModifierListSyntax {
             DeclModifierSyntax.fileprivate
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if !external {
                 DeclModifierSyntax.static
             }

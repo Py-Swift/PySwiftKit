@@ -16,6 +16,7 @@ public class PyClass {
     var base_type: PyTypeObjectBaseType
     var unretained: Bool
     var external: Bool
+    var swift_mode: SwiftMode
     
     public init(
         name: String,
@@ -23,13 +24,15 @@ public class PyClass {
         bases: [PyClassBase] = [],
         base_type: PyTypeObjectBaseType = .none,
         unretained: Bool = false,
-        external: Bool = false
+        external: Bool = false,
+        swift_mode: SwiftMode
     ) {
         self.name = name
         self.bases = bases
         self.base_type = base_type
         self.unretained = unretained
         self.external = external
+        self.swift_mode = swift_mode
         if cls.isPyContainer {
             let signature = FunctionSignatureSyntax.init(
                 parameterClause: .init(parameters: .init {
@@ -60,13 +63,15 @@ public class PyClass {
         bases: [PyClassBase] = [],
         base_type: PyTypeObjectBaseType = .none,
         unretained: Bool = false,
-        external: Bool = false
+        external: Bool = false,
+        swift_mode: SwiftMode
     ) {
         self.name = name
         self.bases = bases
         self.base_type = base_type
         self.unretained = unretained
         self.external = external
+        self.swift_mode = swift_mode
         let inits = ext.memberBlock.members.compactMap { member in
             let decl = member.decl
             if decl.kind == .initializerDecl {
@@ -237,7 +242,7 @@ public extension PyClass {
             "PySwift_initproc"
         }
         return .init(
-            modifiers: [ .static ], .var,
+            modifiers: [ .static ], .let,
             name: .init(stringLiteral: external_name ?? "tp_init"),
             type: .init(type: init_type),
             initializer: .init(value: create_tp_init)
@@ -264,12 +269,12 @@ public extension PyClass {
     func tp_new() -> VariableDeclSyntax {
 
         return .init(
-            modifiers: [ .init(name: .keyword(.static))], .var,
+            modifiers: [ .init(name: .keyword(.static))], .let,
 //            modifiers: [.init(name: .keyword(.fileprivate)), .init(name: .keyword(.static))], .var,
             name: .init(stringLiteral: "tp_new"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_newfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
-                { type, _, _ -> PyPointer? in PySwiftObject_New(type) }                
+                { type, _, _ -> PyPointer? in _PySwiftObject_New(type) }                
                 """))
         ).with(\.leadingTrivia, .newlines(2)).with(\.trailingTrivia, .newlines(2))
     }
@@ -294,7 +299,7 @@ public extension PyClass {
     func tp_dealloc(target: String? = nil) -> VariableDeclSyntax {
         
         return .init(
-            modifiers: [ .static ], .var,
+            modifiers: [ .static ], .let,
             name: .init(stringLiteral: "tp_dealloc"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_destructor")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -324,6 +329,32 @@ public extension PyClass {
     
     func asPyPointer(_ external_name: String?) -> DeclSyntax {
         let pytype_name = if let external_name { "\(external_name)_PyType"} else { "\(name).PyType" }
+        let prefix = switch swift_mode {
+            case .v5: ""
+            case .v6: "@MainActor "
+        }
+        return """
+        \(raw: prefix)public static func asPyPointer(_ target: \(raw: name)) -> PyPointer {
+            return PySwiftObject_Create(\(raw: pytype_name), Unmanaged.passRetained(target).toOpaque())!
+        }
+        """
+    }
+    
+    func asUnretainedPyPointer(_ external_name: String?) -> DeclSyntax {
+        let pytype_name = if let external_name { "\(external_name)_PyType"} else { "\(name).PyType" }
+        let prefix = switch swift_mode {
+            case .v5: ""
+            case .v6: "@MainActor "
+        }
+        return """
+        \(raw: prefix)public static func asPyPointer(unretained target: \(raw: name)) -> PyPointer {
+            return PySwiftObject_Create(\(raw: pytype_name), Unmanaged.passUnretained(target).toOpaque())!
+        }
+        """
+    }
+    
+    func _asPyPointer(_ external_name: String?) -> DeclSyntax {
+        let pytype_name = if let external_name { "\(external_name)_PyType"} else { "\(name).PyType" }
         return """
         public static func asPyPointer(_ target: \(raw: name)) -> PyPointer {
             let new = PySwiftObject_New(\(raw: pytype_name))
@@ -333,7 +364,7 @@ public extension PyClass {
         """
     }
     
-    func asUnretainedPyPointer(_ external_name: String?) -> DeclSyntax {
+    func _asUnretainedPyPointer(_ external_name: String?) -> DeclSyntax {
         let pytype_name = if let external_name { "\(external_name)_PyType"} else { "\(name).PyType" }
         return """
         public static func asPyPointer(unretained target: \(raw: name)) -> PyPointer {

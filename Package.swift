@@ -64,6 +64,17 @@ func package_targets() -> [Target] {
                 .swiftLanguageMode(.v5)
             ]
         ),
+        .target(
+            name: "PySwiftConcurrency",
+            dependencies: [
+                .product(name: "CPython", package: "CPython"),
+                "CPySwiftObject",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
         // PyWrapping Related
         .target(
             name: "PyProtocols",

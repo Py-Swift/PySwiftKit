@@ -108,7 +108,7 @@ extension PyCallableProtocol {
                     }
                     "return result"
                 } else {
-                    "let _result = try \(raw: returnType)(object: result)"
+                    "let _result = try #PyCasted(result, to: \(raw: returnType).self)"
                     "Py_DecRef(result)"
                     if gil {
                         "PyGILState_Release(gil)"
@@ -183,7 +183,7 @@ extension PyCallableProtocol where S == FunctionTypeSyntax, P == TupleTypeElemen
             case 0: ""
             case 1:
                 //let parameter = parameters.first!
-                "let arg = a.pyPointer"
+                "let arg = a.pyPointer()"
             default:
                 "let __args__ = VectorCallArgs.allocate(capacity: \(raw: parameters_count))"
                 for (index, _) in parameters.enumerated() {

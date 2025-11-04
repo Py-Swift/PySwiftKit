@@ -191,11 +191,11 @@ extension PyContainerMacro: ExtensionMacro {
             
         }
         return [
-            ExtensionDeclSyntax(
-                extendedType: type,
-                inheritanceClause: .init(inheritedTypes: inheritedTypes),
-                memberBlock: .init(members: [])
-            )
+//            ExtensionDeclSyntax(
+//                extendedType: type,
+//                inheritanceClause: .init(inheritedTypes: inheritedTypes),
+//                memberBlock: .init(members: [])
+//            )
         ]
     }
 }

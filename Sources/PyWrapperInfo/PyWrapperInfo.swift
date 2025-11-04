@@ -22,6 +22,11 @@ public enum PyClassBase: String, CaseIterable {
     case hash
 }
 
+public enum SwiftMode {
+    case v5
+    case v6
+}
+
 extension Array where Element == PyClassBase {
     public static var all: Self { PyClassBase.allCases }
 }

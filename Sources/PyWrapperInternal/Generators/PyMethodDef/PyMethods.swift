@@ -15,13 +15,15 @@ public class PyMethods {
     let module_or_class: Bool
     let external: Bool
     let base_type: PyTypeObjectBaseType
+    let swift_mode: SwiftMode
     
-    public init(cls: String, input: [FunctionDeclSyntax], module_or_class: Bool = false, external: Bool = false, base_type: PyTypeObjectBaseType) {
+    public init(cls: String, input: [FunctionDeclSyntax], module_or_class: Bool = false, external: Bool = false, base_type: PyTypeObjectBaseType, swift_mode: SwiftMode) {
         self.cls = cls
         self.input = input
         self.module_or_class = module_or_class
         self.external = external
         self.base_type = base_type
+        self.swift_mode = swift_mode
     }
     
 }
@@ -45,6 +47,10 @@ extension PyMethods {
     public var output: DeclSyntax {
         
         let modifiers: DeclModifierListSyntax = .init {
+            
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             DeclModifierSyntax.fileprivate
             if !external {
                 DeclModifierSyntax.static

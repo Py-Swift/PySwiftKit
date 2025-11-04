@@ -88,6 +88,7 @@ extension DeclModifierSyntax {
     static var `private`: Self { .init(name: .keyword(.private)) }
     static var `fileprivate`: Self { .init(name: .keyword(.fileprivate)) }
     static var `static`: Self { .init(name: .keyword(.static)) }
+    static var MainActor: Self { .init(name: .identifier("@MainActor"))}
 }
 
 

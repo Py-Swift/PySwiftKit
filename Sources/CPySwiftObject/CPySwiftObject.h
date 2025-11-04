@@ -22,7 +22,10 @@ PyModuleDef_Base _PyModuleDef_HEAD_INIT;
 //long PySwiftObject_dict_offset;
 long PySwiftObject_size;
 
-PyObject* PySwiftObject_New(PyTypeObject *type);
+PyObject* PySwiftObject_New(PyTypeObject *type, PyObject *x, PyObject* y);
+PyObject* PySwiftObject_Create(PyTypeObject *type, void *swift_object);
+PySwiftObject* _PySwiftObject_Create(PyTypeObject *type, void *swift_object);
+PyObject* _PySwiftObject_New(PyTypeObject *type);
 PySwiftObject* PySwiftObject_Cast(PyObject* o);
 
 

@@ -56,7 +56,8 @@ public macro PyClass(
     unretained: Bool = false,
     bases: [PyClassBase] = [],
     base_type: PyClassBaseType = .none,
-    external: Bool = false
+    external: Bool = false,
+    swift_mode: SwiftMode = .v5
 ) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
 
 @attached(member, names: arbitrary)
@@ -65,7 +66,8 @@ public macro PyClassByExtension(
     unretained: Bool = false,
     bases: [PyClassBase] = [],
     expr: String? = nil,
-    external: Bool = false
+    external: Bool = false,
+    swift_mode: SwiftMode = .v5
 ) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
 
 
@@ -82,4 +84,8 @@ public macro PyProperty(readonly: Bool = false) = #externalMacro(module: "PySwif
         PyDeserialize,
     names: arbitrary
 )
-public macro PyContainer(name: String? = nil, weak_ref: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyContainerMacro")
+public macro PyContainer(
+    name: String? = nil,
+    weak_ref: Bool = false,
+    swift_mode: SwiftMode = .v5
+) = #externalMacro(module: "PySwiftGenerators", type: "PyContainerMacro")

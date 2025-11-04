@@ -10,6 +10,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import PyWrapperInternal
+import PyWrapperInfo
 
 extension AttributeListSyntax.Element {
     var isPyFunction: Bool {
@@ -31,6 +32,11 @@ extension AttributeListSyntax.Element {
     var isPyPropertyEx: Bool {
         trimmedDescription.contains("#PyPropertyEx")
     }
+    
+    var isMainActor: Bool {
+        trimmedDescription.contains("@MainActor")
+        
+    }
 }
 
 extension AttributeListSyntax {
@@ -42,6 +48,9 @@ extension AttributeListSyntax {
     }
     var isPyProperty: Bool {
         contains(where: \.isPyProperty)
+    }
+    var isMainActor: Bool {
+        contains(where: \.isMainActor)
     }
 }
 
@@ -57,6 +66,12 @@ extension FunctionDeclSyntax {
 extension VariableDeclSyntax {
     var isPyProperty: Bool {
         attributes.isPyProperty
+    }
+}
+
+extension ClassDeclSyntax {
+    var isMainActor: Bool {
+        attributes.isMainActor
     }
 }
 
@@ -89,7 +104,7 @@ struct PySwiftModuleGenerator: MemberMacro {
         
         
         return [
-            PyMethods(cls: module_name.text, input: module_functions, module_or_class: true, base_type: .none).output,
+            PyMethods(cls: module_name.text, input: module_functions, module_or_class: true, base_type: .none, swift_mode: .v5).output,
             .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count).variDecl)
         ]
     }
