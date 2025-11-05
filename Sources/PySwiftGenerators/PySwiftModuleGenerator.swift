@@ -52,6 +52,11 @@ extension AttributeListSyntax {
     var isMainActor: Bool {
         contains(where: \.isMainActor)
     }
+    var isPublic: Bool {
+        contains { element in
+            element.trimmedDescription == "public"
+        }
+    }
 }
 
 extension FunctionDeclSyntax {
@@ -72,6 +77,9 @@ extension VariableDeclSyntax {
 extension ClassDeclSyntax {
     var isMainActor: Bool {
         attributes.isMainActor
+    }
+    var isPublic: Bool {
+        attributes.isPublic
     }
 }
 

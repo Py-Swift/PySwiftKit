@@ -277,7 +277,7 @@ struct PySwiftClassGenerator: MemberMacro {
             case .classDecl:
                 if info.external { return [] }
                 let cls_decl = declaration.cast(ClassDeclSyntax.self)
-                
+                let isPublic = declaration.attributes.isPublic
                 
                 let cls_name = cls_decl.name.text
                 
@@ -303,6 +303,7 @@ struct PySwiftClassGenerator: MemberMacro {
                 if hasMethods { type_struct_options.append(.hasMethods) }
                 if hasGetSets { type_struct_options.append(.hasGetSets) }
                 if info.external { type_struct_options.append(.isExternal) }
+                if isPublic { type_struct_options.append(.isPublic) }
                 
                 let type_struct = PyTypeObjectStruct(
                     name: cls_name,
@@ -321,8 +322,9 @@ struct PySwiftClassGenerator: MemberMacro {
                     case .v5: ""
                     case .v6: "@MainActor "
                 }
+                let publicString = isPublic ? "public " : ""
                 var decls: [DeclSyntax] = [
-                    "\n\(raw: swift6_prefix)static var pyTypeObject = \(raw: type_struct.output)",
+                    "\n\(raw: swift6_prefix)\(raw: publicString)static var pyTypeObject = \(raw: type_struct.output)",
                     .init(type_struct.createPyType(swift_mode: swift_mode))
                 ]
                 
