@@ -260,7 +260,7 @@ extension ObjectInitializer {
                     if parameter.type.isPyPointer {
                         "\(raw: name) = try PySwiftKit.PyDict_GetItem(kw, \(literal: name.trimmed.text))"
                     } else {
-                        "\(raw: name) = try PyDict_GetItem<\(raw: parameter.type)>(kw, key: \(literal: name.trimmed.text))"
+                        "\(raw: name) = try PyDict_GetItem(kw, key: \(literal: name.trimmed.text))"
                     }
                 }
             }
