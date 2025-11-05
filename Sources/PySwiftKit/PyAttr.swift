@@ -12,3 +12,7 @@ public func PyObject_GetAttr(_ object: PyPointer, key: String) throws -> PyPoint
         throw PyStandardException.keyError
     }
 }
+
+public func PyObject_HasAttr(_ object: PyPointer, _ key: String) -> Bool {
+    key.withCString({PyObject_HasAttrString(object, $0) == 1})
+}
