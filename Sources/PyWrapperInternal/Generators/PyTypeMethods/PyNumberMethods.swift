@@ -6,6 +6,7 @@
 //
 
 import SwiftSyntax
+import PyWrapperInfo
 
 
 fileprivate extension String {
@@ -88,6 +89,7 @@ struct PyNumberMethodsGenerator {
     
     let cls: String
     let external: Bool
+    let swift_mode: SwiftMode
     
     var methods: [PyNumberMethodProtocol] {
         var out: [PyNumberMethodProtocol] = []
@@ -132,6 +134,9 @@ struct PyNumberMethodsGenerator {
             
         }.with(\.rightParen, .rightParenToken(leadingTrivia: .newline))
         let modifiers = DeclModifierListSyntax {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if !external {
                 DeclModifierSyntax.static
             } else {

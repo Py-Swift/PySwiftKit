@@ -6,6 +6,7 @@
 //
 import Foundation
 import SwiftSyntax
+import PyWrapperInfo
 
 protocol PyMappingMethodProtocol {
     var label: String { get }
@@ -25,7 +26,8 @@ struct PyMappingMethodsGenerator {
 	
     let cls: String
     let external: Bool
-	
+    let swift_mode: SwiftMode
+    
 	var methods: [any PyMappingMethodProtocol] {
 		return [
 			_mp_length(cls: cls),
@@ -42,6 +44,9 @@ struct PyMappingMethodsGenerator {
 		}.with(\.rightParen, .rightParenToken(leadingTrivia: .newline))
         let name = external ? "\(cls)_tp_as_mapping" : "tp_as_mapping"
         let modifiers = DeclModifierListSyntax {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if external {
                 DeclModifierSyntax.fileprivate
             } else {
@@ -58,10 +63,11 @@ struct PyMappingMethodsGenerator {
 		
 	}
 	
-    init(cls: String, external: Bool = false) {
-		self.cls = cls
+    init(cls: String, external: Bool = false, swift_mode: SwiftMode) {
+        self.cls = cls
         self.external = external
-	}
+        self.swift_mode = swift_mode
+    }
 	
 }
 

@@ -6,14 +6,19 @@
 
 import Foundation
 import SwiftSyntax
+import PyWrapperInfo
 
 
 struct PyBufferGenerator {
     let cls: String
     let external: Bool
+    let swift_mode: SwiftMode
     
     var variDecl: VariableDeclSyntax {
         let modifiers = DeclModifierListSyntax {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if !external {
                 DeclModifierSyntax.static
             } else {
@@ -30,8 +35,9 @@ struct PyBufferGenerator {
     }
     
     
-    init(cls: String, external: Bool = false) {
+    init(cls: String, external: Bool, swift_mode: SwiftMode) {
         self.cls = cls
         self.external = external
+        self.swift_mode = swift_mode
     }
 }

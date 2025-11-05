@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftSyntax
+import PyWrapperInfo
 
 
 fileprivate extension String {
@@ -22,6 +23,7 @@ struct PyAsyncMethodsGenerator {
     
     let cls: String
     let external: Bool
+    let swift_mode: SwiftMode
     
     var variDecl: VariableDeclSyntax {
         let call = FunctionCallExprSyntax(callee: ".init".expr) {
@@ -32,6 +34,9 @@ struct PyAsyncMethodsGenerator {
             _am_send(cls: cls).labeledExpr()
         }.with(\.rightParen, .rightParenToken(leadingTrivia: .newline))
         let modifiers = DeclModifierListSyntax {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if !external {
                 DeclModifierSyntax.static
             } else {
@@ -57,9 +62,10 @@ struct PyAsyncMethodsGenerator {
         ]
     }
     
-    init(cls: String, external: Bool = false) {
+    init(cls: String, external: Bool = false, swift_mode: SwiftMode) {
         self.cls = cls
         self.external = external
+        self.swift_mode = swift_mode
     }
     
 }

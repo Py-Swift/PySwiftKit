@@ -99,15 +99,15 @@ extension PyClass {
         let base_methods = bases.lazy.compactMap {[unowned self] base -> VariableDeclSyntax? in
             switch base {
             case .async:
-                PyAsyncMethodsGenerator(cls: name).variDecl
+                    PyAsyncMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
             case .sequence:
-                PySequenceMethodsGenerator(cls: name).variDecl
+                PySequenceMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
             case .mapping:
-                PyMappingMethodsGenerator(cls: name).variDecl
+                PyMappingMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
             case .buffer:
                 nil
             case .number:
-                PyNumberMethodsGenerator(cls: name, external: false).variDecl
+                PyNumberMethodsGenerator(cls: name, external: false, swift_mode: swift_mode).variDecl
             case .hash:
                 tp_hash(target: name)
             case .str:
@@ -135,15 +135,15 @@ extension PyClass {
                 for base in self.bases {
                     switch base {
                     case .async:
-                        PyAsyncMethodsGenerator(cls: name).variDecl
+                        PyAsyncMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
                     case .sequence:
-                        PySequenceMethodsGenerator(cls: name).variDecl
+                        PySequenceMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
                     case .mapping:
-                        PyMappingMethodsGenerator(cls: name).variDecl
+                        PyMappingMethodsGenerator(cls: name, swift_mode: swift_mode).variDecl
                     case .buffer:
                         ""
                     case .number:
-                        PyNumberMethodsGenerator(cls: name, external: false).variDecl
+                        PyNumberMethodsGenerator(cls: name, external: false, swift_mode: swift_mode).variDecl
                     case .hash:
                         tp_hash(target: name)
                     case .str:
@@ -180,15 +180,15 @@ extension PyClass {
             contentsOf: self.bases.compactMap{ base -> VariableDeclSyntax? in
                 switch base {
                 case .async:
-                    PyAsyncMethodsGenerator(cls: name, external: true).variDecl
+                    PyAsyncMethodsGenerator(cls: name, external: true, swift_mode: swift_mode).variDecl
                 case .sequence:
-                    PySequenceMethodsGenerator(cls: name, external: true).variDecl
+                    PySequenceMethodsGenerator(cls: name, external: true, swift_mode: swift_mode).variDecl
                 case .mapping:
-                    PyMappingMethodsGenerator(cls: name, external: true).variDecl
+                    PyMappingMethodsGenerator(cls: name, external: true, swift_mode: swift_mode).variDecl
                 case .buffer:
-                    PyBufferGenerator(cls: name, external: true).variDecl
+                    PyBufferGenerator(cls: name, external: true, swift_mode: swift_mode).variDecl
                 case .number:
-                    PyNumberMethodsGenerator(cls: name, external: true).variDecl
+                    PyNumberMethodsGenerator(cls: name, external: true, swift_mode: swift_mode).variDecl
                 case .hash:
                     _tp_hash(target: name)
                 case .str:

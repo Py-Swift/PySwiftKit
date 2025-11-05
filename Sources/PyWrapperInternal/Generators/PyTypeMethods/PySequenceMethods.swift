@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftSyntax
+import PyWrapperInfo
 
 fileprivate extension String {
 	func asLabeledExpr(_ expression: ExprSyntaxProtocol) -> LabeledExprSyntax {
@@ -40,6 +41,7 @@ struct PySequenceMethodsGenerator {
 	
 	let cls: String
     let external: Bool
+    let swift_mode: SwiftMode
 	
 	var methods: [any PySequenceMethodProtocol] {
 		return [
@@ -78,6 +80,9 @@ struct PySequenceMethodsGenerator {
         
         let name = external ? "\(cls)_tp_as_sequence" : "tp_as_sequence"
         let modifiers = DeclModifierListSyntax {
+            if swift_mode == .v6 {
+                DeclModifierSyntax.MainActor
+            }
             if external {
                 DeclModifierSyntax.fileprivate
             } else {
@@ -94,10 +99,11 @@ struct PySequenceMethodsGenerator {
 		
 	}
 	
-    init(cls: String, external: Bool = false) {
-		self.cls = cls
+    init(cls: String, external: Bool = false, swift_mode: SwiftMode) {
+        self.cls = cls
         self.external = external
-	}
+        self.swift_mode = swift_mode
+    }
 	
 }
 
