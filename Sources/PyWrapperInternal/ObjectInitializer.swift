@@ -280,7 +280,7 @@ extension ObjectInitializer {
                 if parameter.type.isPyPointer {
                     "\(raw: name) = try PySwiftKit.PyTuple_GetItem(_args_, \(raw: i))"
                 } else {
-                    "\(raw: name) = try PyTuple_GetItem<\(raw: parameter.type)>(_args_, index: \(raw: i))"
+                    "\(raw: name) = try PyTuple_GetItem(_args_, index: \(raw: i))"
                 }
             }
         }
@@ -296,9 +296,9 @@ extension IfExprSyntax {
         
         let elseBody = CodeBlockSyntax {
             if pyPointer {
-                "\(raw: key) = try PyDict_GetItem<\(raw: t)>(kw, \(literal: key))"
+                "\(raw: key) = try PyDict_GetItem(kw, \(literal: key))"
             } else {
-                "\(raw: key) = try PyDict_GetItem<\(raw: t)>(kw, key: \(literal: key))"
+                "\(raw: key) = try PyDict_GetItem(kw, key: \(literal: key))"
             }
         }
         
@@ -306,7 +306,7 @@ extension IfExprSyntax {
             if pyPointer {
                 "\(raw: key) = try PySwiftKit.PyTuple_GetItem(_args_, \(raw: index))"
             } else {
-                "\(raw: key) = try PyTuple_GetItem<\(raw: t)>(_args_, index: \(raw: index))"
+                "\(raw: key) = try PyTuple_GetItem(_args_, index: \(raw: index))"
             }
         }
     }
