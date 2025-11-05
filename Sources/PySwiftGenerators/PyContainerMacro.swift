@@ -99,7 +99,7 @@ struct PyContainerMacro: MemberMacro {
             for py_call in py_calls {
                 """
                 _\(raw: py_call.name) = if PyObject_HasAttr(object, "\(raw: py_call.name)") {
-                    PyObject_GetAttr(object, "\(raw: py_call.name)")!
+                    try PyObject_GetAttr(object, key: "\(raw: py_call.name)")
                 } else { fatalError() }
                 """
             }
