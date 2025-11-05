@@ -499,7 +499,7 @@ extension PySwiftClassGenerator: ExtensionMacro {
                     ))
                 case .v6:
                     if cls.isMainActor {
-                        inheritedTypes.append(.init(type: TypeSyntax.PyClassProtocol))
+                        //inheritedTypes.append(.init(type: TypeSyntax.PyClassProtocol))
                         output.append(.init(
                             extendedType: TypeSyntax(stringLiteral: cls.name.text),
                             inheritanceClause: .init {
