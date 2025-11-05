@@ -394,7 +394,7 @@ public extension PyClass {
         var modifiers = base_modifiers
         modifiers.append(.static)
         return .init(
-            modifiers: modifiers, .var,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "tp_hash"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_hashfunc")),
             initializer: .init(value: expr).with(\.trailingTrivia, .newlines(2))
@@ -423,7 +423,7 @@ public extension PyClass {
         modifiers.append(.static)
         
         return .init(
-            modifiers: modifiers, .var,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "tp_str"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -457,7 +457,7 @@ public extension PyClass {
         modifiers.append(.static)
         
         return .init(
-            modifiers: modifiers, .var,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "tp_repr"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -489,7 +489,7 @@ public extension PyClass {
         var modifiers = base_modifiers
         modifiers.append(.static)
         return .init(
-            modifiers: modifiers, .var,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "tp_iter"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_getiterfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
