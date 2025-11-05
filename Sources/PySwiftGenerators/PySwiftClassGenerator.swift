@@ -277,7 +277,7 @@ struct PySwiftClassGenerator: MemberMacro {
             case .classDecl:
                 if info.external { return [] }
                 let cls_decl = declaration.cast(ClassDeclSyntax.self)
-                let isPublic = declaration.attributes.isPublic
+                let isPublic = cls_decl.isPublic
                 
                 let cls_name = cls_decl.name.text
                 
