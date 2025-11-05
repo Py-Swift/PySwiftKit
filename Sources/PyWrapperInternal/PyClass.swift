@@ -375,15 +375,26 @@ public extension PyClass {
         """
     }
     
+    fileprivate var base_modifiers: DeclModifierListSyntax {
+        var base = DeclModifierListSyntax()
+        switch swift_mode {
+            case .v5: break
+            case .v6:
+                base.append(.MainActor)
+        }
+        return base
+    }
+    
     func tp_hash(target: String) -> VariableDeclSyntax {
         let expr = ExprSyntax(stringLiteral: """
             { __self__ -> Int in
                 Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__hash__()
             }
             """).as(ClosureExprSyntax.self)!
-        
+        var modifiers = base_modifiers
+        modifiers.append(.static)
         return .init(
-            modifiers: [ .static], .var,
+            modifiers: modifiers, .var,
             name: .init(stringLiteral: "tp_hash"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_hashfunc")),
             initializer: .init(value: expr).with(\.trailingTrivia, .newlines(2))
@@ -396,9 +407,11 @@ public extension PyClass {
                 Unmanaged<\(target)>.fromOpaque(__self__!.pointee.swift_ptr).takeUnretainedValue().__hash__()
             }
             """).as(ClosureExprSyntax.self)!
+        var modifiers = base_modifiers
+        modifiers.append(.fileprivate)
         
         return .init(
-            modifiers: [ .fileprivate ], .let,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "\(target)_tp_hash"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_hashfunc")),
             initializer: .init(value: expr).with(\.trailingTrivia, .newlines(2))
@@ -406,8 +419,11 @@ public extension PyClass {
     }
     
     func tp_str(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.static)
+        
         return .init(
-            modifiers: [.static ], .var,
+            modifiers: modifiers, .var,
             name: .init(stringLiteral: "tp_str"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -420,8 +436,11 @@ public extension PyClass {
     }
     
     func _tp_str(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.fileprivate)
+        
         return .init(
-            modifiers: [ .fileprivate ], .let,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "\(target)_tp_str"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -434,8 +453,11 @@ public extension PyClass {
     }
     
     func tp_repr(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.static)
+        
         return .init(
-            modifiers: [ .static ], .var,
+            modifiers: modifiers, .var,
             name: .init(stringLiteral: "tp_repr"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -448,8 +470,10 @@ public extension PyClass {
     }
     
     func _tp_repr(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.fileprivate)
         return .init(
-            modifiers: [ .fileprivate ], .let,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "\(target)_tp_repr"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_reprfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -462,8 +486,10 @@ public extension PyClass {
     }
     
     func tp_iter(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.static)
         return .init(
-            modifiers: [ .static ], .var,
+            modifiers: modifiers, .var,
             name: .init(stringLiteral: "tp_iter"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_getiterfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -479,8 +505,10 @@ public extension PyClass {
     }
     
     func _tp_iter(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.fileprivate)
         return .init(
-            modifiers: [ .fileprivate ], .let,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "\(target)_tp_iter"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_getiterfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -496,8 +524,10 @@ public extension PyClass {
     }
     
     func tp_iternext(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.static)
         return .init(
-            modifiers: [ .static ], .var,
+            modifiers: modifiers, .var,
             name: .init(stringLiteral: "tp_iternext"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_iternextfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
@@ -510,8 +540,10 @@ public extension PyClass {
     }
     
     func _tp_iternext(target: String) -> VariableDeclSyntax {
+        var modifiers = base_modifiers
+        modifiers.append(.fileprivate)
         return .init(
-            modifiers: [ .fileprivate ], .let,
+            modifiers: modifiers, .let,
             name: .init(stringLiteral: "\(target)_tp_iternext"),
             type: .init(type: TypeSyntax(stringLiteral: "PySwift_iternextfunc")),
             initializer: .init(value: ExprSyntax(stringLiteral: """
