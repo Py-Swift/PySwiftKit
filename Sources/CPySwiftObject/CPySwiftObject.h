@@ -28,7 +28,7 @@ PySwiftObject* _PySwiftObject_Create(PyTypeObject *type, void *swift_object);
 PyObject* _PySwiftObject_New(PyTypeObject *type);
 PySwiftObject* PySwiftObject_Cast(PyObject* o);
 
-inline
+//inline
 void* PyObject_AS_SwiftPtr(PyObject* o);
 
 
