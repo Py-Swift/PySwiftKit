@@ -19,28 +19,43 @@ public struct PyTypeObjectStruct {
     let hasMethods: Bool
     let hasGetSets: Bool
     let external: Bool
-    
+    let isPublic: Bool
     
     public init(
         name: String,
         pyname: String,
         bases: [PyClassBase],
         base_type: PyTypeObjectBaseType = .none,
-        unretained: Bool = false,
-        hasMethods: Bool,
-        hasGetSets: Bool,
-        external: Bool
+        options: [Option]
+//        unretained: Bool = false,
+//        hasMethods: Bool,
+//        hasGetSets: Bool,
+//        external: Bool
     ) {
         self.name = name
         self.pyname = pyname
         self.bases = bases
         self.base_type = base_type
-        self.unretained = unretained
-        self.hasMethods = hasMethods
-        self.hasGetSets = hasGetSets
-        self.external = external
+        unretained = options.contains(.unRetained)
+        hasMethods = options.contains(.hasMethods)
+        hasGetSets = options.contains(.hasGetSets)
+        external = options.contains(.isExternal)
+        isPublic = options.contains(.isPublic)
+//        self.unretained = unretained
+//        self.hasMethods = hasMethods
+//        self.hasGetSets = hasGetSets
+//        self.external = external
     }
     
+    
+    public enum Option {
+        case unRetained
+        case hasMethods
+        case hasGetSets
+        case isExternal
+        case isPublic
+        
+    }
 }
 
 extension PyTypeObjectLabels {
@@ -477,7 +492,7 @@ extension PyTypeObjectStruct {
             }
         }
         let pytype_name = external ? "\(name)_PyType" : "PyType"
-        let pyTypeObject = external ? "\(swift_mode == .v6 ? "@MainActor" : "")\(name)_pyTypeObject" : "pyTypeObject"
+        let pyTypeObject = external ? "\(name)_pyTypeObject" : "pyTypeObject"
         return .init(
             modifiers: modifiers, .let,
             name: .init(stringLiteral: pytype_name),

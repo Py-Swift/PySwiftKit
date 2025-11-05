@@ -159,15 +159,17 @@ final class PyClassResult {
         let hasMethods = py_functions.count > 0
         let hasGetSets = py_properties.count > 0
         
+        var type_struct_options: [PyTypeObjectStruct.Option] = []
+        
+        if hasMethods { type_struct_options.append(.hasMethods) }
+        if hasGetSets { type_struct_options.append(.hasGetSets) }
+        
         let type_struct = PyTypeObjectStruct(
             name: cls_name,
             pyname: info.name ?? cls_name,
             bases: info.bases,
             base_type: info.base_type,
-            unretained: info.unretained,
-            hasMethods: hasMethods,
-            hasGetSets: hasGetSets,
-            external: true
+            options: type_struct_options
         )
         let py_cls = PyClass(
             name: cls_name,
@@ -217,15 +219,17 @@ final class PyClassResult {
         let hasMethods = py_functions.count > 0
         let hasGetSets = py_properties.count > 0
         
+        var type_struct_options: [PyTypeObjectStruct.Option] = [.isExternal]
+        
+        if hasMethods { type_struct_options.append(.hasMethods) }
+        if hasGetSets { type_struct_options.append(.hasGetSets) }
+        
         let type_struct = PyTypeObjectStruct(
             name: cls_name,
             pyname: info.name ?? cls_name,
             bases: info.bases,
             base_type: info.base_type,
-            unretained: info.unretained,
-            hasMethods: hasMethods,
-            hasGetSets: hasGetSets,
-            external: true
+            options: type_struct_options
         )
         let py_cls = PyClass(
             name: cls_name,
@@ -294,15 +298,18 @@ struct PySwiftClassGenerator: MemberMacro {
                 let hasMethods = py_functions.count > 0
                 let hasGetSets = py_properties.count > 0
                 
+                var type_struct_options: [PyTypeObjectStruct.Option] = []
+                
+                if hasMethods { type_struct_options.append(.hasMethods) }
+                if hasGetSets { type_struct_options.append(.hasGetSets) }
+                if info.external { type_struct_options.append(.isExternal) }
+                
                 let type_struct = PyTypeObjectStruct(
                     name: cls_name,
                     pyname: info.name ?? cls_name,
                     bases: info.bases,
                     base_type: info.base_type,
-                    unretained: info.unretained,
-                    hasMethods: hasMethods,
-                    hasGetSets: hasGetSets,
-                    external: info.external
+                    options: type_struct_options
                 )
                 //            let py_cls = PyClass(
                 //                name: cls_name,
@@ -384,14 +391,17 @@ struct PySwiftClassGenerator: MemberMacro {
                 let hasMethods = methods.count > 0
                 let hasGetSets = py_properties.count > 0
                 
+                var type_struct_options: [PyTypeObjectStruct.Option] = []
+                
+                if hasMethods { type_struct_options.append(.hasMethods) }
+                if hasGetSets { type_struct_options.append(.hasGetSets) }
+                if info.external { type_struct_options.append(.isExternal) }
+                
                 let type_struct = PyTypeObjectStruct(
                     name: cls_name,
                     pyname: info.name ?? cls_name,
                     bases: bases,
-                    unretained: info.unretained,
-                    hasMethods: hasMethods,
-                    hasGetSets: hasGetSets,
-                    external: info.external
+                    options: type_struct_options
                 )
                 
                 
