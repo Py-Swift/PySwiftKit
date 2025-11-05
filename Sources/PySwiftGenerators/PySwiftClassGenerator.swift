@@ -500,13 +500,13 @@ extension PySwiftClassGenerator: ExtensionMacro {
                 case .v6:
                     if cls.isMainActor {
                         //inheritedTypes.append(.init(type: TypeSyntax.PyClassProtocol))
-                        output.append(.init(
-                            extendedType: TypeSyntax(stringLiteral: cls.name.text),
-                            inheritanceClause: .init {
-                                inheritedTypes
-                            },
-                            memberBlock: .init(members: [])
-                        ))
+//                        output.append(.init(
+//                            extendedType: TypeSyntax(stringLiteral: cls.name.text),
+//                            inheritanceClause: .init {
+//                                inheritedTypes
+//                            },
+//                            memberBlock: .init(members: [])
+//                        ))
                     }
                     //.init(type: TypeSyntax.PyClassProtocol)
                     //.init(type: AttributedTypeSyntax.PyClassProtocol)
