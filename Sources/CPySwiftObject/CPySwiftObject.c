@@ -16,7 +16,8 @@ PySwiftObject* PySwiftObject_Cast(PyObject* o) {
 	return (PySwiftObject *) o;
 }
 
-inline void* PyObject_AS_SwiftPtr(PyObject* o) {
+inline
+void* PyObject_AS_SwiftPtr(PyObject* o) {
     return ((PySwiftObject *) o)->swift_ptr;
 }
 
