@@ -38,10 +38,11 @@ public struct PyGetSetDefs {
     public var output: DeclSyntax {
         let name = external ? "\(cls.trimmedDescription)_PyGetSetDefs" : "PyGetSetDefs"
         let modifiers = DeclModifierListSyntax {
-            DeclModifierSyntax.fileprivate
+            
             if swift_mode == .v6 {
                 DeclModifierSyntax.MainActor
             }
+            DeclModifierSyntax.fileprivate
             if !external {
                 DeclModifierSyntax.static
             }
