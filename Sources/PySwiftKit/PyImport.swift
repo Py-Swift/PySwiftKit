@@ -2,18 +2,18 @@ import Foundation
 import CPython
 
 
-private var importedModules = [String: PythonPointer]()
-private var importedModulesItems = [String: PythonPointer]()
+private var importedModules = [String: PyPointer]()
+private var importedModulesItems = [String: PyPointer]()
 
-public func PyImport(from mod: String, import_name: String) -> PythonPointer? {
+public func PyImport(from mod: String, import_name: String) -> PyPointer? {
     let module_item_name = "\(mod)_\(import_name)"
     
     if let _import_ = importedModulesItems[module_item_name] {
         return _import_
     }
     
-    var module: PythonPointer?
-    var module_item: PythonPointer?
+    var module: PyPointer?
+    var module_item: PyPointer?
     
     if let _module = importedModules[mod] {
         module = _module

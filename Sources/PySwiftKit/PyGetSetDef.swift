@@ -7,6 +7,7 @@
 
 import CPython
 
+
 fileprivate func handleDocString(_ string: String?) -> UnsafePointer<CChar>? {
     if let string { return cString(string) }
     return nil
@@ -14,7 +15,7 @@ fileprivate func handleDocString(_ string: String?) -> UnsafePointer<CChar>? {
 
 
 public extension PyGetSetDef {
-    static func new(name: String, get: PySwiftGetter, set: PySwiftSetter = nil, doc: String? = nil) -> Self {
+    static func new(name: String, get: PySwift_getter, set: PySwift_setter = nil, doc: String? = nil) -> Self {
         let _set: setter? = if let set {
             unsafeBitCast(set, to: setter.self)
         } else {

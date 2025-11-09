@@ -1,6 +1,6 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
-import PyWrapper
+import PyWrapperInternal
 
 class PyContainerArguments {
     
@@ -99,7 +99,7 @@ struct PyContainerMacro: MemberMacro {
             for py_call in py_calls {
                 """
                 _\(raw: py_call.name) = if PyObject_HasAttr(object, "\(raw: py_call.name)") {
-                    PyObject_GetAttr(object, "\(raw: py_call.name)")!
+                    try PyObject_GetAttr(object, key: "\(raw: py_call.name)")
                 } else { fatalError() }
                 """
             }
@@ -156,7 +156,7 @@ struct PyContainerMacro: MemberMacro {
                 set {
                     _ = member.withCString { key in
                         if let newValue {
-                            PyObject_SetAttrString(py_target, key, newValue.pyPointer)
+                            PyObject_SetAttrString(py_target, key, newValue.pyPointer())
                         } else {
                             PyObject_SetAttrString(py_target, key, .None)
                         }
@@ -178,18 +178,24 @@ struct PyContainerMacro: MemberMacro {
 
 extension PyContainerMacro: ExtensionMacro {
     static func expansion(of node: AttributeSyntax, attachedTo declaration: some DeclGroupSyntax, providingExtensionsOf type: some TypeSyntaxProtocol, conformingTo protocols: [TypeSyntax], in context: some MacroExpansionContext) throws -> [ExtensionDeclSyntax] {
-        
+        let attr_type = AttributedTypeSyntax(
+            specifiers: [],
+            attributes: [.attribute(.init(stringLiteral: "@preconcurrency"))],
+            baseType: TypeSyntax(stringLiteral: "PyDeserialize")
+        )
         let inheritedTypes = InheritedTypeListSyntax {
-            InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "PyDeserialize"))
+            InheritedTypeSyntax(
+                type: attr_type
+            )
             //InheritedTypeSyntax(type: TypeSyntax(stringLiteral: "PyCallProtocol"))
             
         }
         return [
-            ExtensionDeclSyntax(
-                extendedType: type,
-                inheritanceClause: .init(inheritedTypes: inheritedTypes),
-                memberBlock: .init(members: [])
-            )
+//            ExtensionDeclSyntax(
+//                extendedType: type,
+//                inheritanceClause: .init(inheritedTypes: inheritedTypes),
+//                memberBlock: .init(members: [])
+//            )
         ]
     }
 }

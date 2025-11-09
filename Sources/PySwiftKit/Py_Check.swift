@@ -1,6 +1,6 @@
 
 import Foundation
-import CPython
+@preconcurrency import CPython
 
 
 @inlinable public func PyBool_Check(_ object: PyPointer) -> Bool {

@@ -20,8 +20,11 @@ public enum PyClassBase: String, CaseIterable {
     case str
     case repr
     case hash
-    
-    
+}
+
+public enum SwiftMode {
+    case v5
+    case v6
 }
 
 extension Array where Element == PyClassBase {
@@ -93,3 +96,6 @@ public enum PyTypeObjectBaseType {
     case none
 }
 
+public enum PyModuleDependencies {
+    case datetime
+}

@@ -2,7 +2,7 @@ import SwiftSyntax
 import Foundation
 import SwiftSyntaxMacros
 import SwiftParser
-import PyWrapper
+import PyWrapperInternal
 import PyWrapperInfo
 
 class PyClassByExtensionUnpack {

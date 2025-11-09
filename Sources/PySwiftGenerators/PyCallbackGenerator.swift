@@ -6,7 +6,7 @@
 //
 import SwiftSyntax
 import SwiftSyntaxMacros
-import PyWrapper
+import PyWrapperInternal
 
 extension AttributeListSyntax.Element {
     var isPyCall: Bool { trimmedDescription.contains("@PyCall") }
@@ -75,7 +75,7 @@ struct PyCallbackGenerator: MemberMacro {
             for py_call in py_calls {
                 """
                 _\(raw: py_call.name) = if PyObject_HasAttr(object, "\(raw: py_call.name)") {
-                    PyObject_GetAttr(object, "\(raw: py_call.name)")!
+                    try PyObject_GetAttr(object, key: "\(raw: py_call.name)")
                 } else { fatalError() }
                 """
             }
@@ -206,9 +206,11 @@ class PyCallableArguments {
     init(node: FreestandingMacroExpansionSyntax) {
         let _macroName = node.macroName.text
         macroName = _macroName
-        
-        types = node.genericArgumentClause?.arguments.map({ generic in
-            generic.argument
+        types = node.genericArgumentClause?.arguments.compactMap({ generic in
+            switch generic.argument {
+            case .type(let t): t
+            default: nil
+            }
         }) ?? []
         setAttributes(arguments: node.arguments)
         

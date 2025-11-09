@@ -1,204 +1,54 @@
+//
+//  PyDeserialize.swift
+//  PySwiftKit
+//
+//  Created by CodeBuilder on 23/10/2025.
+//
 import CPython
 import PySwiftKit
-import Foundation
 
 
 public protocol PyDeserialize {
-    init(object: PyPointer) throws
-    static func new(from object: PyPointer) throws -> Self
     static func casted(from object: PyPointer) throws -> Self
-    //static var pyType: UnsafeMutablePointer<PyTypeObject> { get }
+    static func casted(unsafe object: PyPointer) throws -> Self
 }
 
-public typealias PyDeserializeObject = PyDeserialize & AnyObject
-
-public extension PyDeserialize {
-    
-    init(object: PyPointer) throws {
-        fatalError("\(Self.self)(object: PyPointer) not implemented")
-    }
-    
-    static func new(from object: PyPointer) throws -> Self {
-        try Self(object: object)
-    }
-    
-    static func casted(from object: PyPointer) throws -> Self {
-        try Self(object: object)
-    }
-    
-    init(consuming object: PyPointer) throws {
-        try self.init(object: object)
-        _Py_DecRef(object)
-    }
-    
-    init(object: PyPointer?) throws {
-        guard object != PySwiftKit.Py_None else { throw PythonError.type("NoneType is not allowed")}
-        try self.init(object: object)
-    }
-    
-    init?(optional object: PyPointer?) throws {
-        guard let object, object != PySwiftKit.Py_None else { return nil }
-        try self.init(object: object)
-    }
-}
-
-extension PyDeserialize where Self: AnyObject {
-    public static func casted(from object: PyPointer) throws -> Self {
-        guard
-            let pointee = unsafeBitCast(object, to: PySwiftObjectPointer.self)?.pointee
-        else { throw PyStandardException.typeError }
-        
-        return Unmanaged.fromOpaque(pointee.swift_ptr).takeUnretainedValue()
-    }
-}
-
-extension Optional: PyDeserialize where Wrapped: PyDeserialize {
-    
-    public static func new(from object: PyPointer) throws -> Optional<Wrapped> {
-        if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped.new(from: object)
-        }
-    }
-    
-    @_disfavoredOverload
-    public init(object: PyPointer) throws {
-        self = if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped(object: object)
-        }
-    }
-    
-    public init(object: PyPointer) throws where Wrapped: AnyObject {
-        self = if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped.casted(from: object)
-        }
-    }
-    
-    public static func casted(from object: PyPointer) throws -> Optional<Wrapped> {
-        if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped.casted(from: object)
-        }
-    }
-}
-
-extension Optional where Wrapped: PyDeserializeObject {
-    
-//    public init(object: PyPointer) throws {
-//        self = if object == PySwiftKit.Py_None {
-//            nil
-//        } else {
-//            try Wrapped.casted(from: object)
-//        }
-//    }
-    
-    public static func casted(from object: PyPointer) throws -> Self {
-        if object == PySwiftKit.Py_None {
-            nil
-        } else {
-            try Wrapped.casted(from: object)
-        }
-    }
-}
-
-//extension Optional where Wrapped: PyDeserializeObject {
-////    public init(object: PythonCore.PyPointer) throws  {
-////        self = if object == PyNone {
-////            nil
-////        } else {
-////            try Wrapped.casted(from: object)
-////        }
-////    }
-//}
-
-
-@inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize {
-    try key.withCString { string in
-        let value = PyObject_GetAttrString(o, string)
-        defer { Py_DecRef(value) }
-        return try T(object: value)
-    }
-}
-
-@inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: String) throws -> T where T: PyDeserialize & AnyObject {
-    try key.withCString { string in
-        guard let value = PyObject_GetAttrString(o, string) else { throw PyStandardException.typeError }
-        defer { Py_DecRef(value) }
-        return try T.casted(from: value)
-    }
-}
-
-@inlinable public func PyObject_GetAttr<T>(_ o: PyPointer, _ key: CodingKey) throws -> T where T: PyDeserialize {
-    try key.stringValue.withCString { string in
-        let value = PyObject_GetAttrString(o, string)
-        defer { Py_DecRef(value) }
-        return try T(object: value)
-    }
-}
-
-@_disfavoredOverload
-@inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T {
-    guard let result = CPython.PyTuple_GetItem(o, index) else {
+public func PyTuple_GetItem<T>(_ tuple: PyPointer, index: Int) throws -> T where T: PyDeserialize {
+    guard let result = PyTuple_GetItem(tuple, index) else {
         PyErr_Print()
         throw PyStandardException.indexError
     }
-    return try T(object: result)
-}
-
-@inlinable public func PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T where T: AnyObject {
-    guard let result = CPython.PyTuple_GetItem(o, index) else {
-        PyErr_Print()
-        throw PyStandardException.indexError
+    defer {
+        Py_DecRef(result)
     }
     return try T.casted(from: result)
 }
 
-
-
-//@_disfavoredOverload
-@inlinable public func _PyTuple_GetItem<T: PyDeserialize>(_ o: PyPointer, index: Int) throws -> T? {
-    guard let result = CPython.PyTuple_GetItem(o, index) else {
+public func PyDict_GetItem<T>(_ dict: PyPointer, key: String) throws -> T where T: PyDeserialize {
+    guard let result = key.withCString({PyDict_GetItemString(dict, $0)}) else {
         PyErr_Print()
-        throw PyStandardException.indexError
+        throw PyStandardException.keyError
     }
-    return try T(object: result)
+    defer { Py_DecRef(result) }
+    return try T.casted(from: result)
 }
-//@inlinable public func PyTuple_GetItem<T: PyDeserializeObject>(_ o: PyPointer, index: Int) throws -> T {
-//    guard let result = Python.PyTuple_GetItem(o, index) else {
-//        PyErr_Print()
-//        throw PyStandardException.indexError
+
+public func PyObject_GetAttr<T>(_ object: PyPointer, key: String) throws -> T where T: PyDeserialize {
+    guard let result = key.withCString({PyObject_GetAttrString(object, $0)}) else {
+        PyErr_Print()
+        throw PyStandardException.attributeError
+    }
+    defer { Py_DecRef(result)}
+    return try T.casted(from: result)
+}
+
+//extension PyDeserialize where Self: RawRepresentable, Self.RawValue: PyDeserialize {
+//    public init(object: PyPointer) throws {
+//        //guard let raw = Self(rawValue: try RawValue(object: object)) else {
+//        guard let raw = Self(rawValue: try RawValue.casted(from: object)) else {
+//            //throw PythonError.type("\(RawValue.self)")
+//            throw PyStandardException.keyError
+//        }
+//        self = raw
 //    }
-//    return try T.casted(from: result)
 //}
-
-public struct PyCast<T: PyDeserialize> {
-    
-   
-    
-    public static func cast(from object: PyPointer) throws -> T where T: AnyObject {
-        try .casted(from: object)
-    }
-    
-    @_disfavoredOverload
-    public static func cast(from object: PyPointer) throws -> T {
-        try T(object: object)
-    }
-    
-    
-    public static func cast(from object: PyPointer) throws -> T? {
-        try T(object: object)
-    }
-    
-    public static func cast<O: PyDeserialize & AnyObject>(from object: PyPointer) throws -> T where T == Optional<O> {
-        try .casted(from: object)
-    }
-}
-
-
-

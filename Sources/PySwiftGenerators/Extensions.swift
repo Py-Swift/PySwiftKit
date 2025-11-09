@@ -20,11 +20,32 @@ extension String {
 }
 
 extension FunctionCallExprSyntax {
-//    static func pyMethodDef() -> FunctionCallExprSyntax {
-//        
-//        
-//        
-//        
-//        return .init(calledExpression: <#T##ExprSyntaxProtocol#>, arguments: <#T##LabeledExprListSyntax#>)
-//    }
+    //    static func pyMethodDef() -> FunctionCallExprSyntax {
+    //
+    //
+    //
+    //
+    //        return .init(calledExpression: <#T##ExprSyntaxProtocol#>, arguments: <#T##LabeledExprListSyntax#>)
+    //    }
+}
+
+extension TypeSyntax {
+    public static var PyClassProtocol: Self {
+        .init(stringLiteral: "PyClassProtocol")
+    }
+}
+
+extension AttributedTypeSyntax {
+    public static let PyClassProtocol: Self = .init(
+        specifiers: [],
+        attributes: [.preconcurrency],
+        baseType: TypeSyntax.PyClassProtocol
+    )
+    
+}
+
+extension AttributeListSyntax.Element {
+    public static var preconcurrency: Self {
+        .attribute(.init(stringLiteral: "@preconcurrency"))
+    }
 }

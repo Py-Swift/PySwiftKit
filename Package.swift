@@ -1,11 +1,15 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 import Foundation
 import PackageDescription
 import CompilerPluginSupport
 
+
+
+
 let env = ProcessInfo.processInfo.environment
 
 let local = false
+let dev_mode = true
 
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
@@ -23,303 +27,100 @@ var platforms: [SupportedPlatform] = [
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.0"),
 ]
 
-
-
-let package = Package(
-    name: "PySwiftKit",
-    platforms: platforms,
-    products: [
-        .library(
-            name: "PySwiftKit",
-            targets: ["PySwiftKit"]
-        ),
-        .library(
-            name: "PySwiftObject",
-            targets: ["PySwiftObject"]
-        ),
-        .library(
-            name: "PyCollection",
-            targets: ["PyCollection"]
-        ),
-        .library(
-            name: "PyUnpack",
-            targets: ["PyUnpack"]
-        ),
-        .library(
-            name: "PyUnwrap",
-            targets: ["PyUnwrap"]
-        ),
-        .library(
-            name: "PyWrap",
-            targets: ["PyWrap"]
-        ),
-        .library(
-            name: "PyExecute",
-            targets: ["PyExecute"]
-        ),
-        .library(
-            name: "PyCallable",
-            targets: ["PyCallable"]
-        ),
-        .library(
-            name: "PyMemoryView",
-            targets: ["PyMemoryView"]
-        ),
-        .library(
-            name: "PyDictionary",
-            targets: ["PyDictionary"]
-        ),
-        .library(
-            name: "PyUnicode",
-            targets: ["PyUnicode"]
-        ),
-        .library(
-            name: "PyExpressible",
-            targets: ["PyExpressible"]
-        ),
-        .library(
-            name: "PyComparable",
-            targets: ["PyComparable"]
-        ),
-        .library(
-            name: "PySerializing",
-            targets: ["PySerializing"]
-        ),
-        .library(
-            name: "PyBuffering",
-            targets: ["PyBuffering"]
-        ),
-        .library(
-            name: "PyTypes",
-            targets: ["PyTypes"]
-        ),
-        .library(
-            name: "PyTuples",
-            targets: ["PyTuples"]
-        ),
-        .library(
-            name: "SwiftonizeModules",
-            targets: [
-                "PySwiftKit",
-                "PySwiftObject",
-                "PyUnpack",
-                "PySerializing",
-                "PyCallable",
-                "PyDictionary",
-                "PyTuples",
-                "PySwiftWrapper"
-            ]
-        ),
-        .library(
-            name: "PySwiftWrapper",
-            targets: ["PySwiftWrapper"]
-        ),
-        .library(
-            name: "libPySwiftKit",
-            type: .dynamic,
-            targets: [
-                "PySwiftKit",
-                "PySwiftObject",
-                "PyUnpack",
-                "PySerializing",
-                "PyCallable",
-                "PyDictionary",
-                "PyTuples",
-                "PySwiftWrapper"
-            ]
-        )
-    ],
-    dependencies: dependencies,
-    
-    targets: [
+func package_targets() -> [Target] {
+    [
         .target(
-            name: "PyExecute",
-            dependencies: [
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PyCallable",
-            dependencies: [
-                "PySwiftKit",
-                "PySwiftObject",
-                "PySerializing",
-            ]
-        ),
-        .target(
-            name: "PyUnpack",
-            dependencies: [
-                "PySwiftKit",
-                "PyCollection",
-                "PySerializing",
-            ]
-        ),
-        .target(
-            name: "PyUnwrap",
-            dependencies: [
-                "PySwiftKit",
-                "PyCollection",
-                "PyTypes"
-            ]
-        ),
-        .target(
-            name: "PyWrap",
-            dependencies: [
-                "PySwiftKit",
-                "PyCollection",
-                "PyTypes"
-            ]
-        ),
-        .target(
-            name: "PyExpressible",
-            dependencies: [
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PyCollection",
-            dependencies: [
-                "PySwiftKit",
-                "PySerializing",
-            ]
-        ),
-        .target(
-            name: "PyMemoryView",
-            dependencies: [
-                "PySwiftKit",
-                "PySerializing",
-            ]
-        ),
-        .target(
-            name: "PyUnicode",
-            dependencies: [
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PyDictionary",
-            dependencies: [
-                "PySwiftKit",
-                "PySerializing"
-            ]
-        ),
-        .target(
-            name: "PyComparable",
-            dependencies: [
-                "PySwiftKit",
-                "PyTypes",
-            ]
-        ),
-        .target(
-            name: "PySerializing",
-            dependencies: [
-                "PySwiftKit",
-                "PyTypes",
-                "PyComparable",
-                //"PyKit"
-            ]
-        ),
-        .target(
-            name: "PyBuffering",
-            dependencies: [
-                "PySwiftKit",
-                "PyTypes",
-                "PyComparable",
-                
-            ]
-        ),
-        .target(
-            name: "PyTypes",
-            dependencies: [
-                "PySwiftObject",
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PyTuples",
-            dependencies: [
-                "PySerializing",
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PyObjc",
-            dependencies: [
-                "PySerializing",
-                "PySwiftKit",
-            ]
-        ),
-        .target(
-            name: "PySwiftObject",
-            dependencies: [
-                .product(name: "CPython", package: "CPython"),
-                "PySwiftKit",
-            ],
-            resources: [
-                
-            ],
-            swiftSettings: []
-        ),
-        .target(
-            name: "PySwiftKit",
-            dependencies: [
-                .product(name: "CPython", package: "CPython"),
-                "_PySwiftObject",
-                .product(name: "CPython", package: "CPython"),
-                //"PythonTypeAlias"
-            ],
-            resources: [
-                
-            ],
-            swiftSettings: [],
-            linkerSettings: [
-            ]
-        ),
-        .target(
-            name: "_PySwiftObject",
+            name: "CPySwiftObject",
             dependencies: [
                 "CPython"
-            ]
-        ),
-        .testTarget(
-            name: "PythonSwiftCoreTests",
-            dependencies: [
-                .product(name: "CPython", package: "CPython"),
-                "PySwiftKit",
-                "PySwiftObject",
-                "PyUnpack",
-                "PyUnwrap",
-                "PySerializing",
-                "PyCallable",
-                "PyDictionary",
-                "PyTuples",
-                "PyWrapper",
-                "PySwiftWrapper",
-                "PyExecute"
-                
             ],
-            resources: [
-                .copy("python3.13"),
-            ],
-            plugins: [
-                // .plugin(name: "Swiftonize", package: "SwiftonizePlugin")
-            ]
-        ),
-        .target(name: "PyWrapperInfo"),
-        .macro(
-            name: "PySwiftGenerators",
-            dependencies: [
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                "PyWrapper",
-                "PyWrapperInfo"
+            path: "Sources/CPySwiftObject",
+            publicHeadersPath: ".",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         ),
         .target(
-            name: "PyWrapper",
+            name: "PySerializing",
+            dependencies: [
+                "CPython",
+                "PySwiftKit",
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySwiftKit",
+            dependencies: [
+                .product(name: "CPython", package: "CPython"),
+                "CPySwiftObject",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySwiftConcurrency",
+            dependencies: [
+                .product(name: "CPython", package: "CPython"),
+                "CPySwiftObject",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        // PyWrapping Related
+        .target(
+            name: "PyProtocols",
+            dependencies: ["CPython"],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PyWrapperInfo",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        .target(
+            name: "PySwiftWrapper",
+            dependencies: [
+                "PySwiftGenerators",
+                "CPython",
+                "PyWrapperInfo",
+                "PySerializing",
+                "PyProtocols"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
+        
+    ]
+}
+
+
+
+func get_targets() -> [Target] {
+    var targets = package_targets()
+    
+    add_macro_targets(&targets)
+    add_test_targets(&targets)
+    
+    return targets
+}
+
+func add_macro_targets(_ targets: inout [Target]) {
+    targets.append(
+        .target(
+            name: "PyWrapperInternal",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
@@ -327,14 +128,73 @@ let package = Package(
                 "PyWrapperInfo"
             ]
         ),
-        // Library that exposes a macro as part of its API, which is used in client programs.
-        .target(
-            name: "PySwiftWrapper",
+    )
+    targets.append(
+        .macro(
+            name: "PySwiftGenerators",
             dependencies: [
-                "PySwiftGenerators",
-                "PyWrapperInfo",
-                "PySerializing"
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                "PyWrapperInternal",
+                "PyWrapperInfo"
             ]
         ),
-    ]
+    )
+}
+
+func add_test_targets(_ targets: inout [Target]) {
+    targets.append(.testTarget(
+        name: "PyTests",
+        dependencies: [
+            "CPython",
+            "PySwiftKit",
+            "PySerializing",
+            "PyWrapperInternal",
+            "PySwiftWrapper"
+        ],
+        resources: [
+            .copy("python3.13"),
+            .copy("pyswiftwrapper_tests.py")
+        ],
+    ))
+}
+
+func get_products() -> [Product] {
+    var products = [Product]()
+    
+    products.add_library("PySerializing")
+    products.add_library("PySwiftKit")
+    products.add_library("PySwiftWrapper")
+    products.add_library("PySwiftKitBase", targets: [
+        "PySwiftKit",
+        "PySerializing",
+        "PySwiftWrapper"
+    ])
+    
+    if dev_mode {
+        //products.add_library("PyWrapperInternal")
+        //products.add_library("PySwiftGenerators")
+    }
+    
+    return products
+}
+
+
+let package = Package(
+    name: "PySwiftKit",
+    platforms: platforms,
+    products: get_products(),
+    dependencies: dependencies,
+    
+    targets: get_targets()
 )
+
+
+extension Array where Element == Product {
+    mutating func add_library(_ name: String, targets: [String], type: Product.Library.LibraryType? = nil) {
+        append(.library(name: name, type: type, targets: targets))
+    }
+    mutating func add_library(_ name: String, target: String? = nil , type: Product.Library.LibraryType? = nil) {
+        append(.library(name: name, type: type, targets: [target ?? name]))
+    }
+}

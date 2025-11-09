@@ -1,13 +1,13 @@
 {
-  "originHash" : "aab4cff044cf0a46d25d5341cde29168a485ba0f7f7d504e484f32f2244bad0b",
+  "originHash" : "c0358f2d79d77a3daba7710c722c269512bc508175a52b4d59571520692f5ff0",
   "pins" : [
     {
       "identity" : "cpython",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/py-swift/CPython",
       "state" : {
-        "revision" : "24981fc411270c31cec1fbbab312d27ae36fa838",
-        "version" : "313.7.0"
+        "revision" : "529e9f747ed301f230c6157774b65403030bb985",
+        "version" : "313.7.1"
       }
     },
     {
@@ -15,14 +15,14 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "26ac5758409154cc448d7ab82389c520fa8a8247",
-        "version" : "1.3.0"
+        "revision" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+        "version" : "1.4.5"
       }
     },
     {
       "identity" : "swift-docc-symbolkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-docc-symbolkit",
+      "location" : "https://github.com/swiftlang/swift-docc-symbolkit",
       "state" : {
         "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
       }
     }
   ],
