@@ -87,9 +87,6 @@ extension PyCallableProtocol {
                 "let gil = PyGILState_Ensure()"
             }
             pre_call
-            "#if PSK_DEBUG"
-            "pyPrint(\("_\(target ?? "")"))"
-            "#endif"
             GuardStmtSyntax(conditions: condition, elseKeyword: .keyword(.else, leadingTrivia: .space)) {
                 "PyErr_Print()"
                 post_call

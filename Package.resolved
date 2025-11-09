@@ -1,6 +1,15 @@
 {
-  "originHash" : "4071a5322bfb9de5b781f845130bc763f8f48ec0fcc1a3d5c3dd821721d80d62",
+  "originHash" : "c0358f2d79d77a3daba7710c722c269512bc508175a52b4d59571520692f5ff0",
   "pins" : [
+    {
+      "identity" : "cpython",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/py-swift/CPython",
+      "state" : {
+        "revision" : "529e9f747ed301f230c6157774b65403030bb985",
+        "version" : "313.7.1"
+      }
+    },
     {
       "identity" : "swift-docc-plugin",
       "kind" : "remoteSourceControl",
@@ -24,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
       }
     }
   ],
