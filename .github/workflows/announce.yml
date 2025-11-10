@@ -27,12 +27,12 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           nodetail: true
-          title: "New version of `software` is ready!"
+          title: "New version ${{ github.event.release.tag_name }}"
           description: |
-            `${{ github.event.release.tag_name }}`
             
             ${{ github.event.workflow_run.head_commit.message }}
 
             Click [here](${{ github.event.release.html_url }}) to download!
-          color: 0xff91a4
+          color: 0xffff00
+          username: PSProject
           
