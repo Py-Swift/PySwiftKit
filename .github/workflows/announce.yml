@@ -29,10 +29,9 @@ jobs:
           nodetail: true
           title: "New version ${{ github.event.release.tag_name }}"
           description: |
-            
             ${{ github.event.workflow_run.head_commit.message }}
 
-            Click [here](${{ github.event.release.html_url }}) to download!
+            [${{ github.event.release.tag_name }}](${{ github.event.release.html_url }})
           color: 0xffff00
           username: PySwiftKit
           
