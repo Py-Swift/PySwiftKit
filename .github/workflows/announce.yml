@@ -24,16 +24,15 @@ jobs:
         run: |
             echo "var=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
       - uses: sarisia/actions-status-discord@v1
-        if: always()
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          #status: ${{ job.status }}
-          content: ${{ github.event.head_commit.message }}
-          title: "${{ steps.version.outputs.var }}"
-          #description: "Build and deploy to GitHub Pages"
-          #image: ${{ secrets.EMBED_IMAGE }}
-          color: 0x0000ff
-          #url: "https://github.com/sarisia/actions-status-discord"
-          username: PSProject Release
-          #avatar_url: ${{ secrets.AVATAR_URL }}
+          nodetail: true
+          title: "New version of `software` is ready!"
+          description: |
+            `${{ github.event.release.tag_name }}`
+            
+            ${{ github.event.workflow_run.head_commit.message }}
+
+            Click [here](${{ github.event.release.html_url }}) to download!
+          color: 0xff91a4
           
