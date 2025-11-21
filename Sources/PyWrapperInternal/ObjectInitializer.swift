@@ -151,6 +151,7 @@ extension ObjectInitializer {
     var outputNew: CodeBlockItemListSyntax {
         let pcount = parameters.count
         let code = CodeBlockItemListSyntax {
+            "pyPrint(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!"))"
             switch pcount {
             case 0:
                 ""
