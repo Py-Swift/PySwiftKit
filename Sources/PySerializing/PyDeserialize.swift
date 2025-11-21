@@ -18,10 +18,10 @@ public func PyTuple_GetItem<T>(_ tuple: PyPointer, index: Int) throws -> T where
         PyErr_Print()
         throw PyStandardException.indexError
     }
-    defer {
-        Py_DecRef(result)
-    }
-    return try T.casted(from: result)
+    
+    let value = try T.casted(from: result)
+    Py_DecRef(result)
+    return value
 }
 
 public func PyDict_GetItem<T>(_ dict: PyPointer, key: String) throws -> T where T: PyDeserialize {

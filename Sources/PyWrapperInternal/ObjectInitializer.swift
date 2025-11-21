@@ -151,8 +151,8 @@ extension ObjectInitializer {
     var outputNew: CodeBlockItemListSyntax {
         let pcount = parameters.count
         let code = CodeBlockItemListSyntax {
-            "print(\"is_tuple\", PyTuple_Check(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!")))"
-            "pyPrint(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!"))"
+            //"print(\"is_tuple\", PyTuple_Check(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!")))"
+            //"pyPrint(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!"))"
             switch pcount {
             case 0:
                 ""
