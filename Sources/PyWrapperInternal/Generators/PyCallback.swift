@@ -270,14 +270,14 @@ extension PyCallGenerator {
         //let manyArgs = arg_count > 1
         return .init {
             if gil {
-                "let gil = PyGILState_Ensure()"
+                "let gil = PyGIL_Released() ? PyGILState_Ensure() : nil"
             }
             pre_call
             GuardStmtSyntax(conditions: condition, elseKeyword: .keyword(.else, leadingTrivia: .space)) {
                 "PyErr_Print()"
                 post_call
                 if gil {
-                    "PyGILState_Release(gil)"
+                    "if let gil { PyGILState_Release(gil) }"
                 }
                 if returnType != nil {
                     if funcThrows {
@@ -301,14 +301,14 @@ extension PyCallGenerator {
             if let returnType {
                 if returnType.isPyPointer {
                     if gil {
-                        "PyGILState_Release(gil)"
+                        "if let gil { PyGILState_Release(gil) }"
                     }
                     "return result"
                 } else {
                     "let _result = try \(raw: returnType).casted(from: result)"
                     "Py_DecRef(result)"
                     if gil {
-                        "PyGILState_Release(gil)"
+                        "if let gil { PyGILState_Release(gil) }"
                     }
                     "return _result"
                 }
@@ -316,7 +316,7 @@ extension PyCallGenerator {
             } else {
                 "Py_DecRef(result)"
                 if gil {
-                    "PyGILState_Release(gil)"
+                    "if let gil { PyGILState_Release(gil) }"
                 }
             }
         }

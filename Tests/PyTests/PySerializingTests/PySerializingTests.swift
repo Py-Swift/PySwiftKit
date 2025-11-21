@@ -11,7 +11,7 @@ import CPython
 //@testable import PyTestEnvironment
 
 
-
+@MainActor
 final class PyRefCountTests: XCTestCase {
     
     func test_list_append() throws {
@@ -31,7 +31,7 @@ final class PyRefCountTests: XCTestCase {
         }
     }
 }
-
+@MainActor
 final class PyDeserializingTests: XCTestCase {
     
     func noTest() throws {
@@ -98,7 +98,7 @@ final class PyDeserializingTests: XCTestCase {
         }
     }
 }
-
+@MainActor
 final class PySerializingTests: XCTestCase {
     
     

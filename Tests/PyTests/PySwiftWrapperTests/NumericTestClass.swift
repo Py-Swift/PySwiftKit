@@ -2,8 +2,8 @@
 //  NumericTestClass.swift
 //  PySwiftKit
 //
-import CPython
-import PySwiftKit
+@preconcurrency import CPython
+@preconcurrency import PySwiftKit
 
 @testable import PySerializing
 import PyWrapperInternal
@@ -14,7 +14,7 @@ import PyWrapperInternal
 final class NumericTestClass {
     
     @PyInit
-    init() {}
+    init(value: String) {}
 }
 
 
@@ -42,7 +42,7 @@ extension NumericTestClass: PyNumberProtocol {
 @PyModule
 struct PySwiftTesterModule: PyModuleProtocol {
     
-    static var py_classes: [any (PyClassProtocol & AnyObject).Type] = [
+    static let py_classes: [any (PyClassProtocol & AnyObject).Type] = [
         NumericTestClass.self
     ]
 }

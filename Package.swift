@@ -14,7 +14,7 @@ let dev_mode = true
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
 } else {
-    .package(url: "https://github.com/py-swift/CPython", .upToNextMinor(from: .init(313, 7, 0)))
+    .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
 }
 
 
@@ -156,6 +156,9 @@ func add_test_targets(_ targets: inout [Target]) {
             .copy("python3.13"),
             .copy("pyswiftwrapper_tests.py")
         ],
+        swiftSettings: [
+            .swiftLanguageMode(.v5)
+        ]
     ))
 }
 

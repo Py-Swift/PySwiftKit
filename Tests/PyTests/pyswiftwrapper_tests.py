@@ -7,7 +7,7 @@ from pyswiftwrapper import NumericTestClass # pyright: ignore[reportMissingImpor
 
 class TestNumericTestClass():
     def __init__(self):
-        self.obj = NumericTestClass()
+        self.obj = NumericTestClass("abc")
         
         self.test_addition()
         self.test_subtraction()

@@ -4,7 +4,7 @@
 //
 import XCTest
 import CPython
-import PySwiftKit
+@preconcurrency import PySwiftKit
 
 func PyStatus_Exception(_ status: PyStatus) -> Bool {
     PyStatus_Exception(status) == 1
@@ -16,8 +16,9 @@ var pystdlib: URL {
     .init(fileURLWithPath: "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13")
 }
 
-private var pythonIsRunning = false
+@MainActor private var pythonIsRunning = false
 
+@MainActor
 func initPython() {
     if pythonIsRunning { return }
     pythonIsRunning.toggle()

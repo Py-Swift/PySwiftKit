@@ -119,7 +119,7 @@ func test_Set<T: PySerialize & StringProtocol>(_ t: T.Type) throws {
         PyErr_XCTAssert()
     }
 }
-
+@MainActor
 func initPy() throws {
     initPython()
     XCTAssert(PyGIL_Released())

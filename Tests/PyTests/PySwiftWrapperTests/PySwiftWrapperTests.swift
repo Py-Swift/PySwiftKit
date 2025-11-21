@@ -10,7 +10,7 @@ import CPython
 @testable import PySwiftWrapper
 
 
-
+@MainActor
 final class PySwiftWrapperTests: XCTestCase {
     
     func test_number_functions() throws {
