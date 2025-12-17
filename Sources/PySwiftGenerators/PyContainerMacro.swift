@@ -139,7 +139,7 @@ struct PyContainerMacro: MemberMacro {
             subscript<T: PySerializable>(dynamicMember member: String) -> T? {
                 get {
                     do {
-                        if let object = PyObject_GetAttr(py_target, member) {
+                        if let object = PyObject_GetAttr(py_target, key: member) {
                            return try T(consuming: object)
                         } else {
                             print("\\(member) doesn't exist")
