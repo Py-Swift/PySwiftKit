@@ -140,7 +140,7 @@ struct PyContainerMacro: MemberMacro {
                 get {
                     do {
                         if let object = PyObject_GetAttr(py_target, key: member) {
-                           return try T(consuming: object)
+                           return try T.consumedCast(from: object)
                         } else {
                             print("\\(member) doesn't exist")
                         }
