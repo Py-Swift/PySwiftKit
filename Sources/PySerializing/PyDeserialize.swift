@@ -14,13 +14,13 @@ public protocol PyDeserialize {
 }
 
 extension PyDeserialize {
-    public func consumedCast(from object: PyPointer) throws -> Self {
+    public static func consumedCast(from object: PyPointer) throws -> Self {
         let cast = try Self.casted(from: object)
         Py_DecRef(object)
         return cast
     }
     
-    public func consumedCast(unsafe object: PyPointer) throws -> Self {
+    public static func consumedCast(unsafe object: PyPointer) throws -> Self {
         let cast = try Self.casted(unsafe: object)
         Py_DecRef(object)
         return cast
