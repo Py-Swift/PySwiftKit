@@ -13,6 +13,20 @@ public protocol PyDeserialize {
     static func casted(unsafe object: PyPointer) throws -> Self
 }
 
+extension PyDeserialize {
+    public func consumedCast(from object: PyPointer) throws -> Self {
+        let cast = try Self.casted(from: object)
+        Py_DecRef(object)
+        return cast
+    }
+    
+    public func consumedCast(unsafe object: PyPointer) throws -> Self {
+        let cast = try Self.casted(unsafe: object)
+        Py_DecRef(object)
+        return cast
+    }
+}
+
 public func PyTuple_GetItem<T>(_ tuple: PyPointer, index: Int) throws -> T where T: PyDeserialize {
     guard let result = PyTuple_GetItem(tuple, index) else {
         PyErr_Print()
