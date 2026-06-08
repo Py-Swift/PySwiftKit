@@ -36,7 +36,7 @@ extension Float16: PyDeserialize {}
 #endif
 
 
-#if canImport(CoreFoundation)
+#if canImport(CoreFoundation) && !os(Android)
 import CoreFoundation
 extension CGFloat: PyDeserialize {
     public static func casted(unsafe object: PyPointer) throws -> Self {

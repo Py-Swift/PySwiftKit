@@ -322,7 +322,7 @@ struct PySwiftClassGenerator: MemberMacro {
                     case .v5: ""
                     case .v6: "@MainActor "
                 }
-                let publicString = isPublic ? "public " : ""
+                let publicString = "public " //isPublic ? "public " : ""
                 var decls: [DeclSyntax] = [
                     "\n\(raw: swift6_prefix)\(raw: publicString)static var pyTypeObject = \(raw: type_struct.output)",
                     .init(type_struct.createPyType(swift_mode: swift_mode))
@@ -435,7 +435,7 @@ struct PySwiftClassGenerator: MemberMacro {
                     case .v6: "@MainActor "
                 }
                 return decls + [
-                    "\n\(raw: swift6_prefix)static var pyTypeObject = \(raw: type_struct.output)",
+                    "\n\(raw: swift6_prefix)public static var pyTypeObject = \(raw: type_struct.output)",
                     .init(type_struct.createPyType(swift_mode: swift_mode)),
                     py_cls.asPyPointer(nil),
                     py_cls.asUnretainedPyPointer(nil)

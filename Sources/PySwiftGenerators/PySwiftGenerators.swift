@@ -44,6 +44,7 @@ struct PySwiftGeneratorsPlugin: CompilerPlugin {
         PyContainerMacro.self,
         WithGilTestMacro.self,
         PyListGenerator.self,
+        PyTupleGenerator.self,
         //PyMethodGenerator.self
         PyCastMacro.self,
         PyCastMacroVectorArgs.self

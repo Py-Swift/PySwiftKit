@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+pyswiftkit/__init__.py
+pyswiftkit/libPySwiftKit.dylib
+pyswiftkit.egg-info/PKG-INFO
+pyswiftkit.egg-info/SOURCES.txt
+pyswiftkit.egg-info/dependency_links.txt
+pyswiftkit.egg-info/top_level.txt

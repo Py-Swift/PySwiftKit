@@ -10,7 +10,7 @@ extension Optional: PySerialize where Wrapped: PySerialize {
         if let self {
             self.pyPointer()
         } else {
-            __Py_None__
+            .None
         }
     }
 }

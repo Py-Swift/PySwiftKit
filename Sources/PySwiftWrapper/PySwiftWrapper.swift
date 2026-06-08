@@ -89,3 +89,9 @@ public macro PyContainer(
     weak_ref: Bool = false,
     swift_mode: SwiftMode = .v5
 ) = #externalMacro(module: "PySwiftGenerators", type: "PyContainerMacro")
+
+
+extension PyModuleProtocol {
+    public typealias PySerializableType = PySerializable
+    //public static var pyserializableTypes: [(PySerializable).Type] { [] }
+}

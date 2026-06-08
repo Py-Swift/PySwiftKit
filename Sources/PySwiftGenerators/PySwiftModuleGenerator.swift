@@ -86,6 +86,15 @@ extension ClassDeclSyntax {
     }
 }
 
+extension StructDeclSyntax {
+    var isMainActor: Bool {
+        attributes.isMainActor
+    }
+    var isPublic: Bool {
+        modifiers.isPublic
+    }
+}
+
 struct PySwiftModuleGenerator: MemberMacro {
     
     static func expansion(of node: AttributeSyntax, providingMembersOf declaration: some DeclGroupSyntax, in context: some MacroExpansionContext) throws -> [DeclSyntax] {

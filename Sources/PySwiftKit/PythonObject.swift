@@ -1,18 +1,20 @@
 //
-//  PyObject.swift
+//  PythonObject.swift
 //  PySwiftKit
 //
 import CPython
-
-
 
 
 public struct PythonObject: ~Copyable {
     
     private let ptr: PyPointer
     
-    init(_ ptr: PyPointer) {
+    public init(_ ptr: PyPointer) {
         self.ptr = Py_NewRef(ptr)
+    }
+    
+    public init(consume ptr: PyPointer) {
+        self.ptr = ptr
     }
     
     deinit {
@@ -20,3 +22,15 @@ public struct PythonObject: ~Copyable {
     }
 }
 
+fileprivate func inspect(_ object: borrowing PythonObject) {}
+fileprivate func eat(_ object: consuming PythonObject) {}
+
+fileprivate func test() {
+    var a: PythonObject = .init(.False)
+    
+    eat(a)
+    
+    a = .init(.True)
+    inspect(a)
+    
+}

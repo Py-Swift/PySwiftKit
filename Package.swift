@@ -8,12 +8,20 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
 let dev_mode = true
+
+// When PIP_MODE=1 and cross-compiling for Android (SWIFT_ANDROID_HOME set),
+// CPySwiftObject needs PIP_MODE defined so CPython.h skips the bundled
+// PythonHeaders-android branch and uses the CPATH headers instead.
+let pipMode   = env["PIP_MODE"] != nil
+let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
 } else {
+    //.package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
+    //.package(url: "https://github.com/py-swift/CPython", branch: "master")
     .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
 }
 
@@ -39,6 +47,7 @@ func package_targets() -> [Target] {
             ],
             path: "Sources/CPySwiftObject",
             publicHeadersPath: ".",
+            cSettings: pipMode && isAndroid ? [.define("PIP_MODE")] : [],
             swiftSettings: [
                 .swiftLanguageMode(.v5)
             ]
@@ -166,14 +175,21 @@ func get_products() -> [Product] {
     var products = [Product]()
     
     products.add_library("PySerializing")
-    products.add_library("PySwiftKit")
     products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitBase", targets: [
         "PySwiftKit",
         "PySerializing",
         "PySwiftWrapper"
     ])
-    
+    products.add_library(
+        "PySwiftKit",
+        targets: [
+            "PySwiftKit",
+            "PySerializing",
+            "PySwiftWrapper"
+        ],
+        type: .dynamic
+    )
     if dev_mode {
         //products.add_library("PyWrapperInternal")
         //products.add_library("PySwiftGenerators")

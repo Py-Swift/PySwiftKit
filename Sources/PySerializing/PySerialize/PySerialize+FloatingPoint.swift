@@ -26,7 +26,7 @@ extension Float: PySerialize {}
 extension Float16: PySerialize {}
 #endif
 
-#if canImport(CoreFoundation)
+#if canImport(CoreFoundation) && !os(Android)
 import CoreFoundation
 extension CGFloat: PySerialize {
     public func pyPointer() -> PyPointer {

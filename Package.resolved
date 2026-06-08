@@ -1,28 +1,19 @@
 {
-  "originHash" : "619b8a15486f57e4442b6ff2374d7f9701434639a57ebc6742395bd1fcaaa285",
+  "originHash" : "f2d1e164c5fc7701d223b1d91097fd5b68791946d9d0db1c1e63b35b17a7dca1",
   "pins" : [
-    {
-      "identity" : "cpython",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/py-swift/CPython",
-      "state" : {
-        "revision" : "c98c3dea2cef73953507093171f769040bea2e4e",
-        "version" : "313.8.1"
-      }
-    },
     {
       "identity" : "swift-docc-plugin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "26ac5758409154cc448d7ab82389c520fa8a8247",
-        "version" : "1.3.0"
+        "revision" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+        "version" : "1.4.5"
       }
     },
     {
       "identity" : "swift-docc-symbolkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-docc-symbolkit",
+      "location" : "https://github.com/swiftlang/swift-docc-symbolkit",
       "state" : {
         "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"

@@ -1,0 +1,55 @@
+name: Build & publish pyswiftkit pip package
+
+on:
+  push:
+    tags:
+      - "pip-*"          # trigger on tags like pip-313.8.0
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build wheels on macOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install cibuildwheel + delocate
+        run: pip install cibuildwheel delocate
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse PySwiftKit
+        env:
+          # cibuildwheel reads pyproject.toml for environment / repair command.
+          # Nothing extra needed here — PIP_MODE and PYTHON_INCLUDE_DIR are set
+          # inside [tool.cibuildwheel.environment] in pyproject.toml.
+          CIBW_BUILD_VERBOSITY: 1
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyswiftkit-wheels
+          path: wheelhouse/*.whl
+
+  publish:
+    name: Publish to PyPI
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # OIDC trusted publishing
+
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: pyswiftkit-wheels
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

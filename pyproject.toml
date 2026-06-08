@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyswiftkit"
+version = "313.8.0"
+description = "PySwiftKit shared runtime library (libPySwiftKit)"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Other",
+    "Topic :: Software Development :: Libraries",
+    "Operating System :: MacOS",
+]
+
+[tool.setuptools.packages.find]
+include = ["pyswiftkit*"]
+
+[tool.setuptools.package-data]
+# Include both macOS dylibs and Android/Linux shared objects.
+pyswiftkit = ["*.dylib", "*.so"]
+
+# ---------------------------------------------------------------------------
+# cibuildwheel
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel]
+build = "cp313-*"
+skip  = ["*-manylinux*", "*-musllinux*", "*-win32", "*-win_amd64"]
+
+[tool.cibuildwheel.environment]
+PIP_MODE           = "1"
+SWIFT_BUILD_CONFIG = "debug"
+
+# ---------------------------------------------------------------------------
+# macOS
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel.macos]
+# delocate fixes up rpath entries and bundles dependent dylibs into the wheel.
+# --ignore-missing-dependencies: libPySwiftKit.dylib uses -undefined dynamic_lookup
+# so Python symbols are absent at link time and resolve from the running interpreter.
+repair-wheel-command = "delocate-wheel --ignore-missing-dependencies -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.macos.environment]
+MACOSX_DEPLOYMENT_TARGET = "13.0"
+# CPATH propagates to all compilation units — no per-target -I needed in Package.swift.
+CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\")"
+
+# ---------------------------------------------------------------------------
+# Android
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel.android.environment]
+# Pass ANDROID_HOME through into the build environment.
+ANDROID_HOME = "$ANDROID_HOME"
+# Target Swift SDK — override with SWIFT_SDK env var to pick a different snapshot.
+SWIFT_SDK = "swift-6.3-DEVELOPMENT-SNAPSHOT-2026-03-05-a_android"

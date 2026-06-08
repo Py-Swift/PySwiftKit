@@ -2,8 +2,6 @@
 //  PySequenceProtocol.swift
 //  PySwiftKit
 //
-import CPython
-
 
 public protocol PySequenceProtocol {
 	func __len__() -> Int

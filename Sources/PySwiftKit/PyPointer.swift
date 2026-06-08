@@ -11,3 +11,6 @@ public extension PyPointer {
     static var False: Self { __Py_False__ }
 }
 
+public extension PyPointer {
+    var newRef: Self { Py_NewRef(self) }
+}
