@@ -1,10 +1,6 @@
 // swift-tools-version: 6.0
 import Foundation
 import PackageDescription
-import CompilerPluginSupport
-
-
-
 
 let env = ProcessInfo.processInfo.environment
 
@@ -20,22 +16,35 @@ let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
 } else {
-    //.package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
-    //.package(url: "https://github.com/py-swift/CPython", branch: "master")
     .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
 }
 
+// PySwiftGenerators owns the macro plugin + swift-syntax.
+//
+// For production CI with zero swift-syntax compile time, replace with a .binaryTarget:
+//
+//   .binaryTarget(
+//       name: "PySwiftGenerators",
+//       url: "https://github.com/Py-Swift/PySwiftGenerators/releases/download/v0.0.1/PySwiftGenerators.artifactbundle.zip",
+//       checksum: "<checksum from release workflow summary>"
+//   )
+//
+// (then remove the PySwiftGenerators package dep from `dependencies` below)
+let PySwiftGeneratorsDep: Package.Dependency = if local {
+    .package(path: "../PySwiftGenerators")
+} else {
+    .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "1.0.0")
+}
 
 var platforms: [SupportedPlatform] = [
     .iOS(.v13),
     .macOS(.v11)
 ]
 
-
 let dependencies: [Package.Dependency] = [
     CPython,
+    PySwiftGeneratorsDep,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.0"),
 ]
 
 func package_targets() -> [Target] {
@@ -93,17 +102,11 @@ func package_targets() -> [Target] {
             ]
         ),
         .target(
-            name: "PyWrapperInfo",
-            swiftSettings: [
-                .swiftLanguageMode(.v5)
-            ]
-        ),
-        .target(
             name: "PySwiftWrapper",
             dependencies: [
-                "PySwiftGenerators",
+                .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
+                .product(name: "PyWrapperInfo", package: "PySwiftGenerators"),
                 "CPython",
-                "PyWrapperInfo",
                 "PySerializing",
                 "PyProtocols"
             ],
@@ -111,44 +114,13 @@ func package_targets() -> [Target] {
                 .swiftLanguageMode(.v5)
             ]
         ),
-        
     ]
 }
 
-
-
 func get_targets() -> [Target] {
     var targets = package_targets()
-    
-    add_macro_targets(&targets)
     add_test_targets(&targets)
-    
     return targets
-}
-
-func add_macro_targets(_ targets: inout [Target]) {
-    targets.append(
-        .target(
-            name: "PyWrapperInternal",
-            dependencies: [
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                "PyWrapperInfo"
-            ]
-        ),
-    )
-    targets.append(
-        .macro(
-            name: "PySwiftGenerators",
-            dependencies: [
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                "PyWrapperInternal",
-                "PyWrapperInfo"
-            ]
-        ),
-    )
 }
 
 func add_test_targets(_ targets: inout [Target]) {
@@ -158,7 +130,7 @@ func add_test_targets(_ targets: inout [Target]) {
             "CPython",
             "PySwiftKit",
             "PySerializing",
-            "PyWrapperInternal",
+            .product(name: "PyWrapperInternal", package: "PySwiftGenerators"),
             "PySwiftWrapper"
         ],
         resources: [
@@ -173,7 +145,7 @@ func add_test_targets(_ targets: inout [Target]) {
 
 func get_products() -> [Product] {
     var products = [Product]()
-    
+
     products.add_library("PySerializing")
     products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitBase", targets: [
@@ -190,11 +162,7 @@ func get_products() -> [Product] {
         ],
         type: .dynamic
     )
-    if dev_mode {
-        //products.add_library("PyWrapperInternal")
-        //products.add_library("PySwiftGenerators")
-    }
-    
+
     return products
 }
 
@@ -204,7 +172,6 @@ let package = Package(
     platforms: platforms,
     products: get_products(),
     dependencies: dependencies,
-    
     targets: get_targets()
 )
 
@@ -217,3 +184,4 @@ extension Array where Element == Product {
         append(.library(name: name, type: type, targets: [target ?? name]))
     }
 }
+
