@@ -37,7 +37,7 @@ func package_targets() -> [Target] {
         .binaryTarget(
             name: "PySwiftGenerators",
             url: "https://github.com/Py-Swift/PySwiftKit/releases/download/0.0.5/PySwiftGenerators.artifactbundle.zip",
-            checksum: "6cdee95271bc9bf59d4aa688b39cb060db489aa0f8f562d8fae2b0945ee99e71"
+            checksum: "dd3be65634d08884cf4cdf8071fba1a75f369cba56d960ddd6370c531e60bf3c"
         ),
 
         .target(
