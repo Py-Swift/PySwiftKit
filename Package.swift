@@ -27,12 +27,8 @@ let CPython: Package.Dependency = if local {
 //  1. PYSWIFTGENERATORS_TOOL env var  — set automatically by pyswiftkit-builder / cibuildwheel
 //  2. bin/ next to this Package.swift — run ./build-macro-binary.sh once after cloning
 nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
-    // unsafeFlags are forbidden in remote (versioned) dependencies.
-    // PySwiftWrapper doesn't itself use macros — the plugin is only needed
-    // by consuming targets (e.g. PyFilemanager). Skip when we're a remote dep.
-    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    if pkgDir.path.contains("/.build/checkouts/") { return [] }
-
+    // Only applied to PyTests (test-only target). Test targets are never
+    // product-exported so unsafeFlags here are allowed even in remote deps.
     let fm = FileManager.default
     let candidates = [
         "PySwiftGenerators-tool-arm64-apple-macosx",
@@ -43,6 +39,7 @@ nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
         [.unsafeFlags(["-load-plugin-executable", "\(path)#PySwiftGenerators"])]
     }
     if let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty { return flags(tool) }
+    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
     let binDir = pkgDir.appendingPathComponent("bin")
     for name in candidates {
         let path = binDir.appendingPathComponent(name).path
@@ -132,7 +129,7 @@ func package_targets() -> [Target] {
                 "PySerializing",
                 "PyProtocols",
             ],
-            swiftSettings: macroPluginFlags + [
+            swiftSettings: [
                 .swiftLanguageMode(.v5)
             ]
         ),
@@ -158,7 +155,7 @@ func add_test_targets(_ targets: inout [Target]) {
             .copy("python3.13"),
             .copy("pyswiftwrapper_tests.py")
         ],
-        swiftSettings: [
+        swiftSettings: macroPluginFlags + [
             .swiftLanguageMode(.v5)
         ]
     ))
