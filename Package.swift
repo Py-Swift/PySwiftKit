@@ -4,7 +4,7 @@ import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 
-let local = true
+let local = false
 let dev_mode = true
 
 // When PIP_MODE=1 and cross-compiling for Android (SWIFT_ANDROID_HOME set),
@@ -19,22 +19,36 @@ let CPython: Package.Dependency = if local {
     .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
 }
 
-// PySwiftGenerators owns the macro plugin + swift-syntax.
+// PySwiftGenerators provides the macro plugin binary.
+// PyWrapperInfo (pure-Swift runtime types used by PySwiftWrapper) is inlined
+// into this package under Sources/PyWrapperInfo/.
 //
-// For production CI with zero swift-syntax compile time, replace with a .binaryTarget:
-//
-//   .binaryTarget(
-//       name: "PySwiftGenerators",
-//       url: "https://github.com/Py-Swift/PySwiftGenerators/releases/download/v0.0.1/PySwiftGenerators.artifactbundle.zip",
-//       checksum: "<checksum from release workflow summary>"
-//   )
-//
-// (then remove the PySwiftGenerators package dep from `dependencies` below)
-let PySwiftGeneratorsDep: Package.Dependency = if local {
-    .package(path: "../PySwiftGenerators")
-} else {
-    .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "1.0.0")
-}
+// Binary lookup order (SPM 6.2 transitive local-path macro plugin workaround):
+//  1. PYSWIFTGENERATORS_TOOL env var  — set automatically by pyswiftkit-builder / cibuildwheel
+//  2. bin/ next to this Package.swift — run ./build-macro-binary.sh once after cloning
+nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
+    let fm = FileManager.default
+    let candidates = [
+        "PySwiftGenerators-tool-arm64-apple-macosx",
+        "PySwiftGenerators-tool-x86_64-apple-macosx",
+        "PySwiftGenerators-tool",
+    ]
+    func flags(_ path: String) -> [SwiftSetting] {
+        [.unsafeFlags(["-load-plugin-executable", "\(path)#PySwiftGenerators"])]
+    }
+    // 1. Explicit env var
+    if let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty {
+        return flags(tool)
+    }
+    // 2. bin/ sibling to this Package.swift
+    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+    let binDir = pkgDir.appendingPathComponent("bin")
+    for name in candidates {
+        let path = binDir.appendingPathComponent(name).path
+        if fm.isExecutableFile(atPath: path) { return flags(path) }
+    }
+    return []
+}()
 
 var platforms: [SupportedPlatform] = [
     .iOS(.v13),
@@ -43,7 +57,6 @@ var platforms: [SupportedPlatform] = [
 
 let dependencies: [Package.Dependency] = [
     CPython,
-    PySwiftGeneratorsDep,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
 ]
 
@@ -93,6 +106,15 @@ func package_targets() -> [Target] {
                 .swiftLanguageMode(.v5)
             ]
         ),
+        // PyWrapperInfo: pure-Swift types used by PySwiftWrapper (inlined from PySwiftGenerators).
+        .target(
+            name: "PyWrapperInfo",
+            dependencies: [],
+            path: "Sources/PyWrapperInfo",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
+        ),
         // PyWrapping Related
         .target(
             name: "PyProtocols",
@@ -104,13 +126,12 @@ func package_targets() -> [Target] {
         .target(
             name: "PySwiftWrapper",
             dependencies: [
-                .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
-                .product(name: "PyWrapperInfo", package: "PySwiftGenerators"),
+                "PyWrapperInfo",
                 "CPython",
                 "PySerializing",
                 "PyProtocols"
             ],
-            swiftSettings: [
+            swiftSettings: macroPluginFlags + [
                 .swiftLanguageMode(.v5)
             ]
         ),
@@ -130,7 +151,6 @@ func add_test_targets(_ targets: inout [Target]) {
             "CPython",
             "PySwiftKit",
             "PySerializing",
-            .product(name: "PyWrapperInternal", package: "PySwiftGenerators"),
             "PySwiftWrapper"
         ],
         resources: [
