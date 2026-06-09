@@ -36,7 +36,7 @@ func package_targets() -> [Target] {
         // SPM auto-injects -load-plugin-executable for all targets that list it as a dependency.
         .binaryTarget(
             name: "PySwiftGenerators",
-            url: "https://github.com/Py-Swift/PySwiftKit/releases/download/0.0.5/PySwiftGenerators.artifactbundle.zip",
+            url: "https://github.com/Py-Swift/PySwiftKit/releases/download/0.0.7/PySwiftGenerators.artifactbundle.zip",
             checksum: "dd3be65634d08884cf4cdf8071fba1a75f369cba56d960ddd6370c531e60bf3c"
         ),
 
