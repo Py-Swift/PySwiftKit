@@ -30,13 +30,15 @@ let dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
 ]
 
-let generatorsTarget: Target = .binaryTarget(
-    name: "PySwiftGenerators",
-    path: "PySwiftGenerators.artifactbundle"
-)
-
 func package_targets() -> [Target] {
     [
+        // PySwiftGenerators: prebuilt swiftCompilerPlugin binary bundle.
+        // SPM auto-injects -load-plugin-executable for all targets that list it as a dependency.
+        .binaryTarget(
+            name: "PySwiftGenerators",
+            path: "PySwiftGenerators.artifactbundle"
+        ),
+
         .target(
             name: "CPySwiftObject",
             dependencies: [
@@ -115,8 +117,7 @@ func package_targets() -> [Target] {
 }
 
 func get_targets() -> [Target] {
-    var targets = [generatorsTarget]
-    targets += package_targets()
+    var targets = package_targets()
     add_test_targets(&targets)
     return targets
 }
