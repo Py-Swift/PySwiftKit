@@ -19,34 +19,6 @@ let CPython: Package.Dependency = if local {
     .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
 }
 
-// PySwiftGenerators provides the macro plugin binary.
-// PyWrapperInfo (pure-Swift runtime types used by PySwiftWrapper) is inlined
-// into this package under Sources/PyWrapperInfo/.
-//
-// Binary lookup order (SPM 6.2 transitive local-path macro plugin workaround):
-//  1. PYSWIFTGENERATORS_TOOL env var  — set automatically by pyswiftkit-builder / cibuildwheel
-//  2. bin/ next to this Package.swift — run ./build-macro-binary.sh once after cloning
-nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
-    // Only applied to PyTests (test-only target). Test targets are never
-    // product-exported so unsafeFlags here are allowed even in remote deps.
-    let fm = FileManager.default
-    let candidates = [
-        "PySwiftGenerators-tool-arm64-apple-macosx",
-        "PySwiftGenerators-tool-x86_64-apple-macosx",
-        "PySwiftGenerators-tool",
-    ]
-    func flags(_ path: String) -> [SwiftSetting] {
-        [.unsafeFlags(["-load-plugin-executable", "\(path)#PySwiftGenerators"])]
-    }
-    if let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty { return flags(tool) }
-    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    let binDir = pkgDir.appendingPathComponent("bin")
-    for name in candidates {
-        let path = binDir.appendingPathComponent(name).path
-        if fm.isExecutableFile(atPath: path) { return flags(path) }
-    }
-    return []
-}()
 
 var platforms: [SupportedPlatform] = [
     .iOS(.v13),
@@ -57,6 +29,11 @@ let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
 ]
+
+let generatorsTarget: Target = .binaryTarget(
+    name: "PySwiftGenerators",
+    path: "PySwiftGenerators.artifactbundle"
+)
 
 func package_targets() -> [Target] {
     [
@@ -128,6 +105,7 @@ func package_targets() -> [Target] {
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
+                "PySwiftGenerators",
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v5)
@@ -137,7 +115,8 @@ func package_targets() -> [Target] {
 }
 
 func get_targets() -> [Target] {
-    var targets = package_targets()
+    var targets = [generatorsTarget]
+    targets += package_targets()
     add_test_targets(&targets)
     return targets
 }
@@ -155,7 +134,7 @@ func add_test_targets(_ targets: inout [Target]) {
             .copy("python3.13"),
             .copy("pyswiftwrapper_tests.py")
         ],
-        swiftSettings: macroPluginFlags + [
+        swiftSettings: [
             .swiftLanguageMode(.v5)
         ]
     ))
