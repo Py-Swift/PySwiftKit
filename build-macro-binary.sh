@@ -1,16 +1,12 @@
 #!/bin/zsh
-# Downloads the prebuilt PySwiftGenerators-tool universal binary from GitHub releases.
-# Installs to two locations so it is found in all usage modes:
+# Updates bin/PySwiftGenerators-tool from a new PySwiftGenerators GitHub release.
 #
-#   PySwiftKit/bin/         — local path dep (Xcode with sibling clone)
-#   ~/.pyswiftkit/bin/      — remote dep (SPM fetches PySwiftKit by GitHub URL)
-#
-# Package.swift in PySwiftKit and all consumer packages checks both locations
-# automatically — no env vars needed after running this once.
+# The binary is already committed in bin/ — you do NOT need to run this on a
+# fresh clone. Only run this when updating to a newer PySwiftGenerators release.
 #
 # Usage:
-#   ./build-macro-binary.sh           # installs latest (v0.0.1)
-#   ./build-macro-binary.sh v0.0.2    # installs a specific version
+#   ./build-macro-binary.sh           # re-downloads current version (v0.0.1)
+#   ./build-macro-binary.sh v0.0.2    # updates to a specific version
 
 set -euo pipefail
 
