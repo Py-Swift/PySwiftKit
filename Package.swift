@@ -4,7 +4,7 @@ import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 
-let local = true
+let local = false
 let dev_mode = true
 
 // When PIP_MODE=1 and cross-compiling for Android (SWIFT_ANDROID_HOME set),

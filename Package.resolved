@@ -1,6 +1,15 @@
 {
-  "originHash" : "74fb40a024cc8af989f152f44c8673fdc4a353c52c4a375b28b7cf94e513d582",
+  "originHash" : "a143e26373c5a41eff4e19e51684e55c3503bce2456ac7b323e0284a41a24ed0",
   "pins" : [
+    {
+      "identity" : "cpython",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/py-swift/CPython",
+      "state" : {
+        "revision" : "feda635968f285f07858e1c01d2c379829e1e9e7",
+        "version" : "313.11.0"
+      }
+    },
     {
       "identity" : "swift-docc-plugin",
       "kind" : "remoteSourceControl",
