@@ -4,13 +4,13 @@ import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
 let dev_mode = true
 
 // When PIP_MODE=1 and cross-compiling for Android (SWIFT_ANDROID_HOME set),
 // CPySwiftObject needs PIP_MODE defined so CPython.h skips the bundled
 // PythonHeaders-android branch and uses the CPATH headers instead.
-let pipMode   = env["PIP_MODE"] != nil
+let pipMode   = env["PIP_MODE"] == "1"
 let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
 let CPython: Package.Dependency = if local {
@@ -22,33 +22,6 @@ let CPython: Package.Dependency = if local {
 // PySwiftGenerators provides the macro plugin binary.
 // PyWrapperInfo (pure-Swift runtime types used by PySwiftWrapper) is inlined
 // into this package under Sources/PyWrapperInfo/.
-//
-// Binary lookup order (SPM 6.2 transitive local-path macro plugin workaround):
-//  1. PYSWIFTGENERATORS_TOOL env var  — set automatically by pyswiftkit-builder / cibuildwheel
-//  2. bin/ next to this Package.swift — run ./build-macro-binary.sh once after cloning
-nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
-    let fm = FileManager.default
-    let candidates = [
-        "PySwiftGenerators-tool-arm64-apple-macosx",
-        "PySwiftGenerators-tool-x86_64-apple-macosx",
-        "PySwiftGenerators-tool",
-    ]
-    func flags(_ path: String) -> [SwiftSetting] {
-        [.unsafeFlags(["-load-plugin-executable", "\(path)#PySwiftGenerators"])]
-    }
-    // 1. Explicit env var
-    if let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty {
-        return flags(tool)
-    }
-    // 2. bin/ sibling to this Package.swift
-    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    let binDir = pkgDir.appendingPathComponent("bin")
-    for name in candidates {
-        let path = binDir.appendingPathComponent(name).path
-        if fm.isExecutableFile(atPath: path) { return flags(path) }
-    }
-    return []
-}()
 
 var platforms: [SupportedPlatform] = [
     .iOS(.v13),
@@ -129,11 +102,20 @@ func package_targets() -> [Target] {
                 "PyWrapperInfo",
                 "CPython",
                 "PySerializing",
-                "PyProtocols"
+                "PyProtocols",
+                "PySwiftGenerators",
             ],
-            swiftSettings: macroPluginFlags + [
+            swiftSettings: [
                 .swiftLanguageMode(.v5)
             ]
+        ),
+        // Prebuilt macro plugin binary — downloaded from GitHub release.
+        // type: swiftCompilerPlugin in info.json makes SPM load it automatically
+        // for all targets that list it as a dependency.
+        .binaryTarget(
+            name: "PySwiftGenerators",
+            url: "https://github.com/Py-Swift/PySwiftGenerators/releases/download/0.0.1/PySwiftGenerators.artifactbundle.zip",
+            checksum: "413fcf32887353fcf17989c0ca216775f1edf06684e0f93fa83a2dc26bb14f15"
         ),
     ]
 }
