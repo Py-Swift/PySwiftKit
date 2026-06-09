@@ -2,15 +2,15 @@
   "schemaVersion": "1.0",
   "artifacts": {
     "PySwiftGenerators": {
-      "type": "swiftCompilerPlugin",
+      "type": "executable",
       "version": "1.0.0",
       "variants": [
         {
-          "path": "arm64-apple-macosx/bin/PySwiftGenerators-tool",
+          "path": "bin/PySwiftGenerators-tool-arm64-apple-macosx",
           "supportedTriples": ["arm64-apple-macosx"]
         },
         {
-          "path": "x86_64-apple-macosx/bin/PySwiftGenerators-tool",
+          "path": "bin/PySwiftGenerators-tool-x86_64-apple-macosx",
           "supportedTriples": ["x86_64-apple-macosx"]
         }
       ]

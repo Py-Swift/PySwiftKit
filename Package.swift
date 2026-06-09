@@ -28,6 +28,13 @@ let dependencies: [Package.Dependency] = [
 
 func package_targets() -> [Target] {
     [
+        // Prebuilt macro plugin binary. PySwiftWrapper lists this as a dependency
+        // so SPM auto-injects -load-plugin-executable for targets that use the macros.
+        .binaryTarget(
+            name: "PySwiftGenerators",
+            url: "https://github.com/Py-Swift/PySwiftKit/releases/download/1.0.0/PySwiftGenerators.artifactbundle.zip",
+            checksum: "9863851034d7dd50d86c7b664c15c816c5184ae9633425cd857f9410a1ececc4"
+        ),
         .target(
             name: "CPySwiftObject",
             dependencies: ["CPython"],
@@ -77,6 +84,7 @@ func package_targets() -> [Target] {
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
+                "PySwiftGenerators",
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
