@@ -27,6 +27,12 @@ let CPython: Package.Dependency = if local {
 //  1. PYSWIFTGENERATORS_TOOL env var  — set automatically by pyswiftkit-builder / cibuildwheel
 //  2. bin/ next to this Package.swift — run ./build-macro-binary.sh once after cloning
 nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
+    // unsafeFlags are forbidden in remote (versioned) dependencies.
+    // PySwiftWrapper doesn't itself use macros — the plugin is only needed
+    // by consuming targets (e.g. PyFilemanager). Skip when we're a remote dep.
+    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+    if pkgDir.path.contains("/.build/checkouts/") { return [] }
+
     let fm = FileManager.default
     let candidates = [
         "PySwiftGenerators-tool-arm64-apple-macosx",
@@ -37,7 +43,6 @@ nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
         [.unsafeFlags(["-load-plugin-executable", "\(path)#PySwiftGenerators"])]
     }
     if let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty { return flags(tool) }
-    let pkgDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
     let binDir = pkgDir.appendingPathComponent("bin")
     for name in candidates {
         let path = binDir.appendingPathComponent(name).path
