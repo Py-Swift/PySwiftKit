@@ -24,7 +24,15 @@ var platforms: [SupportedPlatform] = [
 
 let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
-    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.4")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.12")
+
+// When pyswiftkit-builder sets PYSWIFTGENERATORS_TOOL (pip/cibuildwheel only),
+// inject -load-plugin-executable so the prebuilt binary is used instead of
+// compiling swift-syntax. In all other contexts this is empty.
+nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
+    guard let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty else { return [] }
+    return [.unsafeFlags(["-load-plugin-executable", "\(tool)#PySwiftGenerators"])]
+}()
 
 let dependencies: [Package.Dependency] = [
     CPython,
@@ -66,12 +74,6 @@ func package_targets() -> [Target] {
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
-            name: "PyWrapperInfo",
-            dependencies: [],
-            path: "Sources/PyWrapperInfo",
-            swiftSettings: [.swiftLanguageMode(.v5)]
-        ),
-        .target(
             name: "PyProtocols",
             dependencies: ["CPython"],
             swiftSettings: [.swiftLanguageMode(.v5)]
@@ -79,13 +81,13 @@ func package_targets() -> [Target] {
         .target(
             name: "PySwiftWrapper",
             dependencies: [
-                "PyWrapperInfo",
+                .product(name: "PyWrapperInfo", package: "PySwiftGenerators"),
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
                 .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: macroPluginFlags + [.swiftLanguageMode(.v5)]
         ),
     ]
 }
