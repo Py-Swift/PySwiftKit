@@ -24,7 +24,7 @@ var platforms: [SupportedPlatform] = [
 
 let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
-    .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.3")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.4")
 
 let dependencies: [Package.Dependency] = [
     CPython,
