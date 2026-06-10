@@ -1,10 +1,11 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 import Foundation
 import PackageDescription
 
 let env = ProcessInfo.processInfo.environment
 
 let local = false
+let localGenerators = false
 let dev_mode = true
 
 let pipMode   = env["PIP_MODE"] == "1"
@@ -21,20 +22,18 @@ var platforms: [SupportedPlatform] = [
     .macOS(.v11)
 ]
 
+let PySwiftGenerators: Package.Dependency = localGenerators
+    ? .package(path: "../PySwiftGenerators")
+    .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.3")
+
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
+    PySwiftGenerators,
 ]
 
 func package_targets() -> [Target] {
     [
-        // Prebuilt macro plugin binary. PySwiftWrapper lists this as a dependency
-        // so SPM auto-injects -load-plugin-executable for targets that use the macros.
-        .binaryTarget(
-            name: "PySwiftGenerators",
-            url: "https://github.com/Py-Swift/PySwiftKit/releases/download/1.0.0/PySwiftGenerators.artifactbundle.zip",
-            checksum: "9863851034d7dd50d86c7b664c15c816c5184ae9633425cd857f9410a1ececc4"
-        ),
         .target(
             name: "CPySwiftObject",
             dependencies: ["CPython"],
@@ -84,7 +83,7 @@ func package_targets() -> [Target] {
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
-                "PySwiftGenerators",
+                .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
@@ -127,7 +126,7 @@ extension Array where Element == Product {
     mutating func add_library(_ name: String, targets: [String], type: Product.Library.LibraryType? = nil) {
         append(.library(name: name, type: type, targets: targets))
     }
-    mutating func add_library(_ name: String, target: String? = nil, type: Product.Library.LibraryType? = nil) {
-        append(.library(name: name, type: type, targets: [target ?? name]))
+    mutating func add_library(_ name: String, type: Product.Library.LibraryType? = nil) {
+        add_library(name, targets: [name], type: type)
     }
 }
