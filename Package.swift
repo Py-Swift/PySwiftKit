@@ -26,14 +26,6 @@ let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
     : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.15")
 
-// When pyswiftkit-builder sets PYSWIFTGENERATORS_TOOL (pip/cibuildwheel only),
-// inject -load-plugin-executable so the prebuilt binary is used instead of
-// compiling swift-syntax. In all other contexts this is empty.
-nonisolated(unsafe) let macroPluginFlags: [SwiftSetting] = {
-    guard let tool = env["PYSWIFTGENERATORS_TOOL"], !tool.isEmpty else { return [] }
-    return [.unsafeFlags(["-load-plugin-executable", "\(tool)#PySwiftGenerators"])]
-}()
-
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
@@ -87,7 +79,7 @@ func package_targets() -> [Target] {
                 "PyProtocols",
                 .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
             ],
-            swiftSettings: macroPluginFlags + [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ]
 }
