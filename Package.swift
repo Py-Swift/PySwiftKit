@@ -24,7 +24,7 @@ var platforms: [SupportedPlatform] = [
 
 let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
-    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.14")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.15")
 
 // When pyswiftkit-builder sets PYSWIFTGENERATORS_TOOL (pip/cibuildwheel only),
 // inject -load-plugin-executable so the prebuilt binary is used instead of
