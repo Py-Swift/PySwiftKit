@@ -24,7 +24,7 @@ var platforms: [SupportedPlatform] = [
 
 let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
-    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.15")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.16")
 
 let dependencies: [Package.Dependency] = [
     CPython,
@@ -66,6 +66,12 @@ func package_targets() -> [Target] {
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
+            name: "PyWrapperInfo",
+            dependencies: [],
+            path: "Sources/PyWrapperInfo",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
             name: "PyProtocols",
             dependencies: ["CPython"],
             swiftSettings: [.swiftLanguageMode(.v5)]
@@ -73,7 +79,7 @@ func package_targets() -> [Target] {
         .target(
             name: "PySwiftWrapper",
             dependencies: [
-                .product(name: "PyWrapperInfo", package: "PySwiftGenerators"),
+                "PyWrapperInfo",
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
