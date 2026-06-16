@@ -8,7 +8,7 @@
 import Foundation
 // import SwiftSyntaxWrapper
 import SwiftSyntax
-import PSGWrapperInfo
+import PyWrapperInfo
 
 
 public struct PyGetSetDefs {

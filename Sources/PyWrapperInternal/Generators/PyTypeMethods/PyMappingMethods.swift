@@ -7,7 +7,7 @@
 import Foundation
 // import SwiftSyntaxWrapper
 import SwiftSyntax
-import PSGWrapperInfo
+import PyWrapperInfo
 
 protocol PyMappingMethodProtocol {
     var label: String { get }

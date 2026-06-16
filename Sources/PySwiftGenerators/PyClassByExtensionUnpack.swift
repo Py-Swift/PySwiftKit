@@ -4,7 +4,7 @@ import Foundation
 import SwiftSyntaxMacros
 import SwiftParser
 import PyWrapperInternal
-import PSGWrapperInfo
+import PyWrapperInfo
 
 class PyClassByExtensionUnpack {
     var bases: [PyClassBase] = []

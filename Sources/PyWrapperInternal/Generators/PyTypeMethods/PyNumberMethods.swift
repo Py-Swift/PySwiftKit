@@ -7,7 +7,7 @@
 
 // import SwiftSyntaxWrapper
 import SwiftSyntax
-import PSGWrapperInfo
+import PyWrapperInfo
 
 
 fileprivate extension String {

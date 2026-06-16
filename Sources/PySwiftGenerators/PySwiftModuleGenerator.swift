@@ -11,7 +11,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import PyWrapperInternal
-import PSGWrapperInfo
+import PyWrapperInfo
 
 extension AttributeListSyntax.Element {
     var isPyFunction: Bool {

@@ -10,7 +10,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import PyWrapperInternal
-import PSGWrapperInfo
+import PyWrapperInfo
 
 
 class PyClassArguments {
