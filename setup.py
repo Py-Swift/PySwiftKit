@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import sysconfig
+import tempfile
 from pathlib import Path
 
 from setuptools import setup
@@ -18,6 +19,7 @@ SWIFT_BUILD_CONFIG = os.environ.get("SWIFT_BUILD_CONFIG", "release")
 # Detect target platform from sysconfig (works correctly inside cibuildwheel).
 _PLAT = sysconfig.get_platform()
 IS_ANDROID = "android" in _PLAT
+IS_IOS     = "ios" in _PLAT and not IS_ANDROID
 
 if IS_ANDROID:
     # sysconfig returns e.g. "android-24-x86_64" for Android cross-builds.
@@ -40,12 +42,121 @@ if IS_ANDROID:
     #   product "PySwiftKit" → "libPySwiftKit.so"
     SWIFT_ARTIFACT = "libPySwiftKit.so"
     INSTALL_LIB    = "libPySwiftKit.so"
+
+    IOS_TRIPLE = None
+
+elif IS_IOS:
+    # sysconfig returns e.g. "ios-17.0-arm64-iphoneos" or "ios-17.0-arm64-iphonesimulator"
+    _parts       = _PLAT.split("-")
+    _ios_version = _parts[1] if len(_parts) > 1 else "17.0"
+    _ios_arch    = _parts[2] if len(_parts) > 2 else "arm64"
+    _ios_env     = _parts[3] if len(_parts) > 3 else "iphoneos"
+
+    _sim_suffix = "-simulator" if "simulator" in _ios_env else ""
+    IOS_TRIPLE = os.environ.get(
+        "SWIFT_TRIPLE", f"{_ios_arch}-apple-ios{_ios_version}{_sim_suffix}"
+    )
+
+    ANDROID_TRIPLE = None
+    SWIFT_SDK      = None
+    # iOS: same dylib format as macOS
+    SWIFT_ARTIFACT = "libPySwiftKit.dylib"
+    INSTALL_LIB    = "libPySwiftKit.dylib"
+
 else:
     ANDROID_TRIPLE = None
     SWIFT_SDK      = None
+    IOS_TRIPLE     = None
     # macOS: product "PySwiftKit" → "libPySwiftKit.dylib"
     SWIFT_ARTIFACT = "libPySwiftKit.dylib"
     INSTALL_LIB    = "libPySwiftKit.dylib"
+
+
+def _ensure_ios_swift_sdk(triple: str) -> None:
+    """Install a minimal Swift SDK bundle so `swift build --swift-sdk <triple>` resolves correctly.
+
+    Xcode 15/16 handles Apple-platform cross-compilation triples natively.
+    Xcode 26 broke that built-in lookup (falls back to macOS sysroot), causing
+    'unable to load standard library for target ...' errors.  Installing a thin
+    bundle that only provides sdkRootPath fixes the regression without affecting
+    the host-tool (macOS) build path.
+    """
+    result = subprocess.run(["swift", "sdk", "list"], capture_output=True, text=True)
+    if triple in (result.stdout or ""):
+        return  # already registered
+
+    sdk_xcrun = "iphonesimulator" if "simulator" in triple else "iphoneos"
+    try:
+        sdk_path = subprocess.check_output(
+            ["xcrun", "--sdk", sdk_xcrun, "--show-sdk-path"], text=True
+        ).strip()
+    except subprocess.CalledProcessError:
+        print(f"[pyswiftkit] warning: could not locate {sdk_xcrun} SDK via xcrun; skipping SDK bundle install")
+        return
+
+    with tempfile.TemporaryDirectory() as tmp:
+        bundle = Path(tmp) / f"{triple}.artifactbundle"
+        (bundle / triple).mkdir(parents=True)
+        (bundle / "info.json").write_text(json.dumps({
+            "schemaVersion": "1.0",
+            "artifacts": {
+                triple: {
+                    "version": "1.0.0",
+                    "type": "swiftSDK",
+                    "variants": [{
+                        "path": triple,
+                        "supportedTriples": ["x86_64-apple-macosx", "arm64-apple-macosx"],
+                    }],
+                },
+            },
+        }, indent=4))
+        (bundle / triple / "swift-sdk.json").write_text(json.dumps({
+            "schemaVersion": "4.0",
+            "targetTriples": {
+                triple: {"sdkRootPath": sdk_path},
+            },
+        }, indent=4))
+        print(f"[pyswiftkit] installing Swift SDK bundle for {triple} → {sdk_path}")
+        subprocess.check_call(["swift", "sdk", "install", str(bundle)])
+
+
+def _patch_ios_sdk_python_linker(triple: str, link_args: list) -> None:
+    """Inject Python linker flags into the iOS Swift SDK bundle's toolset.
+
+    toolset.linkerDriver.extraCLIOptions apply only to TARGET (iOS) link steps,
+    not HOST (macOS) macro-plugin links.  This avoids the error
+    'building for macOS, but linking in dylib built for iOS-simulator'
+    that occurs when the same flags are passed via -Xlinker globally.
+    """
+    sdk_base = Path.home() / "Library/org.swift.swiftpm/swift-sdks"
+    for bundle in sorted(sdk_base.glob("*.artifactbundle")):
+        for variant in sorted(bundle.iterdir()):
+            if not variant.is_dir():
+                continue
+            sdk_json_path = variant / "swift-sdk.json"
+            if not sdk_json_path.exists():
+                continue
+            try:
+                sdk_data = json.loads(sdk_json_path.read_text())
+            except (json.JSONDecodeError, OSError):
+                continue
+            if triple not in sdk_data.get("targetTriples", {}):
+                continue
+            # Swift module final-link uses swiftc (not clang), so
+            # linkerDriver.extraCLIOptions doesn't reach it.  Use
+            # swiftCompiler.extraCLIOptions with -Xlinker forwarding instead.
+            toolset_name = "swift-toolset-python.json"
+            xlinker_args = [x for a in link_args for x in ("-Xlinker", a)]
+            (variant / toolset_name).write_text(json.dumps(
+                {"schemaVersion": "1.0", "swiftCompiler": {"extraCLIOptions": xlinker_args}},
+                indent=4,
+            ))
+            triple_info = sdk_data["targetTriples"][triple]
+            if toolset_name not in triple_info.get("toolsetPaths", []):
+                triple_info["toolsetPaths"] = [toolset_name]
+                sdk_json_path.write_text(json.dumps(sdk_data, indent=4))
+            return
+    print(f"[pyswiftkit] warning: Swift SDK bundle for {triple} not found; Python link flags not applied")
 
 
 def _patch_android_sdk_toolset(sdk_bundle: Path, arch: str, resource_dir: Path) -> None:
@@ -106,11 +217,105 @@ class BuildSwift(build_py):
     def run(self):
         self._build_swift()
         super().run()
+        if IS_IOS:
+            # build_py may carry a stale dylib in the build-lib tree from a
+            # previous macOS or Android build.  Remove it so bdist_wheel does
+            # not bundle a wrong-platform binary alongside the xcframework.
+            stale = Path(self.build_lib) / "pyswiftkit" / INSTALL_LIB
+            if stale.exists():
+                stale.unlink()
 
     def _build_swift(self):
         include_dir = os.environ.get("CPATH") or sysconfig.get_path("include")
 
-        if IS_ANDROID:
+        if IS_IOS:
+
+            # iOS linker does not support -undefined dynamic_lookup — link
+            # explicitly against the libpython provided by cibuildwheel.
+            libdir    = sysconfig.get_config_var("LIBDIR") or ""
+            ldlibrary = sysconfig.get_config_var("LDLIBRARY") or ""
+
+            env = {
+                **os.environ,
+                "PIP_MODE": "1",
+                "CPATH": include_dir,
+            }
+
+            cmd = [
+                "swift", "build",
+                "-c", SWIFT_BUILD_CONFIG,
+                "--product", "PySwiftKit",
+                "--swift-sdk", IOS_TRIPLE,
+                "--disable-sandbox",
+                "-Xcc", f"-isystem{include_dir}",
+            ]
+
+            # Compute Python link args to inject via the SDK bundle toolset.
+            # We do NOT use -Xlinker here — those flags are applied globally to
+            # every link step including the HOST (macOS) macro-plugin link, which
+            # would fail with 'building for macOS, but linking in dylib built for
+            # iOS-simulator'.  The SDK bundle toolset's linkerDriver.extraCLIOptions
+            # applies only to TARGET (iOS) link steps.
+            #
+            # sysconfig's LIBDIR is baked to the CI builder path, so derive the
+            # framework parent from include_dir (cibuildwheel sets this to the real
+            # local path):  <xcframework-slice>/include/python3.x  →  <xcframework-slice>/
+            _py_link_args: list = []
+            if ldlibrary:
+                if ".framework/" in ldlibrary:
+                    fw_name = ldlibrary.split(".framework/")[0].split("/")[-1]
+                    _inc_first = include_dir.split(":")[0] if include_dir else ""
+                    _fw_dir = str(Path(_inc_first).parent.parent) if _inc_first else ""
+                    if _fw_dir and (Path(_fw_dir) / f"{fw_name}.framework").exists():
+                        _py_link_args = ["-F", _fw_dir, "-framework", fw_name]
+                    elif libdir:
+                        _py_link_args = [f"-F{libdir}", "-framework", fw_name]
+                elif libdir:
+                    pylib_name = ldlibrary.removeprefix("lib").removesuffix(".dylib")
+                    _py_link_args = [f"-L{libdir}", f"-l{pylib_name}"]
+
+            # SwiftPM normalises the triple in the build dir by stripping the OS
+            # version (e.g. ios13.0 → ios), so the output lives at:
+            #   .build/x86_64-apple-ios-simulator/  not  .build/x86_64-apple-ios13.0-simulator/
+            _ios_build_triple = re.sub(r"ios\d+[\.\d]*", "ios", IOS_TRIPLE)
+            src = HERE / ".build" / _ios_build_triple / SWIFT_BUILD_CONFIG / SWIFT_ARTIFACT
+
+            # Ensure the Swift SDK bundle is registered so --swift-sdk resolves
+            # the iOS sysroot correctly (needed on Xcode 26+ which broke built-in
+            # Apple-platform triple lookup), then patch its toolset with the
+            # Python linker flags so only the TARGET link gets them.
+            _ensure_ios_swift_sdk(IOS_TRIPLE)
+            if _py_link_args:
+                _patch_ios_sdk_python_linker(IOS_TRIPLE, _py_link_args)
+
+            print(f"[pyswiftkit] swift build  iOS triple={IOS_TRIPLE}  CPATH={include_dir}")
+            subprocess.check_call(cmd, cwd=HERE, env=env)
+
+            # Package the dylib as an xcframework so iOS app builders
+            # (Briefcase, Kivy, etc.) can embed it in Frameworks/ at app-build
+            # time.  The repair-wheel-command injects this staging dir as
+            # .frameworks/ into the wheel.
+            xcf_staging = HERE / "build" / "ios_frameworks"
+            xcf_staging.mkdir(parents=True, exist_ok=True)
+            xcf_out = xcf_staging / "libPySwiftKit.xcframework"
+            if xcf_out.exists():
+                shutil.rmtree(xcf_out)
+
+            print(f"[pyswiftkit] xcodebuild -create-xcframework → {xcf_out.relative_to(HERE)}")
+            subprocess.check_call([
+                "xcodebuild", "-create-xcframework",
+                "-library", str(src),
+                "-output", str(xcf_out),
+            ])
+            # iOS wheels ship the library exclusively via .frameworks/; remove
+            # any stale dylib left by a previous macOS build so build_py does
+            # not bundle a wrong-platform binary alongside the xcframework.
+            _stale = PKG_DIR / INSTALL_LIB
+            if _stale.exists():
+                _stale.unlink()
+            return
+
+        elif IS_ANDROID:
             # Cross-compilation: pass headers only to the target C compiler via
             # -Xcc -isystem rather than CPATH (which would also affect the macOS
             # host compiler and corrupt the macOS SDK module cache).

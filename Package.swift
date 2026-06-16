@@ -1,11 +1,12 @@
 // swift-tools-version: 6.2
 import Foundation
 import PackageDescription
+import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
 let local = false
-let localGenerators = false
+let localGenerators = true
 let dev_mode = true
 
 let pipMode   = env["PIP_MODE"] == "1"
@@ -24,12 +25,13 @@ var platforms: [SupportedPlatform] = [
 
 let PySwiftGenerators: Package.Dependency = localGenerators
     ? .package(path: "../PySwiftGenerators")
-    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.16")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.0")
 
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
-    PySwiftGenerators,
+    //PySwiftGenerators,
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
 ]
 
 func package_targets() -> [Target] {
@@ -83,9 +85,31 @@ func package_targets() -> [Target] {
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
-                .product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
+                "PySwiftGenerators"
+                //.product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
+                //.product(name: "SwiftSyntaxWrapper", package: "PySwiftGenerators"),
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "PyWrapperInternal",
+            dependencies: [
+                //"SwiftSyntaxWrapper",
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                "PyWrapperInfo",
+            ],
+        ),
+        .macro(
+            name: "PySwiftGenerators",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                //"SwiftSyntaxWrapper",
+                "PyWrapperInfo",
+                "PyWrapperInternal",
+            ],
+            //swiftSettings: swift_settings
         ),
     ]
 }
@@ -109,7 +133,7 @@ func get_products() -> [Product] {
     var products = [Product]()
     products.add_library("PySerializing")
     products.add_library("PySwiftWrapper")
-    products.add_library("PySwiftKitBase", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
+    products.add_library("PySwiftKitStatic", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
     products.add_library("PySwiftKit", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"], type: .dynamic)
     return products
 }
