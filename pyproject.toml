@@ -31,7 +31,7 @@ enable = ["cpython-prerelease"]
 
 [tool.cibuildwheel.environment]
 PIP_MODE           = "1"
-SWIFT_BUILD_CONFIG = "debug"
+SWIFT_BUILD_CONFIG = "release"
 
 # ---------------------------------------------------------------------------
 # macOS
