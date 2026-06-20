@@ -40,6 +40,18 @@ extension PyCapsuleProtocol where Self: AnyObject {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 struct TestCapSttuct: PyCapsuleProtocol {
     
 }
