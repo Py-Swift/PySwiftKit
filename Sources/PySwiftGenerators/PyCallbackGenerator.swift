@@ -109,6 +109,7 @@ class PyCallArguments {
             default: break
             }
         }
+        method = macroName == "PyCallMethod"
     }
     
     init(node: FreestandingMacroExpansionSyntax) {
@@ -193,6 +194,75 @@ struct PyCallFiller: BodyMacro {
         output.append("""
         """)
         return output
+    }
+}
+
+struct PyCallMethodBody: BodyMacro {
+    
+    static func expansion(of node: AttributeSyntax, providingBodyFor declaration: some DeclSyntaxProtocol & WithOptionalCodeBlockSyntax, in context: some MacroExpansionContext) throws -> [CodeBlockItemSyntax] {
+        guard let fdecl = declaration.as(FunctionDeclSyntax.self) else { return [] }
+        let info = Arguments(node: node)
+        
+        let path: String = info.path?.components.first?.component.description ?? "py_target"
+        let pycall = PyCallMethodGenerator(function: fdecl, gil: info.gil, method: nil, path: path)
+        
+        return .init(pycall.output)
+    }
+    
+    class Arguments {
+        var name: String
+        var gil = true
+        var method: String?
+        var path: KeyPathExprSyntax?
+        //var once: Bool = false
+        
+        init(node: AttributeSyntax) {
+            let macroName = node.attributeName.trimmedDescription
+            name = macroName
+            //once = macroName.contains("Once")
+            if let arguments = node.arguments {
+                switch arguments {
+                case .argumentList(let labeledExprList):
+                    setAttributes(arguments: labeledExprList)
+                default: break
+                }
+            }
+           
+        }
+        
+        init(node: FreestandingMacroExpansionSyntax) {
+            let macroName = node.macroName.text
+            
+            name = macroName
+            //once = macroName.contains("Once")
+            setAttributes(arguments: node.arguments)
+            
+        }
+        
+        private func setAttributes(arguments: LabeledExprListSyntax) {
+            for arg in arguments {
+                guard let label = arg.label, let argument = Argument(rawValue: label.text) else { continue }
+                switch argument {
+                case .path:
+                    path = arg.expression.as(KeyPathExprSyntax.self)
+                    
+                case .gil:
+                    gil = .init(arg.expression.description) ?? true
+     
+                    
+                case .method:
+                    method = .init(arg.expression.description)
+                }
+            }
+        }
+        
+        
+        
+        enum Argument: String {
+            case path
+            case gil
+            case method
+        }
     }
 }
 

@@ -18,6 +18,7 @@ public class PyClass {
     var unretained: Bool
     var external: Bool
     var swift_mode: SwiftMode
+    var self_ref: Bool
     
     public init(
         name: String,
@@ -26,7 +27,8 @@ public class PyClass {
         base_type: PyTypeObjectBaseType = .none,
         unretained: Bool = false,
         external: Bool = false,
-        swift_mode: SwiftMode
+        swift_mode: SwiftMode,
+        self_ref: Bool
     ) {
         self.name = name
         self.bases = bases
@@ -34,6 +36,7 @@ public class PyClass {
         self.unretained = unretained
         self.external = external
         self.swift_mode = swift_mode
+        self.self_ref = self_ref
         if cls.isPyContainer {
             let signature = FunctionSignatureSyntax.init(
                 parameterClause: .init(parameters: .init {
@@ -65,7 +68,8 @@ public class PyClass {
         base_type: PyTypeObjectBaseType = .none,
         unretained: Bool = false,
         external: Bool = false,
-        swift_mode: SwiftMode
+        swift_mode: SwiftMode,
+        self_ref: Bool
     ) {
         self.name = name
         self.bases = bases
@@ -73,6 +77,7 @@ public class PyClass {
         self.unretained = unretained
         self.external = external
         self.swift_mode = swift_mode
+        self.self_ref = self_ref
         let inits = ext.memberBlock.members.compactMap { member in
             let decl = member.decl
             if decl.kind == .initializerDecl {
@@ -221,14 +226,15 @@ public extension PyClass {
     }
     
     var create_tp_init: ClosureExprSyntax {
- 
+        let params = initDecl?.signature.parameterClause.parameters.filter({!$0.firstName.trimmedDescription.contains("self") }) ?? []
         let closure = if let initDecl {
-            ExprSyntax(stringLiteral: "{ __self__, \(initDecl.signature.parameterClause.parameters.count > 1 ? "_args_" : "__arg__"), kw -> Int32 in }").as(ClosureExprSyntax.self)!
+            
+            ExprSyntax(stringLiteral: "{ __self__, \(params.count > 1 ? "_args_" : "__arg__"), kw -> Int32 in }").as(ClosureExprSyntax.self)!
         } else {
             ExprSyntax(stringLiteral: "{ _, _, _ -> Int32 in }").as(ClosureExprSyntax.self)!
         }
         return closure.with(\.statements, .init {
-            ObjectInitializer(cls: name, decl: initDecl).outputNew
+            ObjectInitializer(cls: name, decl: initDecl, self_ref: self_ref).outputNew
         })
         
     }

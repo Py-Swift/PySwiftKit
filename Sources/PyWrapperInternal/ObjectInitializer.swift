@@ -12,7 +12,7 @@ public class ObjectInitializer {
     let pyInit: Bool
     var options: [Option] = []
     
-    public init(cls: String, decl: InitializerDeclSyntax?) {
+    public init(cls: String, decl: InitializerDeclSyntax?, self_ref: Bool = false) {
         self.cls = cls
         self.decl = decl
         if let decl {
@@ -20,22 +20,29 @@ public class ObjectInitializer {
             let signature = decl.signature
             let parameters = Array(signature.parameterClause.parameters)
             self.parameters = parameters
+            
+            self.filteredParameters = self_ref ? parameters.filter({!($0.secondName ?? $0.firstName).trimmedDescription.contains("self")}) :  parameters
             if
                 signature.effectSpecifiers?.throwsClause != nil,
-                parameters.count == 1,
-                let firstPar = parameters.first,
+                filteredParameters.count == 1,
+                let firstPar = filteredParameters.first,
                 firstPar.firstName.text == "object",
                 firstPar.type.isPyPointer
             {
                 options.append(.pySerialize_init)
+                
             }
         } else {
             pyInit = false
             parameters = []
+            filteredParameters = []
         }
+        if self_ref { options.append(.self_ref) }
     }
     
     var parameters: [FunctionParameterSyntax]
+    
+    var filteredParameters: [FunctionParameterSyntax]
     
     var funcThrows: Bool {
         if let _ =  decl?.signature.effectSpecifiers?.throwsClause?.throwsSpecifier {
@@ -47,7 +54,7 @@ public class ObjectInitializer {
     var canThrow: Bool {
    
         
-        return parameters.count > 0//parameters.canThrow
+        return filteredParameters.count > 0//parameters.canThrow
     }
     
     func process() {
@@ -61,6 +68,7 @@ extension ObjectInitializer {
     
     enum Option {
         case pySerialize_init
+        case self_ref
     }
     
 //    public var output: CodeBlockItemListSyntax { .init {
@@ -150,7 +158,7 @@ extension ObjectInitializer {
      */
     
     var outputNew: CodeBlockItemListSyntax {
-        let pcount = parameters.count
+        let pcount = filteredParameters.count
         let code = CodeBlockItemListSyntax {
             //"print(\"is_tuple\", PyTuple_Check(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!")))"
             //"pyPrint(\(raw: parameters.count == 1 ? "__arg__!" : "__args__!"))"
@@ -158,41 +166,43 @@ extension ObjectInitializer {
             case 0:
                 ""
             case 1:
-                if let parameter = parameters.first {
-                    let name = parameter.secondName ?? parameter.firstName
-                    if options.contains(.pySerialize_init) {
-                        VariableDeclSyntax(
-                            .var,
-                            name: .init(stringLiteral: name.text),
-                            type: .init(type: parameter.type),
-                            initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
-                        )
-                    } else {
-                        if parameter.type.isOptPyPointer || parameter.type.isPyPointer {
+                
+                    if let parameter = filteredParameters.first {
+                        let name = parameter.secondName ?? parameter.firstName
+                        if options.contains(.pySerialize_init) {
                             VariableDeclSyntax(
                                 .var,
                                 name: .init(stringLiteral: name.text),
                                 type: .init(type: parameter.type),
-                                initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\( ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
+                                initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
                             )
                         } else {
-                            VariableDeclSyntax(
-                                .var,
-                                name: .init(stringLiteral: name.text),
-                                type: .init(type: parameter.type),
-                                initializer: .init(value: "try PySerializing.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), index: 0)".expr)
-                            )
+                            if parameter.type.isOptPyPointer || parameter.type.isPyPointer {
+                                VariableDeclSyntax(
+                                    .var,
+                                    name: .init(stringLiteral: name.text),
+                                    type: .init(type: parameter.type),
+                                    initializer: .init(value: "try PySwiftKit.PyTuple_GetItem(\( ForceUnwrapExprSyntax(expression: "__arg__".expr).description), 0)".expr)
+                                )
+                            } else {
+                                VariableDeclSyntax(
+                                    .var,
+                                    name: .init(stringLiteral: name.text),
+                                    type: .init(type: parameter.type),
+                                    initializer: .init(value: "try PySerializing.PyTuple_GetItem(\(ForceUnwrapExprSyntax(expression: "__arg__".expr).description), index: 0)".expr)
+                                )
+                            }
+                            //                        VariableDeclSyntax(
+                            //                            .var,
+                            //                            name: .init(stringLiteral: name.text),
+                            //                            type: .init(type: parameter.type),
+                            //                            initializer: .init(value: handleTypes(parameter.type, nil))
+                            //                        )
                         }
-//                        VariableDeclSyntax(
-//                            .var,
-//                            name: .init(stringLiteral: name.text),
-//                            type: .init(type: parameter.type),
-//                            initializer: .init(value: handleTypes(parameter.type, nil))
-//                        )
                     }
-                }
+                
             default:
-                for parameter in self.parameters {
+                for parameter in self.filteredParameters {
                     let name = parameter.secondName ?? parameter.firstName
                     VariableDeclSyntax(
                         .var,
@@ -234,7 +244,7 @@ extension ObjectInitializer {
     
     var ifKw: IfExprSyntax {
         
-        let pcount = parameters.count
+        let pcount = filteredParameters.count
         
         let kw_con: ConditionElementListSyntax = .init {
             "let kw ".expr
@@ -249,7 +259,7 @@ extension ObjectInitializer {
         
         let if_args: IfExprSyntax = .init(conditions: args_con, elseKeyword: .keyword(.else), elseBody: .codeBlock(nargsErrorBody)) {
             "let nargs = PyTuple_Size(_args_)"
-            for (i, arg) in self.parameters.enumerated() {
+            for (i, arg) in self.filteredParameters.enumerated() {
                 let name = arg.secondName ?? arg.firstName
                 IfExprSyntax.kwOrArg(index: i, key: name.trimmed.text, pyPointer: arg.type.isPyPointer, t: arg.type)
             }
@@ -258,10 +268,10 @@ extension ObjectInitializer {
         return .init(conditions: kw_con, elseKeyword: .keyword(.else), elseBody: .ifExpr(elseIfArgs)) {
             "let nkwargs = PyDict_Size(kw)"
             IfExprSyntax(conditions: nkwargs_con, elseKeyword: .keyword(.else), elseBody: .ifExpr(if_args)) {
-                for parameter in self.parameters {
+                for parameter in self.filteredParameters {
                     let name = parameter.secondName ?? parameter.firstName
                     if parameter.type.isPyPointer {
-                        "\(raw: name) = try PySwiftKit.PyDict_GetItem(kw, \(literal: name.trimmed.text))"
+                        "\(raw: name) = try PySwiftKit.PyDict_GetItem(kw, key: \(literal: name.trimmed.text))"
                     } else {
                         "\(raw: name) = try PySerializing.PyDict_GetItem(kw, key: \(literal: name.trimmed.text))"
                     }
@@ -271,14 +281,14 @@ extension ObjectInitializer {
     }
     
     var elseIfArgs: IfExprSyntax {
-        let pcount = parameters.count
+        let pcount = filteredParameters.count
         let if_arg_con = ConditionElementListSyntax {
             "let _args_".expr
             "PyTuple_Size(_args_) == \(pcount)".expr
         }
         
         return .init(conditions: if_arg_con, elseKeyword: .keyword(.else), elseBody: .codeBlock(nargsErrorBody)) {
-            for (i, parameter) in self.parameters.enumerated() {
+            for (i, parameter) in self.filteredParameters.enumerated() {
                 let name = parameter.secondName ?? parameter.firstName
                 if parameter.type.isPyPointer {
                     "\(raw: name) = try PySwiftKit.PyTuple_GetItem(_args_, \(raw: i))"
@@ -299,7 +309,7 @@ extension IfExprSyntax {
         
         let elseBody = CodeBlockSyntax {
             if pyPointer {
-                "\(raw: key) = try PySwiftKit.PyDict_GetItem(kw, \(literal: key))"
+                "\(raw: key) = try PySwiftKit.PyDict_GetItem(kw, key: \(literal: key))"
             } else {
                 "\(raw: key) = try PySerializing.PyDict_GetItem(kw, key: \(literal: key))"
             }
@@ -319,14 +329,14 @@ extension IfExprSyntax {
 fileprivate extension ObjectInitializer {
     
     var initVars: [VariableDeclSyntax] {
-        parameters.map { arg in
+        filteredParameters.map { arg in
             VariableDeclSyntax(.var, name: .init(stringLiteral: arg.firstName.text ), type: .init(type: arg.type))
             }
     }
     
     func if_nkwargs(elseCode: CodeBlockItemListSyntax) -> IfExprSyntax {
         let if_con = ConditionElementListSyntax {
-            ExprSyntax(stringLiteral: "nkwargs >= \(parameters.count)")
+            ExprSyntax(stringLiteral: "nkwargs >= \(filteredParameters.count)")
         }
         return .init(
             conditions: if_con,
@@ -339,7 +349,7 @@ fileprivate extension ObjectInitializer {
     func handleKWArgs() -> CodeBlockItemListSyntax {
         
         return .init {
-            for arg in parameters {
+            for arg in filteredParameters {
                 let arg_name = arg.firstName.text
                 SequenceExprSyntax(elements: .init(itemsBuilder: {
                     //IdentifierExpr(stringLiteral: arg.name)
@@ -433,11 +443,30 @@ fileprivate extension ObjectInitializer {
         
         let tuple = LabeledExprListSyntax {
             if options.contains(.pySerialize_init) {
-                LabeledExprSyntax(label: "object", expression: "object".expr)
+                if options.contains(.self_ref) {
+                    LabeledExprSyntax(label: "object", expression: "unsafeBitCast(__self__, to: PyPointer.self)".expr)
+                } else {
+                    LabeledExprSyntax(label: "object", expression: "object".expr)
+                }
+                //
             } else {
-                for parameter in self.parameters {
-                    let name = parameter.secondName ?? parameter.firstName
-                    LabeledExprSyntax(label: parameter.firstName.text, expression: name.text.expr)
+                var params = parameters
+                
+                if options.contains(.self_ref) {
+                    for parameter in self.parameters {
+                        let name = parameter.secondName ?? parameter.firstName
+                        let trimmedName = name.trimmedDescription
+                        if trimmedName.contains("self") {
+                            LabeledExprSyntax(label: trimmedName, expression: "unsafeBitCast(__self__, to: PyPointer.self)".expr)
+                        } else {
+                            LabeledExprSyntax(label: parameter.firstName.text, expression: name.text.expr)
+                        }
+                    }
+                } else {
+                    for parameter in self.parameters {
+                        let name = parameter.secondName ?? parameter.firstName
+                        LabeledExprSyntax(label: parameter.firstName.text, expression: name.text.expr)
+                    }
                 }
             }
             //LabeledExprSyntax(label: "with", expression: .init(IdentifierExprSyntax(stringLiteral: src)))

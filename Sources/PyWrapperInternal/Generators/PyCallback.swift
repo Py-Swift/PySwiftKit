@@ -18,10 +18,11 @@ class VectorArgs {
     var count = 0
     
     
-    init(parameters: [FunctionParameterSyntax], method: Bool) {
+    init(parameters: [FunctionParameterSyntax], method: String? = nil) {
         var start_index = 0
-        if method {
-            self.parameters.append(.init(parameter: .init(firstName: .identifier("py_target"), type: TypeSyntax.pyPointer), option: .cls("py_target")))
+        if let method {
+            //self.parameters.append(.init(parameter: .init(firstName: .identifier(method), type: TypeSyntax.pyPointer), option: .cls(method)))
+            self.parameters.append(.init(parameter: .init(stringLiteral: method), option: .cls(method), index: 0))
             start_index += 1
         }
         count = parameters.count + start_index
@@ -33,6 +34,7 @@ class VectorArgs {
     
     var pre: CodeBlockItemListSyntax { .init {
         "let __args__ = VectorCallArgs.allocate(capacity: \(raw: count))"
+        
         for parameter in parameters {
             parameter.insert()
         }
@@ -68,7 +70,7 @@ class VectorArgs {
             case .cls(let string):
                 name = string
                 type = .pyPointer
-                self.index = 0
+                self.index = index
                 no_pyPointer = true
             }
             
@@ -188,11 +190,20 @@ extension PyCallGenerator {
     }
     
     var callee: ExprSyntax {
-        switch arg_count {
-        case 0: "PyObject_CallNoArgs"
-        case 1: "PyObject_CallOneArg"
-        default: "PyObject_Vectorcall"
+        if method {
+            switch arg_count {
+            case 0: "PyObject_CallMethodNoArgs"
+            case 1: "PyObject_CallMethodOneArg"
+            default: "PyObject_VectorcallMethod"
+            }
+        } else {
+            switch arg_count {
+            case 0: "PyObject_CallNoArgs"
+            case 1: "PyObject_CallOneArg"
+            default: "PyObject_Vectorcall"
+            }
         }
+        
     }
     
     var call: FunctionCallExprSyntax {
@@ -231,7 +242,7 @@ extension PyCallGenerator {
                 let parameter = parameters.first!
                 "let arg = \(raw: (parameter.secondName ?? parameter.firstName)).pyPointer()"
             default:
-                VectorArgs(parameters: parameters, method: method).pre
+                VectorArgs(parameters: parameters).pre
 //                "let __args__ = VectorCallArgs.allocate(capacity: \(raw: arg_count))"
 //                if method {
 //                    "__args__[0] = py_target"
@@ -261,7 +272,7 @@ extension PyCallGenerator {
 //                    "Py_DecRef(__args__[\(raw: method ? index + 1 : index)])"
 //                }
 //                "__args__.deallocate()"
-                VectorArgs(parameters: parameters, method: method).post
+                VectorArgs(parameters: parameters).post
             }
             
         }

@@ -41,6 +41,7 @@ struct PySwiftGeneratorsPlugin: CompilerPlugin {
         ExtractPySwiftObject.self,
         PyCallbackGenerator.self,
         PyCallFiller.self,
+        PyCallMethodBody.self,
         PeerDummy.self,
         PyContainerMacro.self,
         WithGilTestMacro.self,

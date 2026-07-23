@@ -11,11 +11,16 @@ public class PyModule {
     let name: String
     let classes: [TypeSyntax]
     let module_count: Int
-    
-    public init(name: String, classes: [TypeSyntax], module_count: Int) {
+    /// When set, `py_module` is built with `slots: &<customSlotsSymbol>` instead of the
+    /// shared `baseSlots`. Used so a module's types are registered in its own `Py_mod_exec`
+    /// slot (multi-phase init), since `PyModule_AddType` needs the real module object.
+    let customSlotsSymbol: String?
+
+    public init(name: String, classes: [TypeSyntax], module_count: Int, customSlotsSymbol: String? = nil) {
         self.name = name
         self.classes = classes
         self.module_count = module_count
+        self.customSlotsSymbol = customSlotsSymbol
     }
 }
 
@@ -30,6 +35,9 @@ extension PyModule {
         let call = FunctionCallExprSyntax(callee: ".new".expr) {
             "name".asLabeledExpr(name.makeLiteralSyntax())
             "methods".asLabeledExpr(module_count > 0 ? "&PyMethodDefs".expr : NilLiteralExprSyntax())
+            if let customSlotsSymbol {
+                "slots".asLabeledExpr("&\(customSlotsSymbol)".expr)
+            }
         }//.with(\.rightParen, .rightParenToken(leadingTrivia: .newline))
         
         

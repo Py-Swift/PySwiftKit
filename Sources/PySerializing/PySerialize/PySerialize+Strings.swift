@@ -22,3 +22,16 @@ extension DefaultStringInterpolation: PySerialize {
     }
 }
 
+extension PyPointer: ExpressibleByStringLiteral, ExpressibleByUnicodeScalarLiteral, ExpressibleByExtendedGraphemeClusterLiteral {
+    public init(stringLiteral value: StringLiteralType) {
+        self = value.pyPointer()
+    }
+    
+    public init(unicodeScalarLiteral value: String) {
+        self = value.pyPointer()
+    }
+    
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self = value.pyPointer()
+    }
+}

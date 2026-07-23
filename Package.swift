@@ -5,11 +5,54 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
 let localGenerators = true
 let dev_mode = true
 
+enum PythonMode {
+    case pip
+    case android
+    case development
+    case normal
+    
+    static let shared = Self.current()
+    
+    static func current() -> Self {
+        if env["PIP_MODE"] == "1" { return .pip }
+        if env["PSK_DEVELOPMENT"] == "1" { return .development }
+        if env["SWIFT_ANDROID_HOME"] != nil { return .android }
+        return .normal
+    }
+    
+    var cSettings: [CSetting] {
+        switch self {
+        case .pip:
+            [.define("PIP_MODE")]
+        case .android:
+            [.define("PIP_MODE")]
+        case .development:
+            []
+        case .normal:
+            []
+        }
+    }
+    
+    var linkerSettings: [LinkerSetting] {
+        switch self {
+        case .pip:
+            []
+        case .android:
+            []
+        case .development:
+            []
+        case .normal:
+            [.linkedFramework("Python")]
+        }
+    }
+}
+
 let pipMode   = env["PIP_MODE"] == "1"
+let frameworkMode = env["FRAMEWORK_MODE"] == "1"
 let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
 let CPython: Package.Dependency = if local {
@@ -41,7 +84,7 @@ func package_targets() -> [Target] {
             dependencies: ["CPython"],
             path: "Sources/CPySwiftObject",
             publicHeadersPath: ".",
-            cSettings: pipMode && isAndroid ? [.define("PIP_MODE")] : [],
+            cSettings: PythonMode.shared.cSettings,
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
@@ -54,7 +97,8 @@ func package_targets() -> [Target] {
             dependencies: [
                 .product(name: "CPython", package: "CPython"),
                 "CPySwiftObject",
-                "PyProtocols"
+                "PyProtocols",
+                "PyWrapperInfo"
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),

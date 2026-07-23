@@ -227,7 +227,8 @@ struct PyStructGenerator: MemberMacro {
                     bases: bases,
                     base_type: .none,
                     external: info.external,
-                    swift_mode: swift_mode
+                    swift_mode: swift_mode,
+                    self_ref: false
                 )
                 let py_methods = PyMethods(cls: structName, input: methods, base_type: .none, swift_mode: swift_mode)
                 
