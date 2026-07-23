@@ -58,7 +58,8 @@ let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 let CPython: Package.Dependency = if local {
     .package(path: "../CPython")
 } else {
-    .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
+   // .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
+    .package(url: "https://github.com/py-swift/CPython", branch: "master")
 }
 
 var platforms: [SupportedPlatform] = [
