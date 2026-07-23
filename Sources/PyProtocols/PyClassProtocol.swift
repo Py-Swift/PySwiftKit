@@ -7,6 +7,6 @@
 import CPython
 
 public protocol PyClassProtocol: AnyObject {
-    static var pyTypeObject: _typeobject { get set }
-    static var PyType: UnsafeMutablePointer<_typeobject> { get }
+    //static var pyTypeObject: _typeobject { get set }
+    //static var PyType: UnsafeMutablePointer<_typeobject> { get }
 }

@@ -64,3 +64,12 @@ public func PyObject_GetAttr<T>(_ object: PyPointer, key: String) throws -> T wh
 //        self = raw
 //    }
 //}
+public extension PyPointer {
+    func castedTo<T: PyDeserialize>() throws -> T {
+        try T.casted(from: self)
+    }
+}
+
+
+
+

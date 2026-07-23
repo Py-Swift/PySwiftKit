@@ -99,3 +99,9 @@ public enum PyTypeObjectBaseType {
 public enum PyModuleDependencies {
     case datetime
 }
+
+
+public enum PyMethodTarget {
+    case none
+    case object(Any)
+}

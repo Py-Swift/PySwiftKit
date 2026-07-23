@@ -9,3 +9,5 @@
 
 
 build/
+wheelhouse/
+*.egg-info/

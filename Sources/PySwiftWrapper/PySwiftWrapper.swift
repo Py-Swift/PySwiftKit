@@ -20,6 +20,9 @@ public macro PyFunction(name: String? = nil) = #externalMacro(module: "PySwiftGe
 @attached(extension, names: arbitrary)
 public macro PyModule(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftModuleGenerator")
 
+@attached(peer)
+public macro PySubModule(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PeerDummy")
+
 @attached(
     peer,
     names:
@@ -57,7 +60,8 @@ public macro PyClass(
     bases: [PyClassBase] = [],
     base_type: PyClassBaseType = .none,
     external: Bool = false,
-    swift_mode: SwiftMode = .v5
+    self_ref: Bool = false,
+    swift_mode: SwiftMode = .v5,
 ) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftClassGenerator")
 
 @attached(member, names: arbitrary)

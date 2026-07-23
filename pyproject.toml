@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyswiftkit"
-version = "313.8.0"
+version = "0.0.1"
 description = "PySwiftKit shared runtime library (libPySwiftKit)"
 license = {text = "MIT"}
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 classifiers = [
     "Programming Language :: Other",
     "Topic :: Software Development :: Libraries",
@@ -25,12 +25,13 @@ pyswiftkit = ["*.dylib", "*.so"]
 # cibuildwheel
 # ---------------------------------------------------------------------------
 [tool.cibuildwheel]
-build = "cp313-*"
+#build = "cp315-*"
 skip  = ["*-manylinux*", "*-musllinux*", "*-win32", "*-win_amd64"]
+enable = ["cpython-prerelease"]
 
 [tool.cibuildwheel.environment]
 PIP_MODE           = "1"
-SWIFT_BUILD_CONFIG = "debug"
+SWIFT_BUILD_CONFIG = "release"
 
 # ---------------------------------------------------------------------------
 # macOS
@@ -44,6 +45,21 @@ repair-wheel-command = "delocate-wheel --ignore-missing-dependencies -w {dest_di
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "13.0"
 # CPATH propagates to all compilation units — no per-target -I needed in Package.swift.
+CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\")"
+
+# ---------------------------------------------------------------------------
+# iOS
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel.ios]
+# swift, xcodebuild, etc. are host-system tools — not pip packages.
+xbuild-tools = []
+# Copy the wheel then inject .frameworks/libPySwiftKit.xcframework/ which was
+# staged in build/ios_frameworks/ by setup.py's iOS build branch.
+repair-wheel-command = "cp {wheel} {dest_dir}/ && python {project}/tools/add-ios-frameworks.py {dest_dir}"
+
+[tool.cibuildwheel.ios.environment]
+# setup.py falls back to sysconfig when CPATH is unset, but set it explicitly
+# so the same Python headers are used consistently by every compilation unit.
 CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\")"
 
 # ---------------------------------------------------------------------------

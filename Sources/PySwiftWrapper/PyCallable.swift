@@ -9,7 +9,10 @@ import PySerializing
 import PySwiftKit
 
 @attached(body)
-public macro PyCall(target: PyCallTarget? = nil, gil: Bool = true, method: Bool = false, cast_options: [ArgumentCast] = []) = #externalMacro(module: "PySwiftGenerators", type: "PyCallFiller")
+public macro PyCall(target: PyCallTarget? = nil, gil: Bool = true, cast_options: [ArgumentCast] = []) = #externalMacro(module: "PySwiftGenerators", type: "PyCallFiller")
+
+@attached(body)
+public macro PyCallMethod<C: PyClassProtocol, T>(path: KeyPath<C, T>, name: PyCallTarget? = nil, gil: Bool = true, cast_options: [ArgumentCast] = []) = #externalMacro(module: "PySwiftGenerators", type: "PyCallMethodBody")
 
 //@freestanding(expression)
 //public macro PyCallable<each T: PySerialize>(_ target: PyPointer, gil: Bool = true) -> (repeat each T) -> Void = #externalMacro(module: "PySwiftGenerators", type: "PyCallFiller")

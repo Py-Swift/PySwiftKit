@@ -1,13 +1,58 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 import Foundation
 import PackageDescription
+import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
+let localGenerators = true
 let dev_mode = true
 
+enum PythonMode {
+    case pip
+    case android
+    case development
+    case normal
+    
+    static let shared = Self.current()
+    
+    static func current() -> Self {
+        if env["PIP_MODE"] == "1" { return .pip }
+        if env["PSK_DEVELOPMENT"] == "1" { return .development }
+        if env["SWIFT_ANDROID_HOME"] != nil { return .android }
+        return .normal
+    }
+    
+    var cSettings: [CSetting] {
+        switch self {
+        case .pip:
+            [.define("PIP_MODE")]
+        case .android:
+            [.define("PIP_MODE")]
+        case .development:
+            []
+        case .normal:
+            []
+        }
+    }
+    
+    var linkerSettings: [LinkerSetting] {
+        switch self {
+        case .pip:
+            []
+        case .android:
+            []
+        case .development:
+            []
+        case .normal:
+            [.linkedFramework("Python")]
+        }
+    }
+}
+
 let pipMode   = env["PIP_MODE"] == "1"
+let frameworkMode = env["FRAMEWORK_MODE"] == "1"
 let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
 let CPython: Package.Dependency = if local {
@@ -21,9 +66,15 @@ var platforms: [SupportedPlatform] = [
     .macOS(.v11)
 ]
 
+let PySwiftGenerators: Package.Dependency = localGenerators
+    ? .package(path: "../PySwiftGenerators")
+    : .package(url: "https://github.com/Py-Swift/PySwiftGenerators", from: "0.0.0")
+
 let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
+    //PySwiftGenerators,
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
 ]
 
 func package_targets() -> [Target] {
@@ -33,7 +84,7 @@ func package_targets() -> [Target] {
             dependencies: ["CPython"],
             path: "Sources/CPySwiftObject",
             publicHeadersPath: ".",
-            cSettings: pipMode && isAndroid ? [.define("PIP_MODE")] : [],
+            cSettings: PythonMode.shared.cSettings,
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
@@ -46,7 +97,8 @@ func package_targets() -> [Target] {
             dependencies: [
                 .product(name: "CPython", package: "CPython"),
                 "CPySwiftObject",
-                "PyProtocols"
+                "PyProtocols",
+                "PyWrapperInfo"
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
@@ -77,8 +129,31 @@ func package_targets() -> [Target] {
                 "CPython",
                 "PySerializing",
                 "PyProtocols",
+                "PySwiftGenerators"
+                //.product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
+                //.product(name: "SwiftSyntaxWrapper", package: "PySwiftGenerators"),
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "PyWrapperInternal",
+            dependencies: [
+                //"SwiftSyntaxWrapper",
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                "PyWrapperInfo",
+            ],
+        ),
+        .macro(
+            name: "PySwiftGenerators",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                //"SwiftSyntaxWrapper",
+                "PyWrapperInfo",
+                "PyWrapperInternal",
+            ],
+            //swiftSettings: swift_settings
         ),
     ]
 }
@@ -102,7 +177,7 @@ func get_products() -> [Product] {
     var products = [Product]()
     products.add_library("PySerializing")
     products.add_library("PySwiftWrapper")
-    products.add_library("PySwiftKitBase", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
+    products.add_library("PySwiftKitStatic", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
     products.add_library("PySwiftKit", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"], type: .dynamic)
     return products
 }
@@ -119,7 +194,7 @@ extension Array where Element == Product {
     mutating func add_library(_ name: String, targets: [String], type: Product.Library.LibraryType? = nil) {
         append(.library(name: name, type: type, targets: targets))
     }
-    mutating func add_library(_ name: String, target: String? = nil, type: Product.Library.LibraryType? = nil) {
-        append(.library(name: name, type: type, targets: [target ?? name]))
+    mutating func add_library(_ name: String, type: Product.Library.LibraryType? = nil) {
+        add_library(name, targets: [name], type: type)
     }
 }
