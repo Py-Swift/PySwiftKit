@@ -109,7 +109,7 @@ import PyWrapperInfo
 
 
 extension PyModuleProtocol {
-    
+    #if !PIP_MODE
     public static func addToImports() {
         
         print("addToImports", py_name)
@@ -120,5 +120,5 @@ extension PyModuleProtocol {
         }
         
     }
-
+    #endif
 }

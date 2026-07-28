@@ -5,7 +5,7 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
 let localGenerators = true
 let dev_mode = true
 
@@ -13,42 +13,71 @@ enum PythonMode {
     case pip
     case android
     case development
+    case pip_development
     case normal
     
     static let shared = Self.current()
     
     static func current() -> Self {
+        if env["PSK_DEVELOPMENT"] == "1" {
+            if env["PIP_MODE"] == "1" { return .pip_development }
+            return .development
+        }
         if env["PIP_MODE"] == "1" { return .pip }
-        if env["PSK_DEVELOPMENT"] == "1" { return .development }
         if env["SWIFT_ANDROID_HOME"] != nil { return .android }
         return .normal
     }
     
-    var cSettings: [CSetting] {
+    var _cSettings: [CSetting] {
         switch self {
         case .pip:
             [.define("PIP_MODE")]
         case .android:
             [.define("PIP_MODE")]
         case .development:
+            []
+        case .pip_development:
             []
         case .normal:
             []
         }
     }
     
-    var linkerSettings: [LinkerSetting] {
+    static var cSettings: [CSetting] { shared._cSettings }
+    
+    var _linkerSettings: [LinkerSetting] {
         switch self {
         case .pip:
             []
         case .android:
             []
         case .development:
+            []
+        case .pip_development:
             []
         case .normal:
             [.linkedFramework("Python")]
         }
     }
+    
+    static var linkerSettings: [LinkerSetting] { shared._linkerSettings }
+    
+    var _swiftSettings: [SwiftSetting] {
+        switch self {
+        case .pip:
+            [.define("PIP_MODE")]
+        case .android:
+            []
+        case .development:
+            []
+        case .pip_development:
+            [.define("PIP_MODE")]
+        case .normal:
+            []
+        }
+    }
+    
+    static var swiftSettings: [SwiftSetting] { shared._swiftSettings }
 }
 
 let pipMode   = env["PIP_MODE"] == "1"
@@ -85,7 +114,7 @@ func package_targets() -> [Target] {
             dependencies: ["CPython"],
             path: "Sources/CPySwiftObject",
             publicHeadersPath: ".",
-            cSettings: PythonMode.shared.cSettings,
+            cSettings: PythonMode.cSettings,
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
@@ -101,7 +130,7 @@ func package_targets() -> [Target] {
                 "PyProtocols",
                 "PyWrapperInfo"
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PySwiftConcurrency",
@@ -121,7 +150,7 @@ func package_targets() -> [Target] {
         .target(
             name: "PyProtocols",
             dependencies: ["CPython"],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PySwiftWrapper",
@@ -134,7 +163,7 @@ func package_targets() -> [Target] {
                 //.product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
                 //.product(name: "SwiftSyntaxWrapper", package: "PySwiftGenerators"),
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PyWrapperInternal",
@@ -154,13 +183,22 @@ func package_targets() -> [Target] {
                 "PyWrapperInfo",
                 "PyWrapperInternal",
             ],
-            //swiftSettings: swift_settings
+            swiftSettings: PythonMode.swiftSettings
         ),
     ]
 }
 
 func get_targets() -> [Target] {
     var targets = package_targets()
+    targets.append(
+        .executableTarget(
+            name: "PSKTest",
+            dependencies: [
+                "PySwiftKit", "PySerializing", "PySwiftWrapper",
+            ],
+            swiftSettings: PythonMode.swiftSettings + [.swiftLanguageMode(.v5)]
+        )
+    )
     add_test_targets(&targets)
     return targets
 }
@@ -180,6 +218,7 @@ func get_products() -> [Product] {
     products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitStatic", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
     products.add_library("PySwiftKit", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"], type: .dynamic)
+    products.append(.executable(name: "PSKTest", targets: ["PSKTest"]))
     return products
 }
 

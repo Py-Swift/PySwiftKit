@@ -33,7 +33,15 @@ public struct PyGetSetDefGenerator {
             } else if let accessorBlock = binding.accessorBlock {
                 switch accessorBlock.accessors  {
                 case .accessors(let acclist):
-                    read_only = !acclist.contains(where: {$0.accessorSpecifier.text == "set"})
+                    read_only = !acclist.contains(where: {
+                        switch $0.accessorSpecifier.text {
+                        case "set": true
+                        case "willSet": true
+                        case "didSet": true
+                        default: false
+                        }
+                        //$0.accessorSpecifier.text == "set"
+                    })
                 case .getter(_):
                     read_only = true
                 default:

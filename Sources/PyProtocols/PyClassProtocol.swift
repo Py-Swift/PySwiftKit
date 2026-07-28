@@ -6,7 +6,7 @@
 //import CPython
 import CPython
 
-public protocol PyClassProtocol: AnyObject {
+public protocol PyClassProtocol: AnyObject, Sendable {
     //static var pyTypeObject: _typeobject { get set }
     //static var PyType: UnsafeMutablePointer<_typeobject> { get }
 }
