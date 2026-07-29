@@ -426,11 +426,19 @@ class BuildSwift(build_py):
             PKG_DIR.mkdir(exist_ok=True)
             dst = PKG_DIR / INSTALL_LIB
 
+            # PIP_MODE builds link PySwiftKit with empty linkerSettings (see
+            # Package.swift PythonMode.pip) — no -framework Python. Without
+            # -undefined dynamic_lookup the final dylib link fails with
+            # "Undefined symbols" for every CPython C API symbol; the
+            # symbols instead resolve at runtime from the host interpreter.
+            undefined_dynamic_lookup = ["-Xlinker", "-undefined", "-Xlinker", "dynamic_lookup"]
+
             if len(target_arches) <= 1:
                 cmd = [
                     "swift", "build",
                     "-c", SWIFT_BUILD_CONFIG,
                     "--product", "PySwiftKit",
+                    *undefined_dynamic_lookup,
                 ]
                 if target_arches:
                     cmd += ["--arch", target_arches[0]]
@@ -450,6 +458,7 @@ class BuildSwift(build_py):
                         "-c", SWIFT_BUILD_CONFIG,
                         "--product", "PySwiftKit",
                         "--arch", arch,
+                        *undefined_dynamic_lookup,
                     ]
                     print(f"[pyswiftkit] swift build  CPATH={include_dir}  arch={arch}")
                     subprocess.check_call(cmd, cwd=HERE, env=env)

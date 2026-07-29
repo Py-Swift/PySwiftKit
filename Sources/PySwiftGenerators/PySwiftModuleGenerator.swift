@@ -198,9 +198,11 @@ struct PySwiftModuleGenerator: MemberMacro {
         
         let classes = pyClassNames(decl: structDecl)
         
+        let customSlotsSymbol: String? = nil//classes.isEmpty ? nil : "py_module_slots"
+        
         var output: [DeclSyntax] = [
             PyMethods(cls: module_name.text, input: module_functions, module_or_class: true, base_type: .none, swift_mode: .v5).output,
-            .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count, customSlotsSymbol: classes.isEmpty ? nil : "py_module_slots").variDecl),
+            .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count).variDecl),
             "public static let py_name = \(literal: _module_name)",
         ]
         output.append(contentsOf: processPyModuleImportFunc(classes: classes))
