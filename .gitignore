@@ -11,3 +11,8 @@
 build/
 wheelhouse/
 *.egg-info/
+
+# Build products setup.py stages into the package dir before wheeling it up —
+# neither belongs in git; both get produced fresh on every real build.
+pyswiftkit/libPySwiftKit.so
+pyswiftkit/libPySwiftKit.dylib
