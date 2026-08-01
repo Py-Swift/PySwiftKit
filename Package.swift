@@ -84,7 +84,19 @@ let pipMode   = env["PIP_MODE"] == "1"
 let frameworkMode = env["FRAMEWORK_MODE"] == "1"
 let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
-let CPython: Package.Dependency = if local {
+// `local` alone isn't enough on its own: a cibuildwheel/manylinux container
+// only ever has this one repo mounted (as /project), never its siblings, so
+// the "../CPython" path SwiftPM would resolve to plain doesn't exist there —
+// "the package at '/CPython' cannot be accessed". Checking that the sibling
+// checkout is actually present is what lets host builds keep using it
+// (fast local iteration, no push required) while a container build falls
+// back to git automatically instead of failing outright.
+let localCPythonPath = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .appendingPathComponent("../CPython")
+    .standardized.path
+
+let CPython: Package.Dependency = if local && FileManager.default.fileExists(atPath: localCPythonPath) {
     .package(path: "../CPython")
 } else {
    // .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))

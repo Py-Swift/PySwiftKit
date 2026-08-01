@@ -20,11 +20,30 @@ SWIFT_BUILD_CONFIG = os.environ.get("SWIFT_BUILD_CONFIG", "release")
 _PLAT = sysconfig.get_platform()
 IS_ANDROID = "android" in _PLAT
 IS_IOS     = "ios" in _PLAT and not IS_ANDROID
+# "linux-x86_64" / "linux-aarch64".  Checked with startswith rather than `in`
+# so it can't also match the "linux" inside an Android triple.
+IS_LINUX   = _PLAT.startswith("linux") and not IS_ANDROID
 
 if IS_ANDROID:
     # sysconfig returns e.g. "android-24-x86_64" for Android cross-builds.
     _parts = _PLAT.split("-")
-    _arch  = _parts[-1]                          # x86_64 | aarch64 | ...
+    # The tag's last segment is Android's *ABI* name, not the LLVM arch that
+    # Swift target triples use: cibuildwheel produces android-28-arm64_v8a,
+    # which would otherwise yield the nonexistent triple
+    # arm64_v8a-unknown-linux-android28. x86_64 is spelled the same either
+    # way, which is why this only ever bites on ARM.
+    _ABI_TO_ARCH = {
+        "arm64_v8a": "aarch64",
+        "arm64-v8a": "aarch64",
+        "armeabi_v7a": "armv7",
+        "armeabi-v7a": "armv7",
+        "x86_64": "x86_64",
+    }
+    _arch  = _ABI_TO_ARCH.get(_parts[-1], _parts[-1])
+    # The ABI directory name Gradle and jniLibs use — hyphenated, unlike the
+    # underscored spelling in the wheel/platform tag.
+    ANDROID_ABI = {"aarch64": "arm64-v8a", "armv7": "armeabi-v7a",
+                   "x86_64": "x86_64"}.get(_arch, _arch)
     _api   = int(_parts[1]) if len(_parts) >= 3 else 24
 
     # The Swift Android SDK only ships triples for API 28+.
@@ -62,6 +81,15 @@ elif IS_IOS:
     # iOS: same dylib format as macOS
     SWIFT_ARTIFACT = "libPySwiftKit.dylib"
     INSTALL_LIB    = "libPySwiftKit.dylib"
+
+elif IS_LINUX:
+    ANDROID_TRIPLE = None
+    SWIFT_SDK      = None
+    IOS_TRIPLE     = None
+    # Linux: product "PySwiftKit" → "libPySwiftKit.so" (same naming rule as
+    # Android, which is also ELF; only the extension differs from Apple).
+    SWIFT_ARTIFACT = "libPySwiftKit.so"
+    INSTALL_LIB    = "libPySwiftKit.so"
 
 else:
     ANDROID_TRIPLE = None
@@ -401,6 +429,32 @@ class BuildSwift(build_py):
             # SwiftPM cross-compilation output: .build/<triple>/<config>/
             src = HERE / ".build" / ANDROID_TRIPLE / SWIFT_BUILD_CONFIG / SWIFT_ARTIFACT
             print(f"[pyswiftkit] swift build  ANDROID triple={ANDROID_TRIPLE}  sdk={SWIFT_SDK}  toolchain={toolchain_bin or '(system)'}")
+        elif IS_LINUX:
+            # Native host build — cibuildwheel runs one container per arch, so
+            # there is no ARCHFLAGS/lipo equivalent to the macOS branch below.
+            #
+            # No -undefined dynamic_lookup counterpart is needed: ELF permits
+            # undefined symbols in a shared library by default, so the Python
+            # symbols stay unresolved until the interpreter dlopen's the
+            # extension, which is exactly the macOS behaviour that flag buys.
+            #
+            # No explicit -rpath either. SwiftPM already emits a RUNPATH of
+            # "<toolchain>/usr/lib/swift/linux:$ORIGIN" for a dynamic product,
+            # and that toolchain entry is what lets auditwheel locate the Swift
+            # runtime .so files and vendor them into the wheel; it rewrites the
+            # RUNPATH to point at the vendored copies afterwards.
+            env = {
+                **os.environ,
+                "PIP_MODE": "1",
+                "CPATH": include_dir,
+            }
+            cmd = [
+                "swift", "build",
+                "-c", SWIFT_BUILD_CONFIG,
+                "--product", "PySwiftKit",
+            ]
+            src = HERE / ".build" / SWIFT_BUILD_CONFIG / SWIFT_ARTIFACT
+            print(f"[pyswiftkit] swift build  LINUX  CPATH={include_dir}")
         else:
             # macOS: CPATH propagates to all compilation units automatically.
             env = {
@@ -477,6 +531,26 @@ class BuildSwift(build_py):
         PKG_DIR.mkdir(exist_ok=True)
         shutil.copy2(src, dst)
         print(f"[pyswiftkit] copied {src.name} → pyswiftkit/{INSTALL_LIB}")
+
+        if IS_ANDROID:
+            # Android also needs it at the wheel root as .libs/<abi>/, which is
+            # the directory ksproject moves into the APK's jniLibs. Everywhere
+            # else a consumer reaches this library through an rpath
+            # ($ORIGIN/../pyswiftkit on Linux, @loader_path/.. on macOS), but
+            # Android has no rpath: the loader resolves DT_NEEDED out of the
+            # app's native library directory, so the copy inside the package
+            # directory is never found. The package copy is kept as well —
+            # it is what `import pyswiftkit` expects to sit beside.
+            # Wipe the whole tree first: one wheel is one ABI, and .libs
+            # persists in the checkout between builds, so otherwise an arm64
+            # wheel would carry the previous x86_64 run's copy.
+            libs_root = HERE / ".libs"
+            if libs_root.exists():
+                shutil.rmtree(libs_root)
+            abi_dir = libs_root / ANDROID_ABI
+            abi_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, abi_dir / INSTALL_LIB)
+            print(f"[pyswiftkit] copied {src.name} → .libs/{ANDROID_ABI}/{INSTALL_LIB}")
 
 
 setup(

@@ -36,16 +36,20 @@ extension Float16: PyDeserialize {}
 #endif
 
 
-#if canImport(CoreFoundation) && !os(Android)
+#if os(macOS) || os(iOS)
 import CoreFoundation
 extension CGFloat: PyDeserialize {
     public static func casted(unsafe object: PyPointer) throws -> Self {
         PyFloat_AS_DOUBLE(object)
     }
-    
+
     public static func casted(from object: PyPointer) throws -> Self {
         guard PyObject_TypeCheck(object, .PyFloat) else { throw PyStandardException.typeError }
         return PyFloat_AS_DOUBLE(object)
     }
 }
+#else
+// CGFloat isn't Foundation's on Linux/Android — alias it to Double, which
+// already conforms above, so no separate extension is needed here.
+fileprivate typealias CGFloat = Double
 #endif

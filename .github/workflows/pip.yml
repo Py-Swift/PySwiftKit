@@ -36,9 +36,46 @@ jobs:
           name: pyswiftkit-wheels
           path: wheelhouse/*.whl
 
+  build_wheels_linux:
+    name: Build wheels on Linux (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Native runners rather than QEMU: cross-emulating a full Swift
+          # compile for aarch64 takes hours and regularly times out.
+          - { runner: ubuntu-latest,   arch: x86_64 }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel
+
+      - name: Build wheels
+        # The Swift toolchain is installed inside the manylinux container by
+        # the before-all step in pyproject.toml, not on the runner.
+        run: python -m cibuildwheel --output-dir wheelhouse .
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_ARCHS_LINUX: ${{ matrix.arch }}
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyswiftkit-wheels-linux-${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
   publish:
     name: Publish to PyPI
-    needs: build_wheels
+    needs: [build_wheels, build_wheels_linux]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -48,7 +85,10 @@ jobs:
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          name: pyswiftkit-wheels
+          # macOS uploads "pyswiftkit-wheels"; Linux uploads one artifact per
+          # arch, so collect them all into a single dist/ for the upload.
+          pattern: pyswiftkit-wheels*
+          merge-multiple: true
           path: dist/
 
       - name: Publish to PyPI

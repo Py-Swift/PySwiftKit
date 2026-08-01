@@ -12,6 +12,7 @@ classifiers = [
     "Programming Language :: Other",
     "Topic :: Software Development :: Libraries",
     "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
 ]
 
 [tool.setuptools.packages.find]
@@ -26,7 +27,9 @@ pyswiftkit = ["*.dylib", "*.so"]
 # ---------------------------------------------------------------------------
 [tool.cibuildwheel]
 #build = "cp315-*"
-skip  = ["*-manylinux*", "*-musllinux*", "*-win32", "*-win_amd64"]
+# musllinux stays skipped: Swift ships no musl/Alpine toolchain, so there is
+# nothing to build the library with. manylinux is built — see [linux] below.
+skip  = ["*-musllinux*", "*-win32", "*-win_amd64"]
 enable = ["cpython-prerelease"]
 
 [tool.cibuildwheel.environment]
@@ -45,6 +48,76 @@ repair-wheel-command = "delocate-wheel --ignore-missing-dependencies -w {dest_di
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "13.0"
 # CPATH propagates to all compilation units — no per-target -I needed in Package.swift.
+CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\")"
+
+# ---------------------------------------------------------------------------
+# Linux
+# ---------------------------------------------------------------------------
+[tool.cibuildwheel.linux]
+# AlmaLinux 9 / glibc 2.34 — the oldest manylinux image new enough to run
+# Swift's official RHEL UBI9 toolchain.  The default manylinux_2_28 is
+# AlmaLinux 8 / glibc 2.28 and cannot: Swift publishes no build for it.
+manylinux-x86_64-image  = "manylinux_2_34"
+manylinux-aarch64-image = "manylinux_2_34"
+
+# PySwiftKit builds through its own setup.py (BuildSwift), not through
+# pyswiftkit-builder — that's a separate backend only PyNucleantUI-style
+# consumers use — so it has no `ensure_swift()` of its own and still needs
+# the toolchain installed and the gcc-toolchain fix applied here.
+before-all = """
+set -eux
+SWIFT_VERSION=6.3.3
+dnf install -y libcurl-devel libxml2-devel libedit libuuid-devel
+case "$(uname -m)" in
+  x86_64)  SWIFT_PLATFORM=ubi9 ;;
+  aarch64) SWIFT_PLATFORM=ubi9-aarch64 ;;
+  *) echo "unsupported arch $(uname -m)" >&2; exit 1 ;;
+esac
+SWIFT_TAG="swift-${SWIFT_VERSION}-RELEASE"
+curl -fsSL -o /tmp/swift.tar.gz \
+  "https://download.swift.org/swift-${SWIFT_VERSION}-release/${SWIFT_PLATFORM}/${SWIFT_TAG}/${SWIFT_TAG}-${SWIFT_PLATFORM}.tar.gz"
+mkdir -p /opt/swift
+tar -xzf /tmp/swift.tar.gz -C /opt/swift --strip-components=1
+rm /tmp/swift.tar.gz
+
+# manylinux_2_34 ships its compiler as gcc-toolset-N under the Red Hat SCL
+# path /opt/rh/gcc-toolset-N/root/usr/lib/gcc/<triple>/<ver>/ rather than the
+# conventional /usr/lib/gcc/<triple>/<ver>/. `gcc` itself knows where its own
+# runtime objects are, but Swift's final link step goes through `clang`
+# directly, and clang's built-in GCC-installation probe only checks the
+# conventional path — never /opt/rh/... — so it can't find crtbeginS.o /
+# crtendS.o / libgcc, and the link fails:
+#   error: cannot open crtbeginS.o: No such file or directory
+#   error: cannot find -lgcc
+# Passing --gcc-toolchain / setting LIBRARY_PATH does not fix this: those
+# affect -l searches, not the implicit startup-object lookup that only
+# consults clang's own probed paths. Symlinking the real directory into the
+# path clang expects is what actually works — verified against a trivial
+# `swift build` in this exact image. Derived via `gcc --print-file-name`
+# rather than hardcoding gcc-toolset-14, since manylinux bumps its default
+# toolset version over time.
+GCC_LIBDIR=$(dirname "$(gcc --print-file-name=crtbeginS.o)")
+GCC_TRIPLE=$(basename "$(dirname "$GCC_LIBDIR")")
+GCC_VER=$(basename "$GCC_LIBDIR")
+mkdir -p "/usr/lib/gcc/$GCC_TRIPLE"
+ln -sfn "$GCC_LIBDIR" "/usr/lib/gcc/$GCC_TRIPLE/$GCC_VER"
+
+/opt/swift/usr/bin/swift --version
+"""
+
+# auditwheel vendors the Swift runtime (libswiftCore.so, libFoundation.so, …)
+# into pyswiftkit.libs/ and rewrites RUNPATH to reach it.  It finds them
+# through the toolchain path SwiftPM leaves in libPySwiftKit.so's RUNPATH.
+# The undefined Py* symbols need no special handling: auditwheel checks
+# external library deps and glibc symbol versions, not undefined symbols.
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.linux.environment]
+# A platform environment table replaces the top-level one rather than merging
+# with it, so PIP_MODE / SWIFT_BUILD_CONFIG are repeated here deliberately.
+PIP_MODE           = "1"
+SWIFT_BUILD_CONFIG = "release"
+PATH               = "/opt/swift/usr/bin:$PATH"
 CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\")"
 
 # ---------------------------------------------------------------------------
