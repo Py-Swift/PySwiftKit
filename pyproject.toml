@@ -25,7 +25,8 @@ pyswiftkit = ["*.dylib", "*.so"]
 # cibuildwheel
 # ---------------------------------------------------------------------------
 [tool.cibuildwheel]
-#build = "cp315-*"
+# Only 3.13 for now — matches PyNucleantUI.
+build = "cp313-*"
 skip  = ["*-manylinux*", "*-musllinux*", "*-win32", "*-win_amd64"]
 enable = ["cpython-prerelease"]
 
@@ -65,8 +66,47 @@ CPATH = "$(python3 -c \"import sysconfig; print(sysconfig.get_path('include'))\"
 # ---------------------------------------------------------------------------
 # Android
 # ---------------------------------------------------------------------------
+[tool.cibuildwheel.android]
+# cibuildwheel's default --ldpaths only covers the NDK sysroot, so auditwheel
+# can link libPySwiftKit.so's own NDK deps but not its Swift runtime deps
+# (libswiftCore.so, libswiftSwiftOnoneSupport.so, ...) — those live inside the
+# Swift Android SDK artifactbundle, under swift-resources/usr/lib/swift-<arch>/
+# android/, not anywhere NDK-related. Discovered dynamically (rather than
+# hardcoding the bundle name here a second time) so this doesn't drift from
+# the SWIFT_SDK value below.
+#
+# --ldpaths lets auditwheel *resolve* those libs (satisfies its "is this
+# actually loadable" check). Standard behavior is to also *vendor* them into
+# the wheel (pyswiftkit.libs/) same as any other missing dependency — this is
+# the correct, safe default for a standalone pyswiftkit install, since nothing
+# else can be assumed to provide the Swift runtime.
+#
+# Some consumers (e.g. NucleantAppTest's bootstrap-aar) already bundle the
+# Swift runtime themselves in jni/<abi>/, and vendoring a second copy there
+# would mean two independently-loaded instances of libswiftCore.so in one
+# process — Swift's runtime keeps global type-metadata state, and this is
+# exactly the "two copies in the process broke generic metadata lookup" class
+# of bug this project has already hit once, on NucleantWindow/Platform_MacOS
+# — see NucleantApplication's Package.swift. Those consumers opt out of
+# vendoring explicitly via PYSWIFTKIT_ANDROID_SKIP_RUNTIME_VENDOR=1.
+repair-wheel-command = """
+SWIFT_LIB_DIRS=$(find ~/.swiftpm/swift-sdks ~/.config/swiftpm/swift-sdks -type d -path '*/swift-resources/usr/lib/swift-*/android' 2>/dev/null | tr '\n' ':')
+EXCLUDES=""
+if [ -n "$PYSWIFTKIT_ANDROID_SKIP_RUNTIME_VENDOR" ]; then
+  EXCLUDES="--exclude libswift*.so --exclude libFoundation*.so --exclude lib_FoundationICU.so --exclude libdispatch.so --exclude libBlocksRuntime.so --exclude libc++_shared.so"
+fi
+set -f
+auditwheel repair --ldpaths "{ldpaths}:$SWIFT_LIB_DIRS" $EXCLUDES -w {dest_dir} {wheel}
+set +f
+"""
+
 [tool.cibuildwheel.android.environment]
 # Pass ANDROID_HOME through into the build environment.
 ANDROID_HOME = "$ANDROID_HOME"
 # Target Swift SDK — override with SWIFT_SDK env var to pick a different snapshot.
-SWIFT_SDK = "swift-6.3-DEVELOPMENT-SNAPSHOT-2026-03-05-a_android"
+SWIFT_SDK = "swift-6.3.3-RELEASE_android"
+# Set (to anything non-empty) when the consuming app already bundles the
+# Swift runtime itself (e.g. NucleantAppTest's bootstrap-aar) — see the
+# repair-wheel-command comment above. Unset by default: a standalone
+# pyswiftkit install must be able to provide its own runtime.
+PYSWIFTKIT_ANDROID_SKIP_RUNTIME_VENDOR = "$PYSWIFTKIT_ANDROID_SKIP_RUNTIME_VENDOR"

@@ -22,9 +22,21 @@ IS_ANDROID = "android" in _PLAT
 IS_IOS     = "ios" in _PLAT and not IS_ANDROID
 
 if IS_ANDROID:
-    # sysconfig returns e.g. "android-24-x86_64" for Android cross-builds.
+    # sysconfig returns e.g. "android-28-arm64_v8a" for Android cross-builds —
+    # the last segment is the Android ABI name, not the LLVM arch Swift target
+    # triples use, so arm64_v8a has to be mapped to aarch64 or the triple comes
+    # out as the nonexistent arm64_v8a-unknown-linux-androidNN. x86_64 is
+    # spelled the same either way, which is why this only shows up on ARM.
+    # 64-bit only — matches build_aar.py's ABIS table: armeabi-v7a is
+    # deliberately unsupported everywhere in this project (not worth the
+    # build time, and Play has required 64-bit support since 2019).
+    _ABI_TO_ARCH = {
+        "arm64_v8a": "aarch64",
+        "arm64-v8a": "aarch64",
+        "x86_64": "x86_64",
+    }
     _parts = _PLAT.split("-")
-    _arch  = _parts[-1]                          # x86_64 | aarch64 | ...
+    _arch  = _ABI_TO_ARCH.get(_parts[-1], _parts[-1])
     _api   = int(_parts[1]) if len(_parts) >= 3 else 24
 
     # The Swift Android SDK only ships triples for API 28+.

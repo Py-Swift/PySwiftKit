@@ -36,7 +36,25 @@ enum PythonMode {
             []
         }
     }
-    
+
+    // Swift's own `#if PIP_MODE` (as opposed to the C-side one above) needs
+    // this as a *Swift* compilation condition, not a C define — the
+    // PySwiftGenerators macro plugin's `#if PIP_MODE` (gating its
+    // @_cdecl("PyInit_<name>") peer-macro output) is compiled with this, so
+    // without it the plugin silently never emits that code, in any mode.
+    var swiftSettings: [SwiftSetting] {
+        switch self {
+        case .pip:
+            [.define("PIP_MODE")]
+        case .android:
+            [.define("PIP_MODE")]
+        case .development:
+            []
+        case .normal:
+            []
+        }
+    }
+
     var linkerSettings: [LinkerSetting] {
         switch self {
         case .pip:
@@ -154,7 +172,7 @@ func package_targets() -> [Target] {
                 "PyWrapperInfo",
                 "PyWrapperInternal",
             ],
-            //swiftSettings: swift_settings
+            swiftSettings: PythonMode.shared.swiftSettings
         ),
     ]
 }

@@ -18,6 +18,7 @@ public macro PyFunction(name: String? = nil) = #externalMacro(module: "PySwiftGe
 
 @attached(member, names: arbitrary)
 @attached(extension, names: arbitrary)
+@attached(peer, names: prefixed(PyInit_))
 public macro PyModule(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftModuleGenerator")
 
 @attached(peer)
