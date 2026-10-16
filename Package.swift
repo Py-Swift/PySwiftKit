@@ -5,7 +5,7 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = false
+let local = true
 let localGenerators = true
 let dev_mode = true
 
@@ -13,67 +13,90 @@ enum PythonMode {
     case pip
     case android
     case development
+    case pip_development
     case normal
     
     static let shared = Self.current()
     
     static func current() -> Self {
+        if env["PSK_DEVELOPMENT"] == "1" {
+            if env["PIP_MODE"] == "1" { return .pip_development }
+            return .development
+        }
         if env["PIP_MODE"] == "1" { return .pip }
-        if env["PSK_DEVELOPMENT"] == "1" { return .development }
         if env["SWIFT_ANDROID_HOME"] != nil { return .android }
         return .normal
     }
     
-    var cSettings: [CSetting] {
+    var _cSettings: [CSetting] {
         switch self {
         case .pip:
             [.define("PIP_MODE")]
         case .android:
             [.define("PIP_MODE")]
         case .development:
+            []
+        case .pip_development:
             []
         case .normal:
             []
         }
     }
-
-    // Swift's own `#if PIP_MODE` (as opposed to the C-side one above) needs
-    // this as a *Swift* compilation condition, not a C define — the
-    // PySwiftGenerators macro plugin's `#if PIP_MODE` (gating its
-    // @_cdecl("PyInit_<name>") peer-macro output) is compiled with this, so
-    // without it the plugin silently never emits that code, in any mode.
-    var swiftSettings: [SwiftSetting] {
-        switch self {
-        case .pip:
-            [.define("PIP_MODE")]
-        case .android:
-            [.define("PIP_MODE")]
-        case .development:
-            []
-        case .normal:
-            []
-        }
-    }
-
-    var linkerSettings: [LinkerSetting] {
+    
+    static var cSettings: [CSetting] { shared._cSettings }
+    
+    var _linkerSettings: [LinkerSetting] {
         switch self {
         case .pip:
             []
         case .android:
             []
         case .development:
+            []
+        case .pip_development:
             []
         case .normal:
             [.linkedFramework("Python")]
         }
     }
+    
+    static var linkerSettings: [LinkerSetting] { shared._linkerSettings }
+    
+    var _swiftSettings: [SwiftSetting] {
+        switch self {
+        case .pip:
+            [.define("PIP_MODE")]
+        case .android:
+            []
+        case .development:
+            []
+        case .pip_development:
+            [.define("PIP_MODE")]
+        case .normal:
+            []
+        }
+    }
+    
+    static var swiftSettings: [SwiftSetting] { shared._swiftSettings }
 }
 
 let pipMode   = env["PIP_MODE"] == "1"
 let frameworkMode = env["FRAMEWORK_MODE"] == "1"
 let isAndroid = env["SWIFT_ANDROID_HOME"] != nil
 
-let CPython: Package.Dependency = if local {
+// `local` alone isn't enough on its own: a cibuildwheel/manylinux container
+// only ever has this one repo mounted (as /project), never its siblings, so
+// the "../CPython" path SwiftPM would resolve to plain doesn't exist there —
+// "the package at '/CPython' cannot be accessed". Checking that the sibling
+// checkout is actually present is what lets host builds keep using it
+// (fast local iteration, no push required) while a container build falls
+// back to git automatically instead of failing outright.
+let localCPythonPath = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .appendingPathComponent("../CPython")
+    .standardized.path
+
+let CPython: Package.Dependency = if local && FileManager.default.fileExists(atPath: localCPythonPath) {
     .package(path: "../CPython")
 } else {
    // .package(url: "https://github.com/py-swift/CPython", .upToNextMajor(from: .init(313, 8, 0)))
@@ -93,7 +116,7 @@ let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
     //PySwiftGenerators,
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0"),
 ]
 
 func package_targets() -> [Target] {
@@ -103,7 +126,7 @@ func package_targets() -> [Target] {
             dependencies: ["CPython"],
             path: "Sources/CPySwiftObject",
             publicHeadersPath: ".",
-            cSettings: PythonMode.shared.cSettings,
+            cSettings: PythonMode.cSettings,
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
@@ -119,7 +142,7 @@ func package_targets() -> [Target] {
                 "PyProtocols",
                 "PyWrapperInfo"
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PySwiftConcurrency",
@@ -139,7 +162,7 @@ func package_targets() -> [Target] {
         .target(
             name: "PyProtocols",
             dependencies: ["CPython"],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PySwiftWrapper",
@@ -152,7 +175,7 @@ func package_targets() -> [Target] {
                 //.product(name: "PySwiftGenerators", package: "PySwiftGenerators"),
                 //.product(name: "SwiftSyntaxWrapper", package: "PySwiftGenerators"),
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)] + PythonMode.swiftSettings
         ),
         .target(
             name: "PyWrapperInternal",
@@ -172,13 +195,22 @@ func package_targets() -> [Target] {
                 "PyWrapperInfo",
                 "PyWrapperInternal",
             ],
-            swiftSettings: PythonMode.shared.swiftSettings
+            swiftSettings: PythonMode.swiftSettings
         ),
     ]
 }
 
 func get_targets() -> [Target] {
     var targets = package_targets()
+    targets.append(
+        .executableTarget(
+            name: "PSKTest",
+            dependencies: [
+                "PySwiftKit", "PySerializing", "PySwiftWrapper",
+            ],
+            swiftSettings: PythonMode.swiftSettings + [.swiftLanguageMode(.v5)]
+        )
+    )
     add_test_targets(&targets)
     return targets
 }
@@ -198,6 +230,7 @@ func get_products() -> [Product] {
     products.add_library("PySwiftWrapper")
     products.add_library("PySwiftKitStatic", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"])
     products.add_library("PySwiftKit", targets: ["PySwiftKit", "PySerializing", "PySwiftWrapper"], type: .dynamic)
+    products.append(.executable(name: "PSKTest", targets: ["PSKTest"]))
     return products
 }
 

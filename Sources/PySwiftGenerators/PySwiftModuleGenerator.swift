@@ -195,16 +195,18 @@ struct PySwiftModuleGenerator: MemberMacro {
         }
         let _module_name = node_info.name ?? module_name.text.camelCaseToSnakeCase()
         guard let structDecl = declaration.as(StructDeclSyntax.self) else { return [] }
-
+        
         let classes = pyClassNames(decl: structDecl)
-
+        
+        let customSlotsSymbol: String? = nil//classes.isEmpty ? nil : "py_module_slots"
+        
         var output: [DeclSyntax] = [
             PyMethods(cls: module_name.text, input: module_functions, module_or_class: true, base_type: .none, swift_mode: .v5).output,
-            .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count, customSlotsSymbol: classes.isEmpty ? nil : "py_module_slots").variDecl),
+            .init(PyModule(name: _module_name, classes: [], module_count: module_functions.count).variDecl),
             "public static let py_name = \(literal: _module_name)",
         ]
         output.append(contentsOf: processPyModuleImportFunc(classes: classes))
-
+        
         if !node_info.py_modules_exist {
             let sub_names = getSubmodules(declaration: structDecl).map { sub_decl in
                 "\(sub_decl.name.text).self"
@@ -225,7 +227,7 @@ struct PySwiftModuleGenerator: MemberMacro {
                 element.expression.as(MemberAccessExprSyntax.self)?.base?.as(DeclReferenceExprSyntax.self)?.baseName.text
             } ?? []
     }
-
+    
     /// Generates the module's multi-phase init entry point.
     ///
     /// `PyModuleDef_Init` returns the *module definition* object, not a created module, so
@@ -238,13 +240,13 @@ struct PySwiftModuleGenerator: MemberMacro {
             PyModuleDef_Init(.init(&py_module))
         }
         """
-
+        
         guard !classes.isEmpty else { return [initDecl] }
-
+        
         let addTypes = classes
             .map { "PyModule_AddType(m, \($0).PyType)" }
             .joined(separator: "\n            ")
-
+        
         let execDecl: DeclSyntax = """
         // Runs during multi-phase init against the real module object `m`.
         static let py_module_exec: inquiry = { m in
@@ -252,7 +254,7 @@ struct PySwiftModuleGenerator: MemberMacro {
             return 0
         }
         """
-
+        
         let slotsDecl: DeclSyntax = """
         static var py_module_slots: [PyModuleDef_Slot] = [
             .init(slot: Py_mod_exec, value: unsafeBitCast(PyModuleDef.emptyPackagePath, to: UnsafeMutableRawPointer.self)),
@@ -260,7 +262,7 @@ struct PySwiftModuleGenerator: MemberMacro {
             .init()
         ]
         """
-
+        
         return [execDecl, slotsDecl, initDecl]
     }
 }
@@ -271,6 +273,9 @@ enum PyModuleError: Error {
 }
 
 
+
+
+
 extension ExtensionDeclSyntax {
     static func pyModuleExtension(struct_name: String, py_name: String, py_classes:  VariableDeclSyntax?, members: MemberBlockItemListSyntax?) -> ExtensionDeclSyntax {
         let classes = py_classes?.bindings.first?.initializer?.value.as(ArrayExprSyntax.self)?.elements.compactMap({ element in
@@ -279,18 +284,18 @@ extension ExtensionDeclSyntax {
         let addTypes = Array( classes.map({cls in "PyModule_AddType(m, \(cls).PyType)"})).joined(separator: "\n")
         
         let module_functions = (members ?? []).compactMap { member in
-                    let decl = member.decl
-                    switch decl.kind {
-                    case .functionDecl:
-                        if let fdecl = decl.as(FunctionDeclSyntax.self), fdecl.isPyFunction {
-                            return fdecl
-                        }
-                        return nil
-                    default:
-                        return nil
-                    }
+            let decl = member.decl
+            switch decl.kind {
+            case .functionDecl:
+                if let fdecl = decl.as(FunctionDeclSyntax.self), fdecl.isPyFunction {
+                    return fdecl
                 }
-                
+                return nil
+            default:
+                return nil
+            }
+        }
+        
         
         return .init(extendedType: struct_name.typeSyntax()) {
             PyMethods(cls: struct_name, input: module_functions, module_or_class: true, base_type: .none, swift_mode: .v5).output
@@ -468,22 +473,22 @@ extension PySwiftModuleGenerator: ExtensionMacro {
 
         return []
     }
-
+    
 }
 
 
 extension PySwiftModuleGenerator: PeerMacro {
     static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
         var decls: [DeclSyntax] = []
-
+        
 #if PIP_MODE
         guard let structDecl = declaration.as(StructDeclSyntax.self) else { return [] }
         let structName = structDecl.name
-
+        
         let node_info = PyModuleNodeInfo(node: node)
-
+        
         let py_name = node_info.name ?? structName.text.camelCaseToSnakeCase()
-
+        
         let classes_decl = (structDecl.memberBlock.members.compactMap({$0.decl.as(VariableDeclSyntax.self)}).first { decl in
             let bindings = decl.bindings
             return if let binding = bindings.first {
@@ -493,32 +498,27 @@ extension PySwiftModuleGenerator: PeerMacro {
                 false
             }
         })
-
+        
         let classes = classes_decl?.bindings.first?.initializer?.value.as(ArrayExprSyntax.self)?.elements.compactMap({ element in
             element.expression.as(MemberAccessExprSyntax.self)!.base!.as(DeclReferenceExprSyntax.self)!.baseName.text
         }) ?? []
-        // Delegates to the member macro's own `py_init`, generated by
-        // processPyModuleImportFunc above: it already does the right thing
-        // for both cases (PyModuleDef_Init alone when there are no classes,
-        // or the multi-phase py_module_exec/py_module_slots path that
-        // registers them via PyModule_AddType once CPython creates the real
-        // module object). Calling PyModule_Create2 (single-phase) here
-        // instead — as this used to — conflicts with m_slots always being
-        // set on py_module (see PyModuleDef.new's baseSlots fallback), and
-        // fails at runtime with "PyModule_Create is incompatible with
-        // m_slots".
+        let addTypes = Array( classes.map({cls in "PyModule_AddType(m, \(cls).PyType)"})).joined(separator: "\n")
         decls.append(
             """
             @_cdecl("PyInit_\(raw: py_name)")
             public func PyInit_\(raw: py_name)() -> PyPointer? {
-                \(raw: structName).py_init()
+                if let m = PyModule_Create2(.init(&\(raw: structName).py_module), 3) {
+                    \(raw: addTypes)
+                    return m
+                }
+                return nil
             }
             """
         )
 #endif
-
-
-
+        
+        
+        
         return decls
     }
 }

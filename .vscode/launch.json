@@ -11,6 +11,26 @@
             "program": "${workspaceFolder}/<executable file>",
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PySwiftKit}",
+            "name": "Debug PSKTest",
+            "target": "PSKTest",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug PSKTest"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PySwiftKit}",
+            "name": "Release PSKTest",
+            "target": "PSKTest",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release PSKTest"
         }
     ]
 }

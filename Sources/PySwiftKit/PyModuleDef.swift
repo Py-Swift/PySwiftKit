@@ -91,9 +91,9 @@ public extension PyModuleDef {
             m_base: base,
             m_name: cString(name),
             m_doc: _doc,
-            m_size: size,
+            m_size: -1,
             m_methods: methods,
-            m_slots: &baseSlots,
+            m_slots: nil,//&baseSlots,
             m_traverse: nil,
             m_clear: nil,
             m_free: nil
@@ -109,16 +109,17 @@ import PyWrapperInfo
 
 
 extension PyModuleProtocol {
-    
+    #if !PIP_MODE
     public static func addToImports() {
         
         print("addToImports", py_name)
         PyImport_AppendInittab(makeCString(from: py_name), py_init)
         
         for module in modules {
-            module.addToImports()
+            //module.addToImports()
+            fatalError()
         }
         
     }
-
+    #endif
 }

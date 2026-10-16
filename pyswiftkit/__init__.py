@@ -1,12 +1,16 @@
+import sys
 from pathlib import Path
 
 __version__ = "313.8.0"
 
 _HERE = Path(__file__).parent
 
+# Apple platforms get a Mach-O dylib; Linux and Android get an ELF .so.
+LIB_NAME = "libPySwiftKit.dylib" if sys.platform == "darwin" else "libPySwiftKit.so"
+
 
 def get_lib_dir() -> str:
-    """Return the directory containing libPySwiftKit.dylib.
+    """Return the directory containing the PySwiftKit shared library.
 
     Use this when building user extension modules to set the correct rpath.
 
@@ -22,5 +26,5 @@ def get_lib_dir() -> str:
 
 
 def get_lib_path() -> str:
-    """Return the absolute path to libPySwiftKit.dylib."""
-    return str(_HERE / "libPySwiftKit.dylib")
+    """Return the absolute path to the PySwiftKit shared library."""
+    return str(_HERE / LIB_NAME)

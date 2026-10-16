@@ -21,6 +21,7 @@ public macro PyFunction(name: String? = nil) = #externalMacro(module: "PySwiftGe
 @attached(peer, names: prefixed(PyInit_))
 public macro PyModule(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PySwiftModuleGenerator")
 
+
 @attached(peer)
 public macro PySubModule(name: String? = nil) = #externalMacro(module: "PySwiftGenerators", type: "PeerDummy")
 
@@ -28,22 +29,22 @@ public macro PySubModule(name: String? = nil) = #externalMacro(module: "PySwiftG
     peer,
     names:
         suffixed(_tp_new),
-    suffixed(_tp_init),
-    suffixed(_tp_dealloc),
-    suffixed(_tp_hash),
-    suffixed(_tp_str),
-    suffixed(_tp_repr),
-    suffixed(_tp_as_async),
-    suffixed(_tp_as_sequence),
-    suffixed(_tp_as_mapping),
-    suffixed(_tp_as_number),
-    suffixed(_tp_as_buffer),
-    suffixed(_buffer_procs),
-    suffixed(_PyMethodDefs),
-    suffixed(_PyGetSetDefs),
-    suffixed(_PyType),
-    suffixed(_pyTypeObject),
-    named(shared)
+        suffixed(_tp_init),
+        suffixed(_tp_dealloc),
+        suffixed(_tp_hash),
+        suffixed(_tp_str),
+        suffixed(_tp_repr),
+        suffixed(_tp_as_async),
+        suffixed(_tp_as_sequence),
+        suffixed(_tp_as_mapping),
+        suffixed(_tp_as_number),
+        suffixed(_tp_as_buffer),
+        suffixed(_buffer_procs),
+        suffixed(_PyMethodDefs),
+        suffixed(_PyGetSetDefs),
+        suffixed(_PyType),
+        suffixed(_pyTypeObject),
+        named(shared)
 )
 
 @attached(member, names: arbitrary)
@@ -80,7 +81,7 @@ public macro PyClassByExtension(
 public macro PyInit() = #externalMacro(module: "PySwiftGenerators", type: "PeerDummy")
 
 @attached(peer)
-public macro PyProperty(readonly: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyPropertyAttribute")
+public macro PyProperty(name: String? = nil, readonly: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyPropertyAttribute")
 
 @attached(member, names: arbitrary)
 @attached(
