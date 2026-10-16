@@ -470,7 +470,7 @@ extension PySwiftModuleGenerator: ExtensionMacro {
         ]
         
         output.append(contentsOf: processSubmodules(modules: getSubmodules(declaration: declaration), parent: module_name))
-        
+
         return []
     }
     
