@@ -5,7 +5,7 @@ import CompilerPluginSupport
 
 let env = ProcessInfo.processInfo.environment
 
-let local = true
+let local = false
 let localGenerators = true
 let dev_mode = true
 
