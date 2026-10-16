@@ -37,7 +37,8 @@ public extension PyModuleProtocol {
     static func getSubmodules(parent_name: String) -> [any PyModuleEntry] {
         let child_name = "\(parent_name).\(py_name)"
         modules.flatMap { mod in
-            mod.getSubmodules(parent_name: child_name)
+            //Self.getSubmodules(parent_name: child_name)
+            fatalError()
         }
         
         return []

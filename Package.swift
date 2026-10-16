@@ -116,7 +116,7 @@ let dependencies: [Package.Dependency] = [
     CPython,
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.1.0"),
     //PySwiftGenerators,
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0"),
 ]
 
 func package_targets() -> [Target] {

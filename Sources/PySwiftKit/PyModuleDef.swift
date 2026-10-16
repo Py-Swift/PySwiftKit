@@ -116,7 +116,8 @@ extension PyModuleProtocol {
         PyImport_AppendInittab(makeCString(from: py_name), py_init)
         
         for module in modules {
-            module.addToImports()
+            //module.addToImports()
+            fatalError()
         }
         
     }

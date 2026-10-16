@@ -81,7 +81,7 @@ public macro PyClassByExtension(
 public macro PyInit() = #externalMacro(module: "PySwiftGenerators", type: "PeerDummy")
 
 @attached(peer)
-public macro PyProperty(readonly: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyPropertyAttribute")
+public macro PyProperty(name: String? = nil, readonly: Bool = false) = #externalMacro(module: "PySwiftGenerators", type: "PyPropertyAttribute")
 
 @attached(member, names: arbitrary)
 @attached(
