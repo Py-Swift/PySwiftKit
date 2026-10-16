@@ -11,6 +11,12 @@
 //#include <Python/Python.h>
 #include "CPython.h"
 
+// Keep C linkage when this header is imported by Swift targets with C++ interop
+// enabled; otherwise the macro-generated calls bind to C++-mangled symbols.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	PyObject_HEAD
 	PyObject* dict;
@@ -76,5 +82,9 @@ typedef struct {
     void* swift_ptrs[2];
     int swift_info;
 } PySwiftObject2;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CPySwiftObject_h */
