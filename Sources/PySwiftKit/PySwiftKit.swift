@@ -2,7 +2,7 @@
 //  PySwiftKit.swift
 //  PySwiftKit
 //
-import CPython
+@_exported import CPython
 @_exported import PyProtocols
 @_exported import CPySwiftObject
 
